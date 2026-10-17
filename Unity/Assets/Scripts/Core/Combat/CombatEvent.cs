@@ -40,9 +40,11 @@ namespace WhereDarknessDwells.Core
         public readonly int Blocked;
         public readonly StatusKind Status;
         public readonly int CardInstanceId;
+        /// <summary>For IntentShown and EnemyActed: the action, as it was when the event happened.</summary>
+        public readonly IntentDef Intent;
 
         public CombatEvent(CombatEventKind kind, string sourceId = null, string targetId = null, int amount = 0,
-            int blocked = 0, StatusKind status = default, int cardInstanceId = 0)
+            int blocked = 0, StatusKind status = default, int cardInstanceId = 0, IntentDef intent = null)
         {
             Kind = kind;
             SourceId = sourceId;
@@ -51,6 +53,7 @@ namespace WhereDarknessDwells.Core
             Blocked = blocked;
             Status = status;
             CardInstanceId = cardInstanceId;
+            Intent = intent;
         }
 
         public override string ToString()

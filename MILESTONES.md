@@ -1,6 +1,7 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 1a, combat rules (in review).** David agreed the Milestone 0 design on 2026-10-17.
+**Current milestone: 1b, combat screen (in review).** 1a, the combat rules, is in review. David agreed the
+Milestone 0 design on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -52,6 +53,22 @@ Milestone 2 tuning job.
   - a Resolve counter and an "End activation" button,
   - a combat log, and win and lose panels.
 - Placeholder art only.
+
+Status: written. The pieces:
+- `Assets/Content`: one asset per hero, card and enemy, and `ContentDatabase.asset`, which lists them. They were
+  generated from `StarterContent`, and an Editor test (`Assets/Tests/Content`) fails if the two ever differ.
+- `Assets/Scripts/Game/CombatScreen.cs` and `Assets/UI`: the screen. It calls only the `CombatState` commands and
+  redraws from the state after each one. Combat log sentences come from `CombatLogText` in Core, which is tested.
+- **Where Darkness Dwells > Build Combat Scene** creates `Assets/Scenes/Combat.unity` and its panel settings, so
+  the scene can be rebuilt the same way on any machine.
+- The test fight is set on the Combat Screen object: the party, the deck (one entry per card copy), the enemies,
+  and a seed. A seed of 0 picks a new one each fight; the seed is shown at the top right so a fight can be
+  replayed.
+
+Checked in David's Editor (2026-10-17): it compiles with no warnings, 241 EditMode tests pass (238 rules tests
+and 3 content asset tests), the scene builds, and a fight starts and plays through activation, a targeted
+card, a refused card and the enemy phase with no Console errors. Still to check by David: playing a fight to
+victory or defeat, and how the screen looks.
 
 **Acceptance criteria**
 - David can press Play, complete one encounter and win or lose it.
@@ -111,5 +128,7 @@ Milestone 2 tuning job.
 
 ## Known limitations and technical debt
 
+- The combat screen doesn't animate events yet. It writes them to the log and redraws, so the enemy phase
+  happens at once. Damage numbers and other feedback are Milestone 2.
 - Cloud sessions have no Unity Editor. Unity-side code is checked by David in the Editor, and Core is checked
   by tests.

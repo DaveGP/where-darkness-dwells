@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatScreen.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement class="top-bar">
+            <ui:Label text="The Black Keep" class="place" />
+            <ui:Label name="round" text="Round 1" class="round" />
+            <ui:Label name="prompt" text="Choose a hero to activate." class="prompt" />
+            <ui:Label name="seed" text="Seed" class="seed" />
+        </ui:VisualElement>
+        <ui:VisualElement class="middle">
+            <ui:VisualElement class="battlefield">
+                <ui:VisualElement name="enemies" class="combatant-row enemy-row" />
+                <ui:VisualElement name="heroes" class="combatant-row hero-row" />
+            </ui:VisualElement>
+            <ui:VisualElement class="log-panel">
+                <ui:Label text="Log" class="panel-heading" />
+                <ui:ScrollView name="log" class="log" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="bottom">
+            <ui:VisualElement class="hand-area">
+                <ui:Label name="hint" class="hint" />
+                <ui:VisualElement name="hand" class="hand" />
+            </ui:VisualElement>
+            <ui:VisualElement class="controls">
+                <ui:Label name="resolve" text="-" class="resolve" />
+                <ui:Label text="Resolve" class="resolve-caption" />
+                <ui:Button name="end-activation" text="End activation" class="end-button" />
+                <ui:Label name="piles" class="piles" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="end-panel" class="end-panel hidden">
+            <ui:VisualElement class="end-box">
+                <ui:Label name="end-title" text="Victory" class="end-title" />
+                <ui:Label name="end-text" class="end-text" />
+                <ui:Button name="again" text="Fight again" class="again-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatScreen.uss" />
+    <ui:VisualElement class="card">
+        <ui:VisualElement name="owners" class="card-owners" />
+        <ui:VisualElement class="card-header">
+            <ui:Label name="cost" text="1" class="card-cost" />
+            <ui:Label name="name" text="Card" class="card-name" />
+        </ui:VisualElement>
+        <ui:Label name="target" text="Enemy" class="card-target" />
+        <ui:Label name="text" text="Deal 6 damage." class="card-text" />
+        <ui:Label name="owner-names" text="Wren" class="card-owner-names" />
+    </ui:VisualElement>
+</ui:UXML>

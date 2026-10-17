@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatScreen.uss" />
+    <ui:VisualElement class="combatant hero">
+        <ui:VisualElement class="combatant-accent" />
+        <ui:Label name="name" text="Hero" class="combatant-name" />
+        <ui:Label name="title" text="the Title" class="combatant-title" />
+        <ui:VisualElement class="bar">
+            <ui:VisualElement name="health-fill" class="bar-fill" />
+            <ui:Label name="health" text="30 / 30" class="bar-text" />
+        </ui:VisualElement>
+        <ui:VisualElement class="badges">
+            <ui:Label name="block" text="Block 0" class="badge block-badge" />
+            <ui:Label name="guard" text="Guarded" class="badge guard-badge" />
+        </ui:VisualElement>
+        <ui:VisualElement name="statuses" class="statuses" />
+        <ui:Button name="activate" text="Activate" class="activate-button" />
+        <ui:Label name="state" text="Active" class="combatant-state" />
+    </ui:VisualElement>
+</ui:UXML>
