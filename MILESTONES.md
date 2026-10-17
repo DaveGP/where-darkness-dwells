@@ -155,7 +155,7 @@ two Investigations without errors. The boss fight with clues and the endings sti
   wins by the number of clues found. `-- boss` measures each clue on its own in the boss fight.
 - The careful player now clears small, dangerous enemies first. Before, it poured damage into Vael and made
   every clue that weakened him look harmful.
-- Vael: 140 health, Blood Tithe heals 24. Blood Thralls: 10 health, Claw 4, Feed 6.
+- Vael: 140 health, Blood Tithe heals 24 (150 health from Milestone 5). Blood Thralls: 10 health, Claw 4, Feed 6.
 - Results over 300 runs: ignoring clues, the careful player beats Vael in 34% of the runs that reach him.
   Seeking clues, it beats him in 24% with one clue, 49% with two, 66% with three and 75% with four. In the boss
   fight alone, the Confession and the Silvered Bells matter most, the Cistern next, and His True Name least.
@@ -176,10 +176,24 @@ two Investigations without errors. The boss fight with clues and the endings sti
 
 Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes and the party".
 
-- **5a.** Keepsakes and events in Core, with tests, and the clue sources moved back to their events.
-- **5b.** The fourth hero, party choice, six dual cards, more reward cards and two or three enemies. Then tune
-  each party of three with the balance tool.
-- **5c.** Event and Keepsake screens, and the party screen with a choice of three from four.
+- **5a.** Keepsakes and events in Core, with tests, and the clue sources moved back to their events. Done.
+- **5b.** Three new heroes (David chose all three) and party choice of 3 from 6, 12 dual cards, 12 reward
+  cards and two enemies. Then tune each party of three with the balance tool. Done, apart from David's call on
+  Bloodrage.
+- **5c.** Event and Keepsake screens, and the party screen with a choice of three from six.
+
+**5b. Tuning**
+- `tools/Balance -- parties` plays every party of three and reports wins per party and per hero, and any
+  stalemate (a fight still going after 100 rounds).
+- Corvin's healing was too strong and Hollis dealt too little damage. After tuning (Mend heals 4, Hollis has
+  32 health and more damage on his bells), parties with each hero win 45 to 57% of the time for the careful
+  player seeking clues, over 100 runs per party.
+- Vael: 150 health and Bloodrage (Fury 3 every sixth step, proposed). The scripted players now value Events,
+  and Events are 22 in 100 rooms (Combat 42, Investigation 18, Sanctuary 8), so a run sees about 1.4.
+- Results over 200 runs with the first party: 38% wins ignoring clues and 47.5% seeking them (31% with one
+  clue, 56% with two, 64% with three, 86% with four). The Thrall's Confession is found in 15% of runs.
+- One stalemate remains in 2,000 runs, and it is the scripted player's fault: it kept blocking instead of
+  finishing two enemies on 1 health.
 
 ## Milestone 6: presentation and polish
 

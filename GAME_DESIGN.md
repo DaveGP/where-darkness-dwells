@@ -86,6 +86,8 @@ the enemy that is about to hit hardest.
 | Weak | Deals 25% less attack damage | Loses 1 stack at the end of each round |
 | Bleed | Takes damage equal to its stacks at the end of the round, ignoring Block | Then loses 1 stack |
 | Hex | Does nothing by itself; Ashe's cards consume stacks for effects | Never ticks down |
+| Riposte | A hero's: when an enemy's attack hits them and they are still standing, the attacker takes that much damage | Removed at the start of the next player turn, like Block |
+| Fury **(proposed, Milestone 5)** | An enemy's: each of its attacks deals that much more base damage | Never ticks down |
 
 **Damage is calculated in a fixed order:** base damage, plus flat bonuses, then multiplied by Weak and then
 by Exposed. The result is rounded down, then Block absorbs what it can and the rest comes off health.
@@ -230,12 +232,19 @@ or the Widow.
 
 ### Three new heroes **(decided: David, 2026-10-17)**
 
-David chose to add all three proposed heroes, so the party is a choice of 3 from 6. Their cards are
-designed in Milestone 5b.
-- **Corvin, the Penitent:** a healer who pays in his own blood. He heals allies and cleanses Bleed, and some
-  of his cards get stronger when he is hurt. New effect: heal an ally.
-- **A duelist:** counterattacks when hit. New status: Riposte.
-- **A bell-ringer:** Weak and Exposed on every enemy at once. Uses the existing statuses.
+David chose to add all three proposed heroes, so the party is a choice of 3 from 6.
+- **Corvin, the Penitent** (Bone, 32 health): a healer who pays in his own blood. He heals allies, cleanses
+  Bleed and Weak, and trades his health for Resolve. New effects: heal, cleanse, pay health.
+- **Mara, the Duelist** (Steel, 34 health): precise strikes, and Riposte to punish whoever attacks her.
+- **Hollis, the Bellwright** (Bronze, 32 health): bells that reach every enemy or every hero at once, with
+  Weak, Exposed and Block.
+
+### Vael's Bloodrage **(proposed, Milestone 5; waiting on David)**
+
+Some new parties heal faster than Vael hurts them and deal less than his Blood Tithe heals, so the fight could
+never end: 44% of Bram, Corvin and Hollis's boss fights in the balance tool. Proposed fix: a sixth step in
+Vael's pattern, Bloodrage, gives him Fury 3, so each time his pattern comes round his attacks deal 3 more.
+Fury is a general enemy status (data), not a rule about Vael. With it, no boss fight stalled in 2,000 runs.
 
 ## Narrative style
 

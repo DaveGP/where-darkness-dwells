@@ -7,12 +7,13 @@ namespace WhereDarknessDwells.Core
     // Content definitions: read-only descriptions of heroes, cards and enemies. They never change during a run;
     // run and combat state refer to them by id. In Unity they are built from ScriptableObject assets.
 
-    /// <summary>Conditions that come in stacks. Block and Guarded are tracked separately because they work differently.</summary>
     /// <summary>
+    /// Conditions that come in stacks. Block and Guarded are tracked separately because they work differently.
     /// Riposte is a hero's: when an enemy's attack hits them, the attacker takes that much damage. It is removed
-    /// at the start of the next player turn, like Block.
+    /// at the start of the next player turn, like Block. Fury is an enemy's: each of its attacks deals that much
+    /// more damage, and like Hex it never fades.
     /// </summary>
-    public enum StatusKind { Exposed, Weak, Bleed, Hex, Riposte }
+    public enum StatusKind { Exposed, Weak, Bleed, Hex, Riposte, Fury }
 
     public sealed class HeroDef
     {

@@ -88,7 +88,7 @@ namespace WhereDarknessDwells.Tests
             combat.Find(StarterContent.Wren).Health = 20;
             Assert.That(combat.TryActivate(StarterContent.Corvin).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "mend").Id, StarterContent.Wren).Ok, Is.True);
-            Assert.That(combat.Find(StarterContent.Wren).Health, Is.EqualTo(26));
+            Assert.That(combat.Find(StarterContent.Wren).Health, Is.EqualTo(24));
             combat.Find(StarterContent.Wren).Health = 25;
             Assert.That(combat.TryPlay(InHand(combat, "mend").Id, StarterContent.Wren).Ok, Is.True);
             Assert.That(combat.Find(StarterContent.Wren).Health, Is.EqualTo(28), "Wren's maximum is 28.");
@@ -119,7 +119,7 @@ namespace WhereDarknessDwells.Tests
             Assert.That(combat.TryActivate(StarterContent.Corvin).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "cleansing_rite").Id, StarterContent.Wren).Ok, Is.True);
             Assert.That(wren.Statuses, Is.Empty);
-            Assert.That(wren.Health, Is.EqualTo(13));
+            Assert.That(wren.Health, Is.EqualTo(12));
         }
 
         [Test]
@@ -145,10 +145,42 @@ namespace WhereDarknessDwells.Tests
             CombatState combat = Fight(party, "gaol_hound", "gaol_hound");
             Assert.That(combat.TryActivate(StarterContent.Hollis).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "sanctuary_peal").Id).Ok, Is.True);
-            Assert.That(combat.Heroes.Select(h => h.Block), Is.All.EqualTo(3));
+            Assert.That(combat.Heroes.Select(h => h.Block), Is.All.EqualTo(4));
             Assert.That(combat.TryPlay(InHand(combat, "knell").Id).Ok, Is.True);
             Assert.That(combat.Enemies.Select(e => e.Status(StatusKind.Exposed)), Is.All.EqualTo(1));
-            Assert.That(combat.Enemies.Select(e => e.Health), Is.All.EqualTo(15));
+            Assert.That(combat.Enemies.Select(e => e.Health), Is.All.EqualTo(13));
+        }
+        [Test]
+        public void FuryMakesEveryAttackHitHarderAndVaelGainsItEachTimeRound()
+        {
+            string[] party = { StarterContent.Bram, StarterContent.Wren, StarterContent.Ashe };
+            CombatState combat = Fight(party, StarterContent.VaelId);
+            Combatant vael = combat.Enemies[0];
+            Assert.That(vael.Intent.Description, Is.EqualTo("Blood lash 10"));
+            Combatant target = combat.Find(vael.IntentTargetId);
+            vael.SetStatus(StatusKind.Fury, 2);
+            int before = target.Health;
+            Assert.That(combat.TryActivate(StarterContent.Bram).Ok, Is.True);
+            Assert.That(combat.TryEndActivation().Ok, Is.True);
+            Assert.That(target.Health, Is.EqualTo(before - 12), "Blood lash 10, plus 2 Fury.");
+
+            // Four more steps, then Bloodrage: Fury 3 on top of what he had, and it never fades.
+            for (int round = 0; round < 5; round++)
+            {
+                Combatant hero = combat.Heroes.First(h => !h.IsDown);
+                hero.Health = hero.MaxHealth;
+                Assert.That(combat.TryActivate(hero.Id).Ok, Is.True);
+                Assert.That(combat.TryEndActivation().Ok, Is.True);
+            }
+            Assert.That(vael.Status(StatusKind.Fury), Is.EqualTo(5));
+        }
+
+        [Test]
+        public void OnlyAnEnemyCanHaveFury()
+        {
+            var enemy = new EnemyDef("raging", "Raging", 10, IntentDef.Apply(StatusKind.Fury, 2, IntentTarget.RandomHero, "Rage"));
+            var library = new ContentLibrary(StarterContent.Heroes(), StarterContent.Cards(), new[] { enemy });
+            Assert.That(library.Validate(), Does.Contain("Enemy 'raging' gives Fury to someone other than itself."));
         }
     }
 }

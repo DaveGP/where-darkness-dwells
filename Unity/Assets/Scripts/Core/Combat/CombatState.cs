@@ -478,8 +478,9 @@ namespace WhereDarknessDwells.Core
                     break;
 
                 case IntentKind.ApplyStatus:
-                    foreach (Combatant hero in IntentTargets(enemy))
-                        SetStatus(hero, intent.Status, hero.Status(intent.Status) + intent.Amount);
+                    IEnumerable<Combatant> targets = intent.Target == IntentTarget.Self ? new[] { enemy } : IntentTargets(enemy);
+                    foreach (Combatant target in targets)
+                        SetStatus(target, intent.Status, target.Status(intent.Status) + intent.Amount);
                     break;
             }
 
@@ -510,6 +511,7 @@ namespace WhereDarknessDwells.Core
         {
             if (attacker.IsHero && defender.Enemy != null && _modifiers.BonusDamageTo.TryGetValue(defender.Enemy.Id, out int bonus))
                 baseDamage += bonus;
+            baseDamage += attacker.Status(StatusKind.Fury);
             int damage = DamageRules.Attack(baseDamage, attacker.Status(StatusKind.Weak) > 0, defender.Status(StatusKind.Exposed) > 0);
             TakeDamage(attacker.Id, defender, damage, ignoresBlock: false);
 

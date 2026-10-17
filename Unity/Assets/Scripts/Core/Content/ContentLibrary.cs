@@ -74,7 +74,9 @@ namespace WhereDarknessDwells.Core
                     if (i.Amount < 0) problems.Add($"Enemy '{e.Id}' has an action with a negative amount.");
                     bool self = i.Kind == IntentKind.Block || i.Kind == IntentKind.Heal;
                     if (self && i.Target != IntentTarget.Self) problems.Add($"Enemy '{e.Id}' blocks or heals someone other than itself.");
-                    if (!self && i.Target == IntentTarget.Self) problems.Add($"Enemy '{e.Id}' aims an attack or status at itself.");
+                    bool fury = i.Kind == IntentKind.ApplyStatus && i.Status == StatusKind.Fury;
+                    if (!self && !fury && i.Target == IntentTarget.Self) problems.Add($"Enemy '{e.Id}' aims an attack or status at itself.");
+                    if (fury && i.Target != IntentTarget.Self) problems.Add($"Enemy '{e.Id}' gives Fury to someone other than itself.");
                 }
             }
 
