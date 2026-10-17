@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    Plays the combat rules many times with scripted players and prints how hard the fights are. A tuning tool for
-    Milestone 2, not part of the game. Run it from the repository root with dotnet run, giving it the project folder tools/Balance (see Program.cs).
+    Plays single fights or whole runs many times with scripted players and prints how hard they are. A tuning tool,
+    not part of the game. Run it from the repository root with dotnet run, giving it the project folder tools/Balance (see Program.cs).
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>

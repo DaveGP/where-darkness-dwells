@@ -80,6 +80,50 @@ namespace WhereDarknessDwells.Core
             return problems;
         }
 
+        /// <summary>Everything wrong with an expedition, checked against this library. Empty means a run can start.</summary>
+        public IReadOnlyList<string> Validate(ExpeditionDef expedition)
+        {
+            var problems = new List<string>();
+            if (expedition == null) { problems.Add("There is no expedition."); return problems; }
+            string name = $"Expedition '{expedition.Id}'";
+
+            if (expedition.Party.Count == 0) problems.Add($"{name} has no party.");
+            if (expedition.Party.Distinct().Count() != expedition.Party.Count) problems.Add($"{name} lists a hero twice.");
+            foreach (string hero in expedition.Party)
+                if (!HasHero(hero)) problems.Add($"{name} has unknown hero '{hero}' in its party.");
+
+            if (expedition.StartingDeck.Count == 0) problems.Add($"{name} has an empty starting deck.");
+            foreach (string card in expedition.StartingDeck) CheckCard(card, "starting deck");
+            if (expedition.RewardCards.Count < 3) problems.Add($"{name} needs at least 3 reward cards to offer a choice.");
+            if (expedition.RewardCards.Distinct().Count() != expedition.RewardCards.Count) problems.Add($"{name} lists a reward card twice.");
+            foreach (string card in expedition.RewardCards) CheckCard(card, "reward cards");
+
+            if (expedition.Encounters.Select(e => e.Id).Distinct().Count() != expedition.Encounters.Count) problems.Add($"{name} has two encounters with the same id.");
+            foreach (EncounterDef e in expedition.Encounters)
+            {
+                if (e.EnemyIds.Count == 0) problems.Add($"Encounter '{e.Id}' has no enemies.");
+                foreach (string enemy in e.EnemyIds)
+                    if (!HasEnemy(enemy)) problems.Add($"Encounter '{e.Id}' has unknown enemy '{enemy}'.");
+                if (e.Kind != EncounterKind.Boss && e.MinLayer > e.MaxLayer) problems.Add($"Encounter '{e.Id}' has its first layer after its last.");
+            }
+            int bosses = expedition.Encounters.Count(e => e.Kind == EncounterKind.Boss);
+            if (bosses != 1) problems.Add($"{name} needs exactly one boss encounter, not {bosses}.");
+            for (int layer = 0; layer < MapGenerator.Layers; layer++)
+            {
+                if (!expedition.Encounters.Any(e => e.Kind == EncounterKind.Normal && e.FitsLayer(layer)))
+                    problems.Add($"{name} has no normal encounter for layer {layer + 1}.");
+                if (layer >= MapGenerator.FirstEliteLayer && !expedition.Encounters.Any(e => e.Kind == EncounterKind.Elite && e.FitsLayer(layer)))
+                    problems.Add($"{name} has no elite encounter for layer {layer + 1}.");
+            }
+            return problems;
+
+            void CheckCard(string id, string list)
+            {
+                if (!HasCard(id)) { problems.Add($"{name} has unknown card '{id}' in its {list}."); return; }
+                if (!Card(id).Owners.Any(expedition.Party.Contains)) problems.Add($"{name} has '{id}' in its {list}, but no hero in the party owns it.");
+            }
+        }
+
         void Add<T>(Dictionary<string, T> map, string id, T def, string kind)
         {
             if (def == null) { _problems.Add($"A {kind} entry is empty."); return; }

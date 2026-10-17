@@ -160,4 +160,59 @@ namespace WhereDarknessDwells.Core
 
         public override string ToString() => Name;
     }
+
+    public enum EncounterKind { Normal, Elite, Boss }
+
+    /// <summary>A group of enemies that can be met in one room, and how deep in the Keep it can appear.</summary>
+    public sealed class EncounterDef
+    {
+        public readonly string Id;
+        public readonly EncounterKind Kind;
+        /// <summary>The map layers it can appear on, counting the first layer as 0. Ignored for the boss.</summary>
+        public readonly int MinLayer;
+        public readonly int MaxLayer;
+        /// <summary>The enemies, left to right. The same enemy can appear more than once.</summary>
+        public readonly IReadOnlyList<string> EnemyIds;
+
+        public EncounterDef(string id, EncounterKind kind, int minLayer, int maxLayer, params string[] enemyIds)
+        {
+            Id = id;
+            Kind = kind;
+            MinLayer = minLayer;
+            MaxLayer = maxLayer;
+            EnemyIds = enemyIds ?? new string[0];
+        }
+
+        public bool FitsLayer(int layer) => layer >= MinLayer && layer <= MaxLayer;
+
+        public override string ToString() => Id;
+    }
+
+    /// <summary>
+    /// Everything a run is built from: the party, the starting deck, the cards that can be offered as rewards, and
+    /// the encounters for each kind of room. Later villains add their own boss and clues here.
+    /// </summary>
+    public sealed class ExpeditionDef
+    {
+        public readonly string Id;
+        public readonly IReadOnlyList<string> Party;
+        /// <summary>Card ids, one entry per copy.</summary>
+        public readonly IReadOnlyList<string> StartingDeck;
+        public readonly IReadOnlyList<string> RewardCards;
+        public readonly IReadOnlyList<EncounterDef> Encounters;
+
+        public ExpeditionDef(string id, IEnumerable<string> party, IEnumerable<string> startingDeck,
+            IEnumerable<string> rewardCards, IEnumerable<EncounterDef> encounters)
+        {
+            Id = id;
+            Party = (party ?? Enumerable.Empty<string>()).ToArray();
+            StartingDeck = (startingDeck ?? Enumerable.Empty<string>()).ToArray();
+            RewardCards = (rewardCards ?? Enumerable.Empty<string>()).ToArray();
+            Encounters = (encounters ?? Enumerable.Empty<EncounterDef>()).ToArray();
+        }
+
+        public EncounterDef Encounter(string id) => Encounters.FirstOrDefault(e => e.Id == id);
+
+        public EncounterDef Boss => Encounters.FirstOrDefault(e => e.Kind == EncounterKind.Boss);
+    }
 }
