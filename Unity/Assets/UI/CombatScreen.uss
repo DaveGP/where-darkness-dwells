@@ -334,13 +334,8 @@
     translate: 0 -10px;
 }
 
-.card.is-unplayable {
-    opacity: 0.45;
-}
-
 .card.is-unplayable:hover {
     translate: 0 0;
-    opacity: 0.7;
 }
 
 .card.is-selected {
@@ -369,15 +364,19 @@
     flex-shrink: 0;
 }
 
+/* A pale coin with a dark rim and a large black number, so the cost reads at a glance. */
 .card-cost {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     margin-right: 6px;
-    border-radius: 14px;
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: rgb(110, 80, 30);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    background-color: rgb(201, 162, 74);
-    color: rgb(20, 16, 18);
+    font-size: 19px;
+    background-color: rgb(232, 200, 120);
+    color: rgb(0, 0, 0);
 }
 
 .card-name {
@@ -601,8 +600,30 @@
     background-color: rgb(50, 34, 26);
 }
 
+/* A card that can't be played is dimmed by its colours, not its opacity, so its cost coin stays crisp.
+   After the hero colours so it overrides their backgrounds. */
+.card.is-unplayable {
+    background-color: rgb(26, 22, 25);
+    border-color: rgb(54, 48, 52);
+}
+
+.card.is-unplayable .card-name,
+.card.is-unplayable .card-text {
+    color: rgb(120, 112, 116);
+}
+
+.card.is-unplayable .card-owners {
+    opacity: 0.4;
+}
+
+.card.is-unplayable .card-cost {
+    background-color: rgb(176, 156, 112);
+}
+
+/* A Keepsake discount turns the coin green, and the number stays black. */
 .card.is-discounted .card-cost {
-    color: rgb(140, 220, 140);
+    background-color: rgb(150, 215, 140);
+    border-color: rgb(40, 100, 40);
 }
 
 /* ---------- end of fight ---------- */
