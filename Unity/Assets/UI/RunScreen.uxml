@@ -1,0 +1,65 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatScreen.uss" />
+    <Style src="RunScreen.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement class="top-bar">
+            <ui:Label text="The Black Keep" class="place" />
+            <ui:Label name="depth" class="round" />
+            <ui:VisualElement name="party-health" class="party-health" />
+            <ui:Label name="deck-count" class="deck-count" />
+            <ui:Label name="seed" class="seed" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="party-view" class="view centred">
+            <ui:Label text="The Black Keep" class="view-title" />
+            <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep, where the siege ended and something else began. Three of you go in." class="view-text" />
+            <ui:VisualElement name="party-heroes" class="party-heroes" />
+            <ui:Button name="enter-keep" text="Enter the Keep" class="big-button" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="map-view" class="view map-view">
+            <ui:VisualElement name="map" class="map" />
+            <ui:VisualElement class="map-side">
+                <ui:Label text="Choose a room" class="panel-heading" />
+                <ui:Label name="map-hint" class="map-hint" />
+                <ui:Label text="Rooms you can enter next are lit. Your route so far is marked in gold." class="map-legend" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="reward-view" class="view centred">
+            <ui:Label text="Victory" class="view-title" />
+            <ui:Label text="Choose a card to add to the deck, or skip." class="view-text" />
+            <ui:VisualElement name="reward-cards" class="card-row" />
+            <ui:Label name="reward-hint" class="hint" />
+            <ui:Button name="skip-reward" text="Skip" class="big-button" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="sanctuary-view" class="view centred">
+            <ui:Label text="Sanctuary" class="view-title" />
+            <ui:Label name="sanctuary-text" text="A chapel the corruption never reached. Candles still burn. Rest, or reflect and leave something behind." class="view-text" />
+            <ui:VisualElement name="sanctuary-choices" class="choice-row">
+                <ui:Button name="rest" text="Rest" class="choice-button" />
+                <ui:Button name="reflect" text="Reflect: remove a card from the deck" class="choice-button" />
+            </ui:VisualElement>
+            <ui:VisualElement name="reflect-panel" class="reflect-panel hidden">
+                <ui:ScrollView name="reflect-cards" class="deck-grid-scroll">
+                    <ui:VisualElement name="reflect-grid" class="deck-grid" />
+                </ui:ScrollView>
+                <ui:Button name="reflect-back" text="Back" class="big-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="unwritten-view" class="view centred">
+            <ui:Label name="unwritten-title" class="view-title" />
+            <ui:Label name="unwritten-text" class="view-text" />
+            <ui:Button name="leave-room" text="Return to the map" class="big-button" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="end-view" class="view centred">
+            <ui:Label name="run-end-title" class="view-title" />
+            <ui:Label name="run-end-text" class="view-text" />
+            <ui:Label name="run-end-summary" class="run-summary" />
+            <ui:Button name="new-expedition" text="New expedition" class="big-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

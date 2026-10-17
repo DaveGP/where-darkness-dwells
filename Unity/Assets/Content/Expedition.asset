@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e3f0f9c3e4a47a08c7601d719e9dfdc, type: 3}
+  m_Name: Expedition
+  m_EditorClassIdentifier: 
+  id: black_keep
+  party:
+  - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
+  - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
+  - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
+  startingDeck:
+  - {fileID: 11400000, guid: 46a37976615d44cfaf4126560d04dc6b, type: 2}
+  - {fileID: 11400000, guid: 677d3f8813d94a959344bc673f87e319, type: 2}
+  - {fileID: 11400000, guid: a02ad552ae334b29b529b14c216ee1be, type: 2}
+  - {fileID: 11400000, guid: 20b66491fea743859ed9cb388c7f250b, type: 2}
+  - {fileID: 11400000, guid: ab835468298b4182a90f05fde58c6c7a, type: 2}
+  - {fileID: 11400000, guid: 546f6573633a4b75b20d2ad09126218c, type: 2}
+  - {fileID: 11400000, guid: da882ce57bb8422e8ca396215bb3528c, type: 2}
+  - {fileID: 11400000, guid: 37b77d336b0d431396a2a3d410e7a16c, type: 2}
+  - {fileID: 11400000, guid: a89a6e6735ed4f0aa51c2442c00310a6, type: 2}
+  - {fileID: 11400000, guid: 247dd1c8b1b4426788d077b0082c4d1b, type: 2}
+  - {fileID: 11400000, guid: c98c1db5a3f74c2da7676ffe3c8c4377, type: 2}
+  - {fileID: 11400000, guid: 536d2dd52a134eb0887860e04bea04f7, type: 2}
+  - {fileID: 11400000, guid: db60fbd09903415abaeb0b366926838a, type: 2}
+  - {fileID: 11400000, guid: 92798ce8f6f6490a840c5e95e672144a, type: 2}
+  - {fileID: 11400000, guid: 0ae59d4e25a146aeab5e3a4a374acf52, type: 2}
+  rewardCards:
+  - {fileID: 11400000, guid: 4a02d3d08d104528bcf40d94b10dd3ea, type: 2}
+  - {fileID: 11400000, guid: e26ee32bddf74f65b720bc2e36916c6d, type: 2}
+  - {fileID: 11400000, guid: b57c2da41aaf4cb084ac094b7e0f055a, type: 2}
+  - {fileID: 11400000, guid: 81d59b8b90624880a3335f9ecfe7a001, type: 2}
+  - {fileID: 11400000, guid: 544eed40d5584069890df0a37bf563a4, type: 2}
+  - {fileID: 11400000, guid: 145f2dc45cb1466ea42d337423eb840f, type: 2}
+  - {fileID: 11400000, guid: 5ae15df90001458bb0ac3bd6ca55ea7f, type: 2}
+  - {fileID: 11400000, guid: 3b5cbd83faaf40f7911fe62f60cd9234, type: 2}
+  - {fileID: 11400000, guid: 09e518508ac74a8ba3dd6d225174ec5d, type: 2}
+  - {fileID: 11400000, guid: ebf6504a2da5449085baf7fca74fb44b, type: 2}
+  - {fileID: 11400000, guid: 1dc807b3772643daa2ef562434614c2c, type: 2}
+  - {fileID: 11400000, guid: df78384992ed48af9bbc80e5507d6b0a, type: 2}
+  - {fileID: 11400000, guid: 0d12cb08de874f5ca8e159a751043484, type: 2}
+  - {fileID: 11400000, guid: d5bcca7195b541ea95a3a2ac28ba5059, type: 2}
+  - {fileID: 11400000, guid: 917cdb6a3ee84f06a5165fc5f825e991, type: 2}
+  encounters:
+  - id: sentry_and_wretch
+    kind: 0
+    minLayer: 0
+    maxLayer: 2
+    enemies:
+    - {fileID: 11400000, guid: 23a71b5394c1485c91127f24aef4d9b5, type: 2}
+    - {fileID: 11400000, guid: d533dd5593aa432e9abe0446021205b8, type: 2}
+  - id: hound_pair
+    kind: 0
+    minLayer: 0
+    maxLayer: 2
+    enemies:
+    - {fileID: 11400000, guid: d90a75b88e04403c872528de657674e6, type: 2}
+    - {fileID: 11400000, guid: d90a75b88e04403c872528de657674e6, type: 2}
+  - id: ringer_and_wretch
+    kind: 0
+    minLayer: 1
+    maxLayer: 4
+    enemies:
+    - {fileID: 11400000, guid: 313555c0d46045f0aea5b05ecf956cc6, type: 2}
+    - {fileID: 11400000, guid: d533dd5593aa432e9abe0446021205b8, type: 2}
+  - id: drowned_watch
+    kind: 0
+    minLayer: 3
+    maxLayer: 6
+    enemies:
+    - {fileID: 11400000, guid: 8e888a1b49714c8c9e810f46a08d9bbc, type: 2}
+    - {fileID: 11400000, guid: 23a71b5394c1485c91127f24aef4d9b5, type: 2}
+  - id: pack_and_bell
+    kind: 0
+    minLayer: 3
+    maxLayer: 6
+    enemies:
+    - {fileID: 11400000, guid: d90a75b88e04403c872528de657674e6, type: 2}
+    - {fileID: 11400000, guid: 313555c0d46045f0aea5b05ecf956cc6, type: 2}
+  - id: retainers
+    kind: 0
+    minLayer: 4
+    maxLayer: 6
+    enemies:
+    - {fileID: 11400000, guid: 8e888a1b49714c8c9e810f46a08d9bbc, type: 2}
+    - {fileID: 11400000, guid: 8e888a1b49714c8c9e810f46a08d9bbc, type: 2}
+  - id: bloodbound_knight
+    kind: 1
+    minLayer: 2
+    maxLayer: 6
+    enemies:
+    - {fileID: 11400000, guid: b322a485a2ba4e70954576e75a3c8eba, type: 2}
+  - id: matron_and_wretch
+    kind: 1
+    minLayer: 2
+    maxLayer: 6
+    enemies:
+    - {fileID: 11400000, guid: 1ea984c17b854951910c458adc14a756, type: 2}
+    - {fileID: 11400000, guid: d533dd5593aa432e9abe0446021205b8, type: 2}
+  - id: vael
+    kind: 2
+    minLayer: 0
+    maxLayer: 0
+    enemies:
+    - {fileID: 11400000, guid: f0ee62b80aa24fd5a68e9465dd0dd4dc, type: 2}

@@ -55,11 +55,28 @@ namespace WhereDarknessDwells.Tests
             Assert.That(assets.Enemies.Select(Describe), Is.EquivalentTo(tested.Enemies.Select(Describe)));
         }
 
+        [Test]
+        public void TheExpeditionMatchesTheOneTheRulesAreTestedWith()
+        {
+            var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>(DatabasePath);
+            Assert.That(database.Expedition, Is.Not.Null, "The content database has no expedition.");
+            ExpeditionDef asset = database.Expedition.ToDef();
+            ExpeditionDef tested = StarterContent.Expedition();
+
+            Assert.That(asset.Id, Is.EqualTo(tested.Id));
+            Assert.That(asset.Party, Is.EqualTo(tested.Party));
+            Assert.That(asset.StartingDeck, Is.EquivalentTo(tested.StartingDeck));
+            Assert.That(asset.RewardCards, Is.EquivalentTo(tested.RewardCards));
+            Assert.That(asset.Encounters.Select(Describe), Is.EquivalentTo(tested.Encounters.Select(Describe)));
+        }
+
         static string Describe(HeroDef h) => $"{h.Id}|{h.Name}|{h.Title}|{h.Colour}|{h.MaxHealth}";
 
         static string Describe(CardDef c) =>
             $"{c.Id}|{c.Name}|{string.Join("+", c.Owners)}|{c.Cost}|{c.Target}|{c.Text}|" +
             string.Join(";", c.Effects.Select(e => $"{e.Kind},{e.Scope},{e.Amount},{e.Status},{e.BonusIfExposed}"));
+
+        static string Describe(EncounterDef e) => $"{e.Id}|{e.Kind}|{e.MinLayer}|{e.MaxLayer}|{string.Join("+", e.EnemyIds)}";
 
         static string Describe(EnemyDef e) =>
             $"{e.Id}|{e.Name}|{e.MaxHealth}|" +

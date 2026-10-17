@@ -1,7 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 2, a combat system worth building on (in progress).** Milestone 1 was merged on
-2026-10-17.
+**Current milestone: 3, a complete run (in progress).** Milestones 1 and 2 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -75,7 +74,7 @@ victory or defeat, and how the screen looks. David played it and approved the lo
 
 ## Milestone 2: a combat system worth building on
 
-Status (2026-10-17):
+Status: done, merged on 2026-10-17 (PR #5).
 - `tools/Balance` plays the first fight with two scripted players. Over 200 seeds, a careful player (one that
   looks ahead at the enemy phase) wins every fight in about 6 rounds with 73% of the party's health left. A
   careless one (random choices) wins 2 in 3, takes about 12 rounds and ends with 19%. Choices matter, so the
@@ -105,6 +104,28 @@ Status (2026-10-17):
   and a run-end screen.
 - **Acceptance criteria:** start a run, choose a route, clear rooms, take rewards, and reach the boss or
   defeat.
+
+Status (2026-10-17): written, waiting for a check in David's Editor.
+
+**3a. Run rules in Core**
+- `Map/MapGenerator` builds the floor from the run's "map" stream and `Run/RunState` carries the party's health
+  and deck from room to room. Every command is validated, and the same seed and choices give the same run.
+- The content a run needs is in `StarterContent` and `Assets/Content`: 15 reward cards (4 per hero and 3 dual),
+  3 more enemies, 2 elites, a placeholder Vael, and the encounter table in `Expedition.asset`. They all use the
+  effects the starting cards already have.
+- Defaults chosen where the design left a gap:
+  - Investigation and Event rooms appear on the map but are empty until Milestones 4 and 5.
+  - Elites give a card choice; their Keepsake comes with Milestone 5.
+  - The first layer is always an ordinary fight.
+- `tools/Balance` now plays whole runs (`-- run 300`). With the tuned content, the careful player wins 63% of runs
+  and reaches Vael in 94%. The careless player wins none, and most of its runs end on layers 1 to 4. Open question
+  3 was answered with the same tool: David chose to bring fallen heroes back with a quarter of their health.
+
+**3b. Run screens in Unity**
+- **Where Darkness Dwells > Build Run Scene** creates `Assets/Scenes/Run.unity` and makes it the first scene in
+  the build. `RunFlow` shows the party, map, reward, Sanctuary, empty rooms and the run's end, and hands each fight
+  to the combat screen, which hands it back when it's over. `MapView` draws the map from the run's state.
+- The Combat scene still plays one test fight on its own.
 
 ## Milestone 4: the mystery
 
@@ -141,7 +162,7 @@ Status (2026-10-17):
 
 ## Known limitations and technical debt
 
-- The combat screen doesn't animate events yet. It writes them to the log and redraws, so the enemy phase
-  happens at once. Damage numbers and other feedback are Milestone 2.
+- Vael is a placeholder enemy with ordinary intents. His own rules and the clue effects come with Milestone 4.
+- A run can't be saved yet. Saving between rooms is Milestone 6.
 - Cloud sessions have no Unity Editor. Unity-side code is checked by David in the Editor, and Core is checked
   by tests.
