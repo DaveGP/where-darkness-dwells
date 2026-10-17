@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 6, menus, saving and the map (in progress).** Milestones 1 to 5 were merged on 2026-10-17.
+**Current milestone: 6.5, presentation (not started).** Milestones 1 to 6 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -217,7 +217,7 @@ David split the old Milestone 6 in two (2026-10-17). This one comes first.
 - **Acceptance criteria:** quit in the middle of a run, start the game again, choose Continue and carry on from
   the same map with the same party, deck, Keepsakes and clues.
 
-Status: built and checked in the Editor (it compiles, all EditMode tests pass, and a quit and Continue in the middle of a fight worked). Waiting on David's playtest.
+Status: done, merged as PR #10. Discarding a card (once per activation, chosen by David) followed in its own PR.
 
 - **Core:** `RunState.TrySnapshot` and `RunState.TryRestore` with a plain `RunSnapshot`, and tests that a restored
   run plays on exactly as the original did.
