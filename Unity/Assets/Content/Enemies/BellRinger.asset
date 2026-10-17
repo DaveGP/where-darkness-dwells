@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c0530793d6842d4a247f5c3d7dfe638, type: 3}
+  m_Name: BellRinger
+  m_EditorClassIdentifier: 
+  id: bell_ringer
+  displayName: 'Bell Ringer'
+  maxHealth: 26
+  intents:
+  - description: 'Toll: Exposed 1 to all'
+    kind: 2
+    target: 2
+    amount: 1
+    status: 0
+  - description: 'Hammer 9'
+    kind: 0
+    target: 1
+    amount: 9
+    status: 0
+  - description: 'Brace 6'
+    kind: 1
+    target: 3
+    amount: 6
+    status: 0

@@ -13,13 +13,17 @@ namespace WhereDarknessDwells.Game
     /// The combat screen. It shows a <see cref="CombatState"/> and turns clicks into its Try* commands. It never
     /// changes the fight itself: after every command it adds the events to the log and redraws from the state.
     /// The only state it keeps is the card the player has picked and is choosing a target for.
+    /// In a run, <see cref="RunFlow"/> hands it each fight with <see cref="Show"/>. Played on its own in the Combat
+    /// scene, it starts the test fight below.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class CombatScreen : MonoBehaviour
     {
         [SerializeField] ContentDatabase content;
 
-        [Header("Test fight (until the map exists in Milestone 3)")]
+        [Header("Test fight, when the Combat scene is played on its own")]
+        [Tooltip("Off when a run hands this screen its fights.")]
+        [SerializeField] bool startTestFight = true;
         [SerializeField] HeroAsset[] party = new HeroAsset[0];
         [Tooltip("One entry per copy of a card.")]
         [SerializeField] CardAsset[] deck = new CardAsset[0];
@@ -43,6 +47,8 @@ namespace WhereDarknessDwells.Game
         ContentLibrary _library;
         CombatState _combat;
         ulong _seed;
+        Action _onFinished; // Set while showing a run's fight: called when the player leaves the end panel.
+        VisualElement _root;
         int _selectedCard; // Instance id of the card waiting for a target; 0 when none.
         IReadOnlyList<CombatEvent> _preview = new CombatEvent[0]; // What the enemies would do if they acted now.
         readonly Dictionary<string, VisualElement> _views = new Dictionary<string, VisualElement>();
@@ -55,7 +61,7 @@ namespace WhereDarknessDwells.Game
 
         void OnEnable()
         {
-            VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+            VisualElement root = _root = GetComponent<UIDocument>().rootVisualElement;
             _round = root.Q<Label>("round");
             _prompt = root.Q<Label>("prompt");
             _seedLabel = root.Q<Label>("seed");
@@ -79,7 +85,7 @@ namespace WhereDarknessDwells.Game
                 _selectedCard = 0;
                 Apply(() => _combat.TryEndActivation());
             };
-            _again.clicked += NewFight;
+            _again.clicked += OnEndButton;
             // Right-click anywhere cancels choosing a target.
             root.RegisterCallback<PointerDownEvent>(e => { if (e.button == 1) CancelTarget(); }, TrickleDown.TrickleDown);
 
@@ -92,7 +98,45 @@ namespace WhereDarknessDwells.Game
                 ShowProblems(problems);
                 return;
             }
-            NewFight();
+            if (startTestFight) NewFight();
+            else _root.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>
+        /// Shows a fight the run has already started, and calls <paramref name="onFinished"/> once it is over and the
+        /// player presses Continue. The screen hides itself again before the call.
+        /// </summary>
+        public void Show(CombatState combat, ulong seed, Action onFinished)
+        {
+            _combat = combat;
+            _seed = seed;
+            _onFinished = onFinished;
+            _selectedCard = 0;
+            _log.Clear();
+            foreach (CombatEvent e in combat.Log)
+            {
+                string line = CombatLogText.Describe(e, combat);
+                if (line != null) AddLogLine(line, e.Kind);
+            }
+            _endPanel.AddToClassList("hidden");
+            _again.text = "Continue";
+            _root.style.display = DisplayStyle.Flex;
+            SetHint("", false);
+            Redraw();
+        }
+
+        void OnEndButton()
+        {
+            if (_onFinished == null)
+            {
+                NewFight();
+                return;
+            }
+            Action finished = _onFinished;
+            _onFinished = null;
+            _combat = null;
+            _root.style.display = DisplayStyle.None;
+            finished();
         }
 
         void Update()
@@ -133,6 +177,7 @@ namespace WhereDarknessDwells.Game
             foreach (string p in problems) Debug.LogError($"[Combat] {p}");
             _endTitle.text = "The fight can't start";
             _endText.text = string.Join("\n", problems);
+            if (_root != null) _root.style.display = DisplayStyle.Flex;
             _again.AddToClassList("hidden");
             _endPanel.RemoveFromClassList("hidden");
         }
@@ -246,7 +291,7 @@ namespace WhereDarknessDwells.Game
                 bool won = _combat.Phase == CombatPhase.Won;
                 _endTitle.text = won ? "Victory" : "Defeat";
                 _endText.text = won
-                    ? $"The chapel falls silent after {_combat.Round} rounds."
+                    ? $"The room falls silent after {_combat.Round} rounds."
                     : "The darkness takes the party.";
                 _again.RemoveFromClassList("hidden");
                 _endPanel.RemoveFromClassList("hidden");
@@ -268,8 +313,8 @@ namespace WhereDarknessDwells.Game
 
         VisualElement HeroView(Combatant hero, CardDef selected)
         {
-            VisualElement view = Copy(heroPanel, "hero");
-            view.AddToClassList(OwnerClass(hero.Hero.Colour));
+            VisualElement view = Views.Copy(heroPanel, "hero");
+            view.AddToClassList(Views.OwnerClass(hero.Hero.Colour));
             view.Q<Label>("name").text = hero.Name;
             view.Q<Label>("title").text = hero.Hero.Title;
             DrawHealth(view, hero);
@@ -309,7 +354,7 @@ namespace WhereDarknessDwells.Game
 
         VisualElement EnemyView(Combatant enemy, CardDef selected)
         {
-            VisualElement view = Copy(enemyPanel, "enemy");
+            VisualElement view = Views.Copy(enemyPanel, "enemy");
             view.Q<Label>("name").text = enemy.Name;
             DrawHealth(view, enemy);
             DrawBlockAndStatuses(view, enemy);
@@ -357,24 +402,7 @@ namespace WhereDarknessDwells.Game
         VisualElement CardView(CardInstance card)
         {
             CardDef def = _combat.CardOf(card);
-            VisualElement view = Copy(cardView, "card");
-            view.Q<Label>("cost").text = def.Cost.ToString();
-            view.Q<Label>("name").text = def.Name;
-            view.Q<Label>("text").text = def.Text;
-            view.Q<Label>("target").text = def.Target == CardTarget.Enemy ? "Target an enemy" : def.Target == CardTarget.Ally ? "Target an ally" : "";
-
-            List<HeroDef> owners = def.Owners.Select(id => _library.Hero(id)).ToList();
-            view.Q<Label>("owner-names").text = string.Join(" or ", owners.Select(o => o.Name));
-            VisualElement swatches = view.Q("owners");
-            foreach (HeroDef owner in owners)
-            {
-                var swatch = new VisualElement();
-                swatch.AddToClassList("swatch");
-                swatch.AddToClassList(OwnerClass(owner.Colour));
-                swatches.Add(swatch);
-            }
-            if (owners.Count == 1) view.AddToClassList(OwnerClass(owners[0].Colour));
-            else view.AddToClassList("is-dual");
+            VisualElement view = Views.Card(cardView, def, _library);
 
             string reason = _combat.WhyCantPlay(card.Id);
             view.EnableInClassList("is-unplayable", reason != null);
@@ -539,10 +567,5 @@ namespace WhereDarknessDwells.Game
             _log.Add(line);
             _log.schedule.Execute(() => _log.ScrollTo(line));
         }
-
-        /// <summary>A copy of a layout's root element, such as the "card" element of Card.uxml.</summary>
-        static VisualElement Copy(VisualTreeAsset layout, string rootClass) => layout.Instantiate().Q(className: rootClass);
-
-        static string OwnerClass(string colour) => $"owner-{(colour ?? "").ToLowerInvariant()}";
     }
 }

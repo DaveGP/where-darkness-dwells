@@ -4,8 +4,8 @@ using System.Linq;
 namespace WhereDarknessDwells.Core
 {
     /// <summary>
-    /// The Milestone 1 content, written in code so the rules can be tested without Unity. In Unity this same
-    /// content becomes ScriptableObject assets; this class stays as the test fixture.
+    /// The game's content, written in code so the rules can be tested without Unity. In Unity this same content
+    /// becomes ScriptableObject assets; this class stays as the test fixture.
     /// </summary>
     public static class StarterContent
     {
@@ -27,7 +27,10 @@ namespace WhereDarknessDwells.Core
             new HeroDef(Ashe, "Sister Ashe", "the Occultist", "Ash", 30),
         };
 
-        public static IEnumerable<CardDef> Cards() => new[]
+        public static IEnumerable<CardDef> Cards() => StarterCards().Concat(RewardCards());
+
+        /// <summary>The 15 cards of the starting deck.</summary>
+        public static IEnumerable<CardDef> StarterCards() => new[]
         {
             // Bram: protect the party and set enemies up.
             new CardDef("shield_wall", "Shield Wall", new[] { Bram }, 1, CardTarget.Ally,
@@ -83,6 +86,63 @@ namespace WhereDarknessDwells.Core
                 EffectDef.Block(5), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies)),
         };
 
+        /// <summary>Cards that can be offered after a won fight. They use the same effects as the starting cards.</summary>
+        public static IEnumerable<CardDef> RewardCards() => new[]
+        {
+            // Bram
+            new CardDef("bulwark", "Bulwark", new[] { Bram }, 2, CardTarget.Ally,
+                "Give an ally 12 Block.",
+                EffectDef.Block(12)),
+            new CardDef("iron_rebuke", "Iron Rebuke", new[] { Bram }, 1, CardTarget.Enemy,
+                "Deal 6 damage. Bram gains 4 Block.",
+                EffectDef.Damage(6), EffectDef.Block(4, EffectScope.ActingHero)),
+            new CardDef("hold_the_line", "Hold the Line", new[] { Bram }, 2, CardTarget.Ally,
+                "Guard another ally until your next turn. Bram gains 10 Block.",
+                EffectDef.Guard(), EffectDef.Block(10, EffectScope.ActingHero)),
+            new CardDef("crushing_blow", "Crushing Blow", new[] { Bram }, 2, CardTarget.Enemy,
+                "Deal 9 damage. Apply 1 Weak.",
+                EffectDef.Damage(9), EffectDef.Apply(StatusKind.Weak, 1)),
+
+            // Wren
+            new CardDef("aimed_shot", "Aimed Shot", new[] { Wren }, 2, CardTarget.Enemy,
+                "Deal 11 damage, or 17 if the target is Exposed.",
+                EffectDef.Damage(11, bonusIfExposed: 6)),
+            new CardDef("open_vein", "Open Vein", new[] { Wren }, 1, CardTarget.Enemy,
+                "Apply 5 Bleed.",
+                EffectDef.Apply(StatusKind.Bleed, 5)),
+            new CardDef("mark_prey", "Mark Prey", new[] { Wren }, 0, CardTarget.Enemy,
+                "Apply 1 Exposed.",
+                EffectDef.Apply(StatusKind.Exposed, 1)),
+            new CardDef("arrow_storm", "Arrow Storm", new[] { Wren }, 3, CardTarget.None,
+                "Deal 6 damage to every enemy. Apply 2 Bleed to every enemy.",
+                EffectDef.DamageAll(6), EffectDef.Apply(StatusKind.Bleed, 2, EffectScope.AllEnemies)),
+
+            // Sister Ashe
+            new CardDef("grave_whisper", "Grave Whisper", new[] { Ashe }, 1, CardTarget.None,
+                "Draw 2 cards.",
+                EffectDef.Draw(2)),
+            new CardDef("creeping_rot", "Creeping Rot", new[] { Ashe }, 1, CardTarget.None,
+                "Apply 2 Hex to every enemy.",
+                EffectDef.Apply(StatusKind.Hex, 2, EffectScope.AllEnemies)),
+            new CardDef("sap_strength", "Sap Strength", new[] { Ashe }, 1, CardTarget.Enemy,
+                "Apply 2 Weak and 1 Hex.",
+                EffectDef.Apply(StatusKind.Weak, 2), EffectDef.Apply(StatusKind.Hex, 1)),
+            new CardDef("ward_of_ash", "Ward of Ash", new[] { Ashe }, 1, CardTarget.Ally,
+                "Give an ally 6 Block. Draw a card.",
+                EffectDef.Block(6), EffectDef.Draw(1)),
+
+            // Dual cards
+            new CardDef("shieldbreaker", "Shieldbreaker", new[] { Bram, Wren }, 2, CardTarget.Enemy,
+                "Deal 8 damage. Apply 2 Exposed.",
+                EffectDef.Damage(8), EffectDef.Apply(StatusKind.Exposed, 2)),
+            new CardDef("witchfire_arrows", "Witchfire Arrows", new[] { Wren, Ashe }, 2, CardTarget.None,
+                "Deal 3 damage to every enemy. Apply 2 Hex to every enemy.",
+                EffectDef.DamageAll(3), EffectDef.Apply(StatusKind.Hex, 2, EffectScope.AllEnemies)),
+            new CardDef("consecrate", "Consecrate", new[] { Ashe, Bram }, 2, CardTarget.Ally,
+                "Give an ally 8 Block. Apply 1 Weak to every enemy.",
+                EffectDef.Block(8), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies)),
+        };
+
         public static IEnumerable<EnemyDef> Enemies() => new[]
         {
             new EnemyDef("hollow_sentry", "Hollow Sentry", 34,
@@ -93,10 +153,60 @@ namespace WhereDarknessDwells.Core
                 IntentDef.Apply(StatusKind.Weak, 2, IntentTarget.HealthiestHero, "Curse: Weak 2"),
                 IntentDef.Attack(4, IntentTarget.AllHeroes, "Wail 4 to all"),
                 IntentDef.Attack(6, IntentTarget.RandomHero, "Claw 6")),
+
+            // Milestone 3: the rest of the floor.
+            new EnemyDef("gaol_hound", "Gaol Hound", 18,
+                IntentDef.Attack(5, IntentTarget.RandomHero, "Bite 5"),
+                IntentDef.Apply(StatusKind.Bleed, 3, IntentTarget.RandomHero, "Rend: Bleed 3"),
+                IntentDef.Attack(8, IntentTarget.RandomHero, "Lunge 8")),
+            new EnemyDef("bell_ringer", "Bell Ringer", 26,
+                IntentDef.Apply(StatusKind.Exposed, 1, IntentTarget.AllHeroes, "Toll: Exposed 1 to all"),
+                IntentDef.Attack(9, IntentTarget.HealthiestHero, "Hammer 9"),
+                IntentDef.Block(6, "Brace 6")),
+            new EnemyDef("drowned_retainer", "Drowned Retainer", 30,
+                IntentDef.Attack(6, IntentTarget.RandomHero, "Grasp 6"),
+                IntentDef.Block(10, "Silt armour 10"),
+                IntentDef.Attack(10, IntentTarget.RandomHero, "Drag under 10")),
+
+            // Elites
+            new EnemyDef("bloodbound_knight", "Bloodbound Knight", 70,
+                IntentDef.Attack(13, IntentTarget.HealthiestHero, "Cleave 13"),
+                IntentDef.Apply(StatusKind.Bleed, 4, IntentTarget.RandomHero, "Blood oath: Bleed 4"),
+                IntentDef.Attack(7, IntentTarget.AllHeroes, "Sweep 7 to all"),
+                IntentDef.Block(14, "Crimson guard 14")),
+            new EnemyDef("chapel_matron", "Chapel Matron", 52,
+                IntentDef.Apply(StatusKind.Weak, 2, IntentTarget.AllHeroes, "Hymn: Weak 2 to all"),
+                IntentDef.Attack(12, IntentTarget.RandomHero, "Smite 12"),
+                IntentDef.Attack(5, IntentTarget.AllHeroes, "Lament 5 to all")),
+
+            // Placeholder boss until Milestone 4 gives Vael his own rules.
+            new EnemyDef("vael", "Vael, the Bloodbound Steward", 110,
+                IntentDef.Attack(10, IntentTarget.RandomHero, "Blood lash 10"),
+                IntentDef.Apply(StatusKind.Bleed, 2, IntentTarget.AllHeroes, "Hemorrhage: Bleed 2 to all"),
+                IntentDef.Block(16, "Sanguine ward 16"),
+                IntentDef.Attack(16, IntentTarget.HealthiestHero, "Execute 16")),
         };
 
-        /// <summary>The 15-card starting deck: one of each card above, numbered 1 to 15.</summary>
+        /// <summary>The Milestone 3 floor of the Keep: the fixed party, the starting deck and every encounter.</summary>
+        public static ExpeditionDef Expedition() => new ExpeditionDef("black_keep",
+            Party,
+            StarterCards().Select(c => c.Id),
+            RewardCards().Select(c => c.Id),
+            new[]
+            {
+                new EncounterDef("sentry_and_wretch", EncounterKind.Normal, 0, 2, FirstEncounter),
+                new EncounterDef("hound_pair", EncounterKind.Normal, 0, 2, "gaol_hound", "gaol_hound"),
+                new EncounterDef("ringer_and_wretch", EncounterKind.Normal, 1, 4, "bell_ringer", "chapel_wretch"),
+                new EncounterDef("drowned_watch", EncounterKind.Normal, 3, 6, "drowned_retainer", "hollow_sentry"),
+                new EncounterDef("pack_and_bell", EncounterKind.Normal, 3, 6, "gaol_hound", "bell_ringer"),
+                new EncounterDef("retainers", EncounterKind.Normal, 4, 6, "drowned_retainer", "drowned_retainer"),
+                new EncounterDef("bloodbound_knight", EncounterKind.Elite, 2, 6, "bloodbound_knight"),
+                new EncounterDef("matron_and_wretch", EncounterKind.Elite, 2, 6, "chapel_matron", "chapel_wretch"),
+                new EncounterDef("vael", EncounterKind.Boss, 0, 0, "vael"),
+            });
+
+        /// <summary>The 15-card starting deck: one of each starter card, numbered 1 to 15.</summary>
         public static List<CardInstance> StartingDeck() =>
-            Cards().Select((c, i) => new CardInstance(i + 1, c.Id)).ToList();
+            StarterCards().Select((c, i) => new CardInstance(i + 1, c.Id)).ToList();
     }
 }

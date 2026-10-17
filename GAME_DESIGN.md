@@ -95,7 +95,7 @@ Combat rules use no randomness apart from shuffling.
 
 - A hero at 0 health is **down**. Their own cards are set aside for the rest of the combat. Dual cards stay
   playable through the other owner.
-- After a won combat, downed heroes stand back up with 1 health.
+- After a won combat, downed heroes stand back up with a quarter of their maximum health (rounded down).
 - If all three heroes are down, the run is lost.
 - An enemy whose shown target goes down before it acts turns on the healthiest standing hero instead.
 
@@ -163,7 +163,9 @@ noticeably easier or changes the ending. The journal shows found clues and blank
    the right moment.
 2. ~~**Benched heroes.**~~ **Decided (Milestone 2): no bonus.** Giving waiting heroes 1 Block changed results by
    about 2 percentage points, so it isn't worth the extra rule.
-3. **Downed heroes.** Is "stand back up with 1 health" too forgiving or too harsh?
+3. ~~**Downed heroes.**~~ **Decided (Milestone 3): stand back up with a quarter of max health.** Over 300 runs in the
+   balance tool, a hero brought back with 1 health fell again in the next fight 45% of the time, against 35% with a
+   quarter. David chose the quarter so a fall still costs something without making that hero useless.
 4. **Fourth hero.** Who is it? This is needed so choosing a party is a real decision.
 5. **Platform.** Steam, itch.io or both? This changes Milestone 7, not the earlier ones.
 6. **Meta-progression.** Should anything unlock between runs, such as new heroes or villains? Currently a

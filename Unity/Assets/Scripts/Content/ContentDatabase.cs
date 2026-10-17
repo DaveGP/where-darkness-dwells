@@ -6,8 +6,8 @@ using WhereDarknessDwells.Core;
 namespace WhereDarknessDwells.Content
 {
     /// <summary>
-    /// Lists every hero, card and enemy asset in the game and turns them into the Core definitions. The game builds
-    /// it once at startup and refuses to start if anything is wrong.
+    /// Lists every hero, card and enemy asset in the game, and the expedition a run uses, and turns them into the Core
+    /// definitions. The game builds it once at startup and refuses to start if anything is wrong.
     /// </summary>
     [CreateAssetMenu(menuName = "Where Darkness Dwells/Content Database", fileName = "ContentDatabase")]
     public sealed class ContentDatabase : ScriptableObject
@@ -15,10 +15,12 @@ namespace WhereDarknessDwells.Content
         [SerializeField] HeroAsset[] heroes = new HeroAsset[0];
         [SerializeField] CardAsset[] cards = new CardAsset[0];
         [SerializeField] EnemyAsset[] enemies = new EnemyAsset[0];
+        [SerializeField] ExpeditionAsset expedition;
 
         public IReadOnlyList<HeroAsset> Heroes => heroes;
         public IReadOnlyList<CardAsset> Cards => cards;
         public IReadOnlyList<EnemyAsset> Enemies => enemies;
+        public ExpeditionAsset Expedition => expedition;
 
         /// <summary>
         /// The definitions, plus every problem found in them, one readable line each. Only use the library when
@@ -45,6 +47,8 @@ namespace WhereDarknessDwells.Content
                 cards.Where(c => c != null).Select(c => c.ToDef()),
                 enemies.Where(e => e != null).Select(e => e.ToDef()));
             problems.AddRange(library.Validate());
+            if (expedition == null) problems.Add("The content database has no expedition.");
+            else problems.AddRange(library.Validate(expedition.ToDef()));
             return library;
         }
 
