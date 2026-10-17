@@ -52,7 +52,7 @@ namespace WhereDarknessDwells.Core
                 "Give an ally 7 Block.",
                 EffectDef.Block(7)),
             new CardDef("stand_guard", "Stand Guard", new[] { Bram }, 1, CardTarget.Ally,
-                "Guard another ally until your next turn: attacks aimed at them hit Bram. Bram gains 4 Block.",
+                "Guard another ally until your next turn. Bram gains 4 Block.",
                 EffectDef.Guard(), EffectDef.Block(4, EffectScope.ActingHero)),
             new CardDef("shield_bash", "Shield Bash", new[] { Bram }, 1, CardTarget.Enemy,
                 "Deal 4 damage. Apply 2 Exposed.",
@@ -134,10 +134,10 @@ namespace WhereDarknessDwells.Core
 
             // Hollis: rings Weak and Exposed over every enemy at once.
             new CardDef("toll", "Toll", new[] { Hollis }, 1, CardTarget.None,
-                "Deal 2 damage to every enemy. Apply 1 Weak to every enemy. Draw a card.",
+                "Deal 2 damage and apply 1 Weak to every enemy. Draw a card.",
                 EffectDef.DamageAll(2), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies), EffectDef.Draw(1)),
             new CardDef("knell", "Knell", new[] { Hollis }, 2, CardTarget.None,
-                "Deal 5 damage to every enemy. Apply 1 Exposed to every enemy.",
+                "Deal 5 damage and apply 1 Exposed to every enemy.",
                 EffectDef.DamageAll(5), EffectDef.Apply(StatusKind.Exposed, 1, EffectScope.AllEnemies)),
             new CardDef("sanctuary_peal", "Sanctuary Peal", new[] { Hollis }, 1, CardTarget.None,
                 "Give every hero 4 Block.",

@@ -324,6 +324,8 @@
     border-width: 2px;
     border-radius: 8px;
     border-color: rgb(80, 70, 76);
+    /* A long text is cut off at the bottom rather than pushing the colour bar and names out of the card. */
+    overflow: hidden;
     transition-property: translate, scale, opacity;
     transition-duration: 0.12s;
 }
@@ -354,6 +356,7 @@
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .swatch {
@@ -388,6 +391,7 @@
 }
 
 .card-target {
+    flex-shrink: 0;
     font-size: 12px;
     color: rgb(150, 140, 146);
     margin: 4px 0;
@@ -395,11 +399,14 @@
 
 .card-text {
     flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
     font-size: 14px;
     white-space: normal;
 }
 
 .card-owner-names {
+    flex-shrink: 0;
     font-size: 12px;
     -unity-text-align: middle-center;
     color: rgb(150, 140, 146);

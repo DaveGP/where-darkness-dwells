@@ -450,6 +450,8 @@ namespace WhereDarknessDwells.Game
 
             string help = reason ?? (def.Target == CardTarget.None ? $"Click to play {def.Name}." : $"Click {def.Name}, then choose {(def.Target == CardTarget.Enemy ? "an enemy" : "an ally")}.");
             if (boost != null) help += " " + boost;
+            // Guard is explained here rather than on the card, so the card's text stays short enough to fit.
+            if (def.Effects.Any(e => e.Kind == EffectKind.Guard)) help += " Guard: attacks aimed at that ally hit the guard instead.";
             view.RegisterCallback<PointerEnterEvent>(_ => SetHint(help, false));
             view.RegisterCallback<PointerLeaveEvent>(_ => SetHint("", false));
             view.RegisterCallback<ClickEvent>(e =>
