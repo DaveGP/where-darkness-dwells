@@ -20,7 +20,9 @@ Done:
 
 Waiting on David:
 - [ ] Review the proposed decisions in `GAME_DESIGN.md` (heroes, turn structure, villain).
-- [ ] Create the Unity project in this repository (see "Creating the Unity project" below).
+- [x] Create the Unity project in this repository. It's in `Unity/` (6000.6.5f1, Universal 3D template).
+- [x] Check the Editor can be driven from a Claude session on David's Mac: it recompiles with 0 errors and
+  lists tests.
 
 ## Milestone 1: playable combat prototype
 

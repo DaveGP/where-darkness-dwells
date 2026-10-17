@@ -15,6 +15,9 @@ milestone are in `MILESTONES.md`. Read both before changing anything.
 
 ## Architecture
 
+The Unity project lives in `Unity/`. Paths below are relative to it, and the .NET test project sits at the
+repository root in `tests/`.
+
 The game rules are plain C# with no Unity references, so they can be tested in milliseconds without the
 Editor. Unity only shows the state and passes player choices back to the rules.
 
@@ -57,7 +60,9 @@ Assets/Tests/EditMode    NUnit tests for Core. tests/WhereDarknessDwells.Tests r
 
 - **Core tests:** `dotnet test tests/WhereDarknessDwells.Tests`. These run in CI on every push and in cloud
   sessions, where there is no Unity Editor.
-- **Unity:** Window > General > Test Runner > EditMode runs the same tests inside Unity.
+- **Unity:** Window > General > Test Runner > EditMode runs the same tests inside Unity. On David's Mac, a
+  Claude session can drive his open Editor with the Unity CLI (`unity recompile`, `unity test --mode EditMode`)
+  through the `com.unity.pipeline` package.
 - **Before a PR:** Core tests pass, a review of the diff for state changes made outside Core, and new assets
   committed with their `.meta` files.
 - **What a cloud session can't check:** compilation of the Unity layer, scenes, serialization, and how
@@ -77,7 +82,7 @@ Assets/Tests/EditMode    NUnit tests for Core. tests/WhereDarknessDwells.Tests r
 ## Third-party assets
 
 - **Synty assets are licensed to David and must not be committed.** The repo is public and the licence
-  doesn't allow redistribution. `.gitignore` excludes `Assets/Synty/` and `Assets/Polygon*/`. If a pack
+  doesn't allow redistribution. `.gitignore` excludes `Unity/Assets/Synty/` and `Unity/Assets/Polygon*/` (with their `.meta` files). Run `git status` after every import. If a pack
   imports somewhere else, add that folder to `.gitignore` before committing.
 - Because of that, cloud sessions and fresh clones won't have the Synty art. Scenes and prefabs must still
   load without it, falling back to placeholders, so the game always runs from a clean clone.
