@@ -44,11 +44,14 @@ namespace WhereDarknessDwells.Core
 
                 case CombatEventKind.IntentShown:
                 {
-                    string action = e.Intent?.Description ?? "an action";
+                    string action = combat.IntentText(combat.Find(e.SourceId), e.Intent) ?? "an action";
                     return e.TargetId == null ? $"{source} readies {action}." : $"{source} readies {action} at {target}.";
                 }
 
-                case CombatEventKind.EnemyActed: return $"{source} uses {e.Intent?.Description ?? "an action"}.";
+                case CombatEventKind.EnemyActed: return $"{source} uses {combat.IntentText(combat.Find(e.SourceId), e.Intent) ?? "an action"}.";
+                case CombatEventKind.IntentCancelled:
+                    return $"{combat.Cancel?.Label ?? "The party acts"}: {source}'s {combat.IntentText(combat.Find(e.SourceId), e.Intent) ?? "action"} is cancelled.";
+                case CombatEventKind.Healed: return $"{target} heals {e.Amount}.";
                 case CombatEventKind.HeroDowned: return $"{source} is down.";
                 case CombatEventKind.EnemyDefeated: return $"{source} is defeated.";
                 case CombatEventKind.CardsSetAside:

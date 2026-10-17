@@ -72,8 +72,9 @@ namespace WhereDarknessDwells.Core
                 foreach (IntentDef i in e.Intents)
                 {
                     if (i.Amount < 0) problems.Add($"Enemy '{e.Id}' has an action with a negative amount.");
-                    if (i.Kind == IntentKind.Block && i.Target != IntentTarget.Self) problems.Add($"Enemy '{e.Id}' blocks for someone other than itself.");
-                    if (i.Kind != IntentKind.Block && i.Target == IntentTarget.Self) problems.Add($"Enemy '{e.Id}' aims an attack or status at itself.");
+                    bool self = i.Kind == IntentKind.Block || i.Kind == IntentKind.Heal;
+                    if (self && i.Target != IntentTarget.Self) problems.Add($"Enemy '{e.Id}' blocks or heals someone other than itself.");
+                    if (!self && i.Target == IntentTarget.Self) problems.Add($"Enemy '{e.Id}' aims an attack or status at itself.");
                 }
             }
 
@@ -115,6 +116,7 @@ namespace WhereDarknessDwells.Core
                 if (layer >= MapGenerator.FirstEliteLayer && !expedition.Encounters.Any(e => e.Kind == EncounterKind.Elite && e.FitsLayer(layer)))
                     problems.Add($"{name} has no elite encounter for layer {layer + 1}.");
             }
+            if (expedition.Villain != null) ValidateVillain(expedition, problems);
             return problems;
 
             void CheckCard(string id, string list)
@@ -122,6 +124,31 @@ namespace WhereDarknessDwells.Core
                 if (!HasCard(id)) { problems.Add($"{name} has unknown card '{id}' in its {list}."); return; }
                 if (!Card(id).Owners.Any(expedition.Party.Contains)) problems.Add($"{name} has '{id}' in its {list}, but no hero in the party owns it.");
             }
+        }
+
+        void ValidateVillain(ExpeditionDef expedition, List<string> problems)
+        {
+            VillainDef v = expedition.Villain;
+            string name = $"Villain '{v.Id}'";
+            EncounterDef boss = expedition.Boss;
+            if (!HasEnemy(v.BossEnemyId)) problems.Add($"{name} has unknown boss enemy '{v.BossEnemyId}'.");
+            else if (boss != null && !boss.EnemyIds.Contains(v.BossEnemyId)) problems.Add($"{name}'s boss '{v.BossEnemyId}' isn't in the boss encounter.");
+            if (v.Clues.Select(c => c.Id).Distinct().Count() != v.Clues.Count) problems.Add($"{name} has two clues with the same id.");
+            foreach (ClueDef c in v.Clues)
+            {
+                if (c.Effects.Count == 0) problems.Add($"Clue '{c.Id}' changes nothing.");
+                if (c.SearchCost < 0) problems.Add($"Clue '{c.Id}' has a negative search cost.");
+                if ((c.Sources & ClueSource.Investigation) != 0 && c.MinLayer > c.MaxLayer) problems.Add($"Clue '{c.Id}' has its first layer after its last.");
+                if (c.Has(ClueEffectKind.RevealSecretRoom))
+                {
+                    if (v.SecretRoom == null) problems.Add($"Clue '{c.Id}' reveals a secret room, but {name} has none.");
+                    else if (c.MaxLayer >= v.SecretRoom.Layer) problems.Add($"Clue '{c.Id}' can be found after the secret room it reveals.");
+                }
+                foreach (ClueEffect e in c.Effects.Where(e => e.Kind == ClueEffectKind.CancelBossIntent))
+                    if (string.IsNullOrEmpty(e.Label)) problems.Add($"Clue '{c.Id}' grants a cancel with no button label.");
+            }
+            if (v.SecretRoom != null && (v.SecretRoom.Layer < 1 || v.SecretRoom.Layer > MapGenerator.Layers - 2))
+                problems.Add($"{name}'s secret room must sit between two layers of the map.");
         }
 
         void Add<T>(Dictionary<string, T> map, string id, T def, string kind)

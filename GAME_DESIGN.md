@@ -152,7 +152,7 @@ says otherwise.
 - **Clues that come from Events** (the Thrall's Confession, and His True Name from an Event) can also turn
   up in Investigations until Events exist in Milestone 5. His True Name can also come from an Elite
   reward, as the table says.
-- **Before the Ledger,** the boss is shown as "The Steward". His intents read as vague lines such as
+- **Before the Ledger,** the boss is shown as "The Master of the Keep". His intents read as vague lines such as
   "Blood gathers", with no numbers or previews. The Ledger shows his real name and exact intents.
 - **The Cistern** is a hidden room in the middle of the map. It is always generated, but only shown and
   connected once the Cistern Door is found, so the door only appears on layers 1 to 4. Entering it, each

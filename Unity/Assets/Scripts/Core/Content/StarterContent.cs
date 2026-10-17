@@ -179,12 +179,17 @@ namespace WhereDarknessDwells.Core
                 IntentDef.Attack(12, IntentTarget.RandomHero, "Smite 12"),
                 IntentDef.Attack(5, IntentTarget.AllHeroes, "Lament 5 to all")),
 
-            // Placeholder boss until Milestone 4 gives Vael his own rules.
-            new EnemyDef("vael", "Vael, the Bloodbound Steward", 110,
-                IntentDef.Attack(10, IntentTarget.RandomHero, "Blood lash 10"),
-                IntentDef.Apply(StatusKind.Bleed, 2, IntentTarget.AllHeroes, "Hemorrhage: Bleed 2 to all"),
-                IntentDef.Block(16, "Sanguine ward 16"),
-                IntentDef.Attack(16, IntentTarget.HealthiestHero, "Execute 16")),
+            // The boss. Until the party finds the Ledger they only see the vague lines.
+            new EnemyDef(VaelId, "Vael, the Bloodbound Steward", 130,
+                IntentDef.Attack(10, IntentTarget.RandomHero, "Blood lash 10").Vaguely("Blood gathers in his hand"),
+                IntentDef.Heal(18, "Blood Tithe: heal 18").Vaguely("He drinks"),
+                IntentDef.Apply(StatusKind.Bleed, 2, IntentTarget.AllHeroes, "Hemorrhage: Bleed 2 to all").Vaguely("The air turns red"),
+                IntentDef.Block(14, "Sanguine ward 14").Vaguely("He wraps himself in red"),
+                IntentDef.Attack(16, IntentTarget.HealthiestHero, "Execute 16").Vaguely("He chooses one of you")),
+            new EnemyDef("blood_thrall", "Blood Thrall", 16,
+                IntentDef.Attack(5, IntentTarget.RandomHero, "Claw 5"),
+                IntentDef.Attack(5, IntentTarget.RandomHero, "Claw 5"),
+                IntentDef.Attack(8, IntentTarget.HealthiestHero, "Feed 8")),
         };
 
         /// <summary>The Milestone 3 floor of the Keep: the fixed party, the starting deck and every encounter.</summary>
@@ -202,8 +207,52 @@ namespace WhereDarknessDwells.Core
                 new EncounterDef("retainers", EncounterKind.Normal, 4, 6, "drowned_retainer", "drowned_retainer"),
                 new EncounterDef("bloodbound_knight", EncounterKind.Elite, 2, 6, "bloodbound_knight"),
                 new EncounterDef("matron_and_wretch", EncounterKind.Elite, 2, 6, "chapel_matron", "chapel_wretch"),
-                new EncounterDef("vael", EncounterKind.Boss, 0, 0, "vael"),
-            });
+                new EncounterDef("vael", EncounterKind.Boss, 0, 0, "blood_thrall", VaelId, "blood_thrall"),
+            },
+            Vael());
+
+        public const string VaelId = "vael";
+
+        /// <summary>The first villain: the clues about Vael, the Cistern, and the two endings (GAME_DESIGN.md).</summary>
+        public static VillainDef Vael() => new VillainDef("vael", VaelId, "The Master of the Keep",
+            new[]
+            {
+                new ClueDef("ledger", "The Steward's Ledger", ClueSource.Investigation, 0, 6, 3,
+                    "The steward's study. Accounts cover every wall, each entry signed V. A locked drawer holds the last ledger.",
+                    "Force the drawer",
+                    "Vael, the steward, paid the thing beneath the chapel in blood, one name a week. You know who rules the Keep now, and you'll see his every move.",
+                    new ClueEffect(ClueEffectKind.RevealBoss)),
+                new ClueDef("silvered_bells", "Silvered Chapel Bells", ClueSource.Investigation | ClueSource.Event, 0, 6, 4,
+                    "The bell tower. The bells were silvered against the siege's dead, then cut down. One still hangs, out of reach.",
+                    "Climb for the bell",
+                    "Silver hurts what Vael has become. Every attack on him deals 2 more damage.",
+                    new ClueEffect(ClueEffectKind.BonusDamageToBoss, 2)),
+                new ClueDef("cistern_door", "The Cistern Door", ClueSource.Investigation, 0, 3, 3,
+                    "Water drips through the floor. Under a rotten rug, an iron door, chained shut, leads down toward the cistern.",
+                    "Break the chain",
+                    "Something of Vael's is kept in the cistern below the Keep. The Cistern is now on your map.",
+                    new ClueEffect(ClueEffectKind.RevealSecretRoom)),
+                new ClueDef("thrall_confession", "The Thrall's Confession", ClueSource.Investigation | ClueSource.Event, 1, 6, 2,
+                    "A chained servant, half turned, begs you not to kill him. He served the steward. He'll talk if you loosen the chain.",
+                    "Loosen his chains",
+                    "The thrall told you how Vael calls his servants, and you broke the call. Vael will fight alone.",
+                    new ClueEffect(ClueEffectKind.RemoveBossAllies)),
+                new ClueDef("true_name", "His True Name", ClueSource.Elite | ClueSource.Event | ClueSource.Investigation, 2, 6, 4,
+                    "The chapel register. Its last page is torn but legible: the steward's name before he took the Keep's.",
+                    "Read it aloud",
+                    "The name he was born with still binds him. Once per fight, speak it to stop his Blood Tithe.",
+                    new ClueEffect(ClueEffectKind.CancelBossIntent, cancelKind: IntentKind.Heal, label: "Speak his name")),
+                new ClueDef("broken_seal", "The Broken Seal", ClueSource.Investigation, 4, 6, 5,
+                    "Behind the altar, a seal of black wax as wide as a door. It is cracked from the inside.",
+                    "Touch the seal",
+                    "Vael didn't make his bargain alone. Whatever answered him is still beneath the chapel.",
+                    new ClueEffect(ClueEffectKind.TrueEnding)),
+            },
+            new SecretRoomDef("The Cistern", 4,
+                "Black water, and in it, still beating, a heart bound in silver wire. Vael's. He hid it where the siege couldn't reach.",
+                "Destroy the heart", 4, 30),
+            "Vael falls, and the Keep is quiet. In the village they'll say the curse lifted on its own.",
+            "Vael falls. Beneath the chapel the broken seal breathes out, and something that was never Vael turns over in its sleep. The Keep is quiet. It won't stay quiet.");
 
         /// <summary>The 15-card starting deck: one of each starter card, numbered 1 to 15.</summary>
         public static List<CardInstance> StartingDeck() =>
