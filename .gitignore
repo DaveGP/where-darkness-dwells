@@ -104,3 +104,7 @@ Unity/[Aa]ssets/[Ss]ynty/
 Unity/[Aa]ssets/[Ss]ynty.meta
 Unity/[Aa]ssets/[Pp]olygon*/
 Unity/[Aa]ssets/[Pp]olygon*.meta
+
+# .NET test project output
+tests/**/bin/
+tests/**/obj/

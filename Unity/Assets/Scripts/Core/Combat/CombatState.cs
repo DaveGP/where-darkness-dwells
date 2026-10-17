@@ -1,0 +1,523 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace WhereDarknessDwells.Core
+{
+    public enum CombatPhase
+    {
+        NotStarted,
+        /// <summary>The player picks which hero to activate this turn.</summary>
+        ChooseHero,
+        /// <summary>One hero is active and the player is playing their cards.</summary>
+        Activation,
+        Won,
+        Lost,
+    }
+
+    /// <summary>
+    /// One fight: the party, the enemies, the cards, and the turn rules in GAME_DESIGN.md. The interface reads the
+    /// state and calls the Try* commands. A command either does everything or nothing; a refused command returns a
+    /// reason for the player and changes nothing.
+    /// </summary>
+    public sealed class CombatState
+    {
+        public const int HandSize = 6;
+        public const int MaxHandSize = 10;
+        public const int ResolvePerActivation = 3;
+
+        readonly ContentLibrary _content;
+        readonly Rng _rng;
+        readonly List<Combatant> _heroes;
+        readonly List<Combatant> _enemies;
+        readonly List<CardInstance> _draw = new List<CardInstance>();
+        readonly List<CardInstance> _hand = new List<CardInstance>();
+        readonly List<CardInstance> _discard = new List<CardInstance>();
+        readonly List<CardInstance> _setAside = new List<CardInstance>();
+        readonly List<CombatEvent> _log = new List<CombatEvent>();
+        List<CombatEvent> _pending;
+
+        /// <param name="heroIds">The party in seat order.</param>
+        /// <param name="deck">The party's deck. The combat shuffles its own copy of the list.</param>
+        /// <param name="enemyIds">The enemies in the fight, left to right.</param>
+        /// <param name="rng">The combat's random stream: shuffles and enemy targets.</param>
+        /// <param name="heroHealth">Health carried in from the run; heroes not listed start at full health.</param>
+        public CombatState(ContentLibrary content, IReadOnlyList<string> heroIds, IEnumerable<CardInstance> deck,
+            IReadOnlyList<string> enemyIds, Rng rng, IReadOnlyDictionary<string, int> heroHealth = null)
+        {
+            _content = content ?? throw new ArgumentNullException(nameof(content));
+            _rng = rng ?? throw new ArgumentNullException(nameof(rng));
+            if (heroIds == null || heroIds.Count == 0) throw new ArgumentException("A fight needs at least one hero.", nameof(heroIds));
+            if (heroIds.Distinct().Count() != heroIds.Count) throw new ArgumentException("A hero can only fight once per party.", nameof(heroIds));
+            if (enemyIds == null || enemyIds.Count == 0) throw new ArgumentException("A fight needs at least one enemy.", nameof(enemyIds));
+
+            _heroes = heroIds.Select(id =>
+            {
+                HeroDef def = content.Hero(id);
+                int health = def.MaxHealth;
+                if (heroHealth != null && heroHealth.TryGetValue(id, out int carried)) health = Math.Max(0, Math.Min(carried, def.MaxHealth));
+                return Combatant.ForHero(def, health);
+            }).ToList();
+            _enemies = enemyIds.Select((id, i) => Combatant.ForEnemy(content.Enemy(id), i)).ToList();
+
+            foreach (CardInstance card in deck ?? throw new ArgumentNullException(nameof(deck)))
+            {
+                CardDef def = content.Card(card.DefId);
+                if (!def.Owners.Any(heroIds.Contains))
+                    throw new ArgumentException($"{def.Name} belongs to no hero in this party.", nameof(deck));
+                _draw.Add(card);
+            }
+            if (_draw.Select(c => c.Id).Distinct().Count() != _draw.Count) throw new ArgumentException("Two cards share an instance id.", nameof(deck));
+        }
+
+        public CombatPhase Phase { get; private set; } = CombatPhase.NotStarted;
+        public int Round { get; private set; }
+        /// <summary>The active hero's id during an activation, otherwise null.</summary>
+        public string ActiveHeroId { get; private set; }
+        public int Resolve { get; private set; }
+
+        public IReadOnlyList<Combatant> Heroes => _heroes;
+        public IReadOnlyList<Combatant> Enemies => _enemies;
+        public IReadOnlyList<CardInstance> DrawPile => _draw;
+        public IReadOnlyList<CardInstance> Hand => _hand;
+        public IReadOnlyList<CardInstance> DiscardPile => _discard;
+        /// <summary>Cards out of this fight because every hero who owns them is down.</summary>
+        public IReadOnlyList<CardInstance> SetAside => _setAside;
+        /// <summary>Everything that has happened in this fight, in order.</summary>
+        public IReadOnlyList<CombatEvent> Log => _log;
+
+        public bool IsOver => Phase == CombatPhase.Won || Phase == CombatPhase.Lost;
+
+        public CardDef CardOf(CardInstance card) => _content.Card(card.DefId);
+
+        public Combatant Find(string id) => _heroes.Concat(_enemies).FirstOrDefault(c => c.Id == id);
+
+        // ---------- commands ----------
+
+        /// <summary>Shuffles the deck, deals the first hand, and shows the enemies' first intents.</summary>
+        public CombatResult Start()
+        {
+            if (Phase != CombatPhase.NotStarted) return CombatResult.Refused("The fight has already started.");
+            return Run(() =>
+            {
+                _rng.Shuffle(_draw);
+                if (_heroes.All(h => h.IsDown)) { Lose(); return; }
+                foreach (Combatant hero in _heroes.Where(h => h.IsDown)) KnockDown(hero);
+                BeginRound();
+                foreach (Combatant enemy in _enemies) ShowIntent(enemy);
+            });
+        }
+
+        public CombatResult TryActivate(string heroId)
+        {
+            string reason = Over() ?? (Phase == CombatPhase.Activation ? $"{Name(ActiveHeroId)} is already active. End the activation first." : null);
+            if (reason != null) return CombatResult.Refused(reason);
+            Combatant hero = _heroes.FirstOrDefault(h => h.Id == heroId);
+            if (hero == null) return CombatResult.Refused("Choose a hero from your party.");
+            if (hero.IsDown) return CombatResult.Refused($"{hero.Name} is down and can't act.");
+
+            return Run(() =>
+            {
+                Phase = CombatPhase.Activation;
+                ActiveHeroId = hero.Id;
+                Emit(CombatEventKind.HeroActivated, hero.Id);
+                SetResolve(ResolvePerActivation);
+            });
+        }
+
+        /// <summary>Plays a card from the hand. <paramref name="targetId"/> is an enemy or hero id, or null for untargeted cards.</summary>
+        public CombatResult TryPlay(int cardInstanceId, string targetId = null)
+        {
+            string reason = WhyCantPlay(cardInstanceId);
+            if (reason != null) return CombatResult.Refused(reason);
+
+            CardInstance card = _hand.First(c => c.Id == cardInstanceId);
+            CardDef def = CardOf(card);
+            Combatant actor = Find(ActiveHeroId);
+            Combatant target = null;
+            if (def.Target == CardTarget.Enemy)
+            {
+                target = _enemies.FirstOrDefault(e => e.Id == targetId);
+                if (target == null || target.IsDown) return CombatResult.Refused($"Choose an enemy for {def.Name}.");
+            }
+            else if (def.Target == CardTarget.Ally)
+            {
+                target = _heroes.FirstOrDefault(h => h.Id == targetId);
+                if (target == null || target.IsDown) return CombatResult.Refused($"Choose a standing hero for {def.Name}.");
+                if (target == actor && def.Effects.Any(e => e.Kind == EffectKind.Guard))
+                    return CombatResult.Refused($"{actor.Name} can't guard themselves. Choose another hero.");
+            }
+
+            return Run(() =>
+            {
+                _hand.Remove(card);
+                Emit(CombatEventKind.CardPlayed, actor.Id, target?.Id, cardInstanceId: card.Id);
+                SetResolve(Resolve - def.Cost);
+                foreach (EffectDef effect in def.Effects)
+                {
+                    Apply(effect, actor, target);
+                    if (IsOver) break;
+                }
+                if (OwnersAllDown(def)) _setAside.Add(card);
+                else _discard.Add(card);
+            });
+        }
+
+        /// <summary>Ends the active hero's turn: the enemies act, statuses tick, and the next turn is dealt.</summary>
+        public CombatResult TryEndActivation()
+        {
+            string reason = Over() ?? (Phase != CombatPhase.Activation ? "Choose a hero to activate first." : null);
+            if (reason != null) return CombatResult.Refused(reason);
+
+            return Run(() =>
+            {
+                Emit(CombatEventKind.ActivationEnded, ActiveHeroId);
+                ActiveHeroId = null;
+                SetResolve(0);
+
+                foreach (Combatant enemy in _enemies.Where(e => !e.IsDown).ToList())
+                {
+                    Act(enemy);
+                    if (IsOver) return;
+                }
+
+                EndRound();
+                if (IsOver) return;
+
+                BeginRound();
+                foreach (Combatant enemy in _enemies.Where(e => !e.IsDown)) ShowIntent(enemy);
+            });
+        }
+
+        /// <summary>
+        /// Why a card in the hand can't be played right now, written for the player, or null if it can (given a
+        /// valid target). The interface uses this to dim cards and explain them.
+        /// </summary>
+        public string WhyCantPlay(int cardInstanceId)
+        {
+            string over = Over();
+            if (over != null) return over;
+            CardInstance card = _hand.FirstOrDefault(c => c.Id == cardInstanceId);
+            if (card == null) return "That card isn't in your hand.";
+            CardDef def = CardOf(card);
+            if (Phase != CombatPhase.Activation) return $"Activate {OwnerNames(def)} to play {def.Name}.";
+            if (!def.IsOwnedBy(ActiveHeroId)) return $"Only {OwnerNames(def)} can play {def.Name}.";
+            if (def.Cost > Resolve) return $"{def.Name} needs {def.Cost} Resolve; {Name(ActiveHeroId)} has {Resolve}.";
+            if (def.Target == CardTarget.Enemy && _enemies.All(e => e.IsDown)) return "There's no enemy to target.";
+            return null;
+        }
+
+        public bool CanPlay(int cardInstanceId) => WhyCantPlay(cardInstanceId) == null;
+
+        // ---------- card effects ----------
+
+        void Apply(EffectDef effect, Combatant actor, Combatant target)
+        {
+            switch (effect.Kind)
+            {
+                case EffectKind.Damage:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target))
+                    {
+                        int amount = effect.Amount + (t.Status(StatusKind.Exposed) > 0 ? effect.BonusIfExposed : 0);
+                        Attack(actor, t, amount);
+                    }
+                    break;
+
+                case EffectKind.ConsumeHex:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target))
+                    {
+                        int stacks = t.Status(StatusKind.Hex);
+                        SetStatus(t, StatusKind.Hex, 0);
+                        if (stacks > 0) Attack(actor, t, stacks * effect.Amount);
+                    }
+                    break;
+
+                case EffectKind.Block:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target)) GainBlock(t, effect.Amount);
+                    break;
+
+                case EffectKind.ApplyStatus:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target))
+                        SetStatus(t, effect.Status, t.Status(effect.Status) + effect.Amount);
+                    break;
+
+                case EffectKind.Guard:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target))
+                    {
+                        if (t == actor) continue;
+                        t.GuardedBy = actor.Id;
+                        Emit(CombatEventKind.Guarded, actor.Id, t.Id);
+                    }
+                    break;
+
+                case EffectKind.GainResolve:
+                    SetResolve(Resolve + effect.Amount);
+                    break;
+
+                case EffectKind.Draw:
+                    Draw(effect.Amount, MaxHandSize);
+                    break;
+            }
+        }
+
+        IEnumerable<Combatant> Targets(EffectScope scope, Combatant actor, Combatant target)
+        {
+            switch (scope)
+            {
+                case EffectScope.AllEnemies: return _enemies.Where(e => !e.IsDown).ToList();
+                case EffectScope.ActingHero: return new[] { actor };
+                default: return target == null || target.IsDown ? Enumerable.Empty<Combatant>() : new[] { target };
+            }
+        }
+
+        // ---------- enemies ----------
+
+        void ShowIntent(Combatant enemy)
+        {
+            IntentDef intent = enemy.Enemy.Intents[enemy.IntentStep % enemy.Enemy.Intents.Count];
+            enemy.Intent = intent;
+            enemy.IntentTargetId = PickTarget(intent.Target)?.Id;
+            Emit(CombatEventKind.IntentShown, enemy.Id, enemy.IntentTargetId, intent.Amount);
+        }
+
+        Combatant PickTarget(IntentTarget rule)
+        {
+            List<Combatant> standing = _heroes.Where(h => !h.IsDown).ToList();
+            if (standing.Count == 0) return null;
+            switch (rule)
+            {
+                case IntentTarget.RandomHero: return standing[_rng.Next(standing.Count)];
+                case IntentTarget.HealthiestHero: return Healthiest(standing);
+                default: return null;
+            }
+        }
+
+        static Combatant Healthiest(List<Combatant> heroes)
+        {
+            Combatant best = heroes[0];
+            foreach (Combatant h in heroes) if (h.Health > best.Health) best = h;
+            return best;
+        }
+
+        void Act(Combatant enemy)
+        {
+            IntentDef intent = enemy.Intent;
+            enemy.Block = 0; // An enemy's Block lasts through the player's turn and drops when it acts again.
+            Emit(CombatEventKind.EnemyActed, enemy.Id, enemy.IntentTargetId, intent.Amount);
+
+            switch (intent.Kind)
+            {
+                case IntentKind.Block:
+                    GainBlock(enemy, intent.Amount);
+                    break;
+
+                case IntentKind.Attack:
+                    foreach (Combatant hero in IntentTargets(enemy))
+                    {
+                        Combatant hit = Guardian(hero) ?? hero;
+                        if (hit != hero) Emit(CombatEventKind.Redirected, hit.Id, hero.Id);
+                        Attack(enemy, hit, intent.Amount);
+                        if (IsOver) return;
+                    }
+                    break;
+
+                case IntentKind.ApplyStatus:
+                    foreach (Combatant hero in IntentTargets(enemy))
+                        SetStatus(hero, intent.Status, hero.Status(intent.Status) + intent.Amount);
+                    break;
+            }
+
+            enemy.IntentStep++;
+        }
+
+        IEnumerable<Combatant> IntentTargets(Combatant enemy)
+        {
+            if (enemy.Intent.Target == IntentTarget.AllHeroes) return _heroes.Where(h => !h.IsDown).ToList();
+            if (enemy.Intent.Target == IntentTarget.Self) return Enumerable.Empty<Combatant>();
+            Combatant chosen = _heroes.FirstOrDefault(h => h.Id == enemy.IntentTargetId);
+            if (chosen != null && !chosen.IsDown) return new[] { chosen };
+            // The shown target went down before the enemy acted: it turns on the healthiest hero still standing.
+            List<Combatant> standing = _heroes.Where(h => !h.IsDown).ToList();
+            return standing.Count == 0 ? Enumerable.Empty<Combatant>() : new[] { Healthiest(standing) };
+        }
+
+        Combatant Guardian(Combatant hero)
+        {
+            if (hero.GuardedBy == null) return null;
+            Combatant guardian = _heroes.FirstOrDefault(h => h.Id == hero.GuardedBy);
+            return guardian != null && !guardian.IsDown && guardian != hero ? guardian : null;
+        }
+
+        // ---------- shared rules ----------
+
+        void Attack(Combatant attacker, Combatant defender, int baseDamage)
+        {
+            int damage = DamageRules.Attack(baseDamage, attacker.Status(StatusKind.Weak) > 0, defender.Status(StatusKind.Exposed) > 0);
+            TakeDamage(attacker.Id, defender, damage, ignoresBlock: false);
+        }
+
+        void TakeDamage(string sourceId, Combatant target, int damage, bool ignoresBlock)
+        {
+            if (target.IsDown) return;
+            int blocked = ignoresBlock ? 0 : Math.Min(target.Block, damage);
+            target.Block -= blocked;
+            int taken = Math.Min(target.Health, damage - blocked);
+            target.Health -= taken;
+            Emit(CombatEventKind.Damaged, sourceId, target.Id, taken, blocked);
+
+            if (!target.IsDown) return;
+            if (target.IsHero) KnockDown(target);
+            else
+            {
+                target.Block = 0;
+                Emit(CombatEventKind.EnemyDefeated, target.Id);
+            }
+            CheckEnd();
+        }
+
+        void KnockDown(Combatant hero)
+        {
+            hero.Block = 0;
+            hero.GuardedBy = null;
+            foreach (Combatant other in _heroes.Where(h => h.GuardedBy == hero.Id)) other.GuardedBy = null;
+            Emit(CombatEventKind.HeroDowned, hero.Id);
+
+            int before = _setAside.Count;
+            foreach (List<CardInstance> pile in new[] { _draw, _hand, _discard })
+            {
+                List<CardInstance> dead = pile.Where(c => OwnersAllDown(CardOf(c))).ToList();
+                foreach (CardInstance c in dead) pile.Remove(c);
+                _setAside.AddRange(dead);
+            }
+            if (_setAside.Count > before) Emit(CombatEventKind.CardsSetAside, hero.Id, amount: _setAside.Count - before);
+        }
+
+        /// <summary>True when no owner of the card is standing. An owner who isn't in the party counts as down.</summary>
+        bool OwnersAllDown(CardDef def) => def.Owners.All(o => _heroes.FirstOrDefault(h => h.Id == o)?.IsDown ?? true);
+
+        void GainBlock(Combatant target, int amount)
+        {
+            if (amount <= 0 || target.IsDown) return;
+            target.Block += amount;
+            Emit(CombatEventKind.BlockGained, null, target.Id, amount);
+        }
+
+        void SetStatus(Combatant target, StatusKind status, int stacks)
+        {
+            if (target.IsDown) return;
+            stacks = Math.Max(0, stacks);
+            if (target.Status(status) == stacks) return;
+            target.SetStatus(status, stacks);
+            Emit(CombatEventKind.StatusChanged, null, target.Id, stacks, status: status);
+        }
+
+        void SetResolve(int value)
+        {
+            if (Resolve == value) return;
+            Resolve = value;
+            Emit(CombatEventKind.ResolveChanged, amount: value);
+        }
+
+        // ---------- rounds ----------
+
+        void BeginRound()
+        {
+            Round++;
+            Phase = CombatPhase.ChooseHero;
+            Emit(CombatEventKind.RoundStarted, amount: Round);
+            foreach (Combatant hero in _heroes)
+            {
+                hero.Block = 0;
+                hero.GuardedBy = null;
+            }
+            Draw(HandSize - _hand.Count, HandSize);
+        }
+
+        /// <summary>Bleed hurts, then Bleed, Exposed and Weak each lose a stack. Hex never fades by itself.</summary>
+        void EndRound()
+        {
+            foreach (Combatant c in _heroes.Concat(_enemies).Where(c => !c.IsDown).ToList())
+            {
+                int bleed = c.Status(StatusKind.Bleed);
+                if (bleed > 0)
+                {
+                    TakeDamage(null, c, bleed, ignoresBlock: true);
+                    if (IsOver) return;
+                    SetStatus(c, StatusKind.Bleed, bleed - 1);
+                }
+                SetStatus(c, StatusKind.Exposed, c.Status(StatusKind.Exposed) - 1);
+                SetStatus(c, StatusKind.Weak, c.Status(StatusKind.Weak) - 1);
+            }
+        }
+
+        void Draw(int count, int handLimit)
+        {
+            int drawn = 0;
+            while (drawn < count && _hand.Count < handLimit)
+            {
+                if (_draw.Count == 0)
+                {
+                    if (_discard.Count == 0) break;
+                    _draw.AddRange(_discard);
+                    _discard.Clear();
+                    _rng.Shuffle(_draw);
+                    Emit(CombatEventKind.DeckShuffled, amount: _draw.Count);
+                }
+                _hand.Add(_draw[_draw.Count - 1]);
+                _draw.RemoveAt(_draw.Count - 1);
+                drawn++;
+            }
+            if (drawn > 0) Emit(CombatEventKind.CardsDrawn, amount: drawn);
+        }
+
+        void CheckEnd()
+        {
+            if (IsOver) return;
+            if (_enemies.All(e => e.IsDown))
+            {
+                Phase = CombatPhase.Won;
+                ActiveHeroId = null;
+                Emit(CombatEventKind.CombatWon);
+            }
+            else if (_heroes.All(h => h.IsDown)) Lose();
+        }
+
+        void Lose()
+        {
+            Phase = CombatPhase.Lost;
+            ActiveHeroId = null;
+            Emit(CombatEventKind.CombatLost);
+        }
+
+        // ---------- plumbing ----------
+
+        CombatResult Run(Action command)
+        {
+            _pending = new List<CombatEvent>();
+            command();
+            List<CombatEvent> events = _pending;
+            _pending = null;
+            _log.AddRange(events);
+            return CombatResult.Success(events);
+        }
+
+        void Emit(CombatEventKind kind, string sourceId = null, string targetId = null, int amount = 0, int blocked = 0,
+            StatusKind status = default, int cardInstanceId = 0) =>
+            _pending.Add(new CombatEvent(kind, sourceId, targetId, amount, blocked, status, cardInstanceId));
+
+        string Over()
+        {
+            switch (Phase)
+            {
+                case CombatPhase.NotStarted: return "The fight hasn't started.";
+                case CombatPhase.Won:
+                case CombatPhase.Lost: return "The fight is over.";
+                default: return null;
+            }
+        }
+
+        string Name(string heroId) => _heroes.FirstOrDefault(h => h.Id == heroId)?.Name ?? heroId;
+
+        string OwnerNames(CardDef def) => string.Join(" or ", def.Owners.Select(Name));
+    }
+}
