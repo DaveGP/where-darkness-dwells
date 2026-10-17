@@ -209,7 +209,83 @@ namespace WhereDarknessDwells.Core
                 new EncounterDef("matron_and_wretch", EncounterKind.Elite, 2, 6, "chapel_matron", "chapel_wretch"),
                 new EncounterDef("vael", EncounterKind.Boss, 0, 0, "blood_thrall", VaelId, "blood_thrall"),
             },
-            Vael());
+            Vael(),
+            Keepsakes(),
+            Events());
+
+        /// <summary>The Milestone 5 Keepsakes (GAME_DESIGN.md).</summary>
+        public static KeepsakeDef[] Keepsakes() => new[]
+        {
+            new KeepsakeDef("gaolers_keyring", "Gaoler's Keyring", "The first card each fight costs 1 less.", KeepsakeEffectKind.FirstCardDiscount, 1),
+            new KeepsakeDef("siege_lantern", "Siege Lantern", "Every hero starts each fight with 4 Block.", KeepsakeEffectKind.StartBlock, 4),
+            new KeepsakeDef("chapel_candle", "Chapel Candle", "After each won fight, every standing hero heals 3.", KeepsakeEffectKind.HealAfterWin, 3),
+            new KeepsakeDef("rusted_caltrops", "Rusted Caltrops", "At the start of each fight, every enemy gets Bleed 2.", KeepsakeEffectKind.EnemyStartStatus, 2, StatusKind.Bleed),
+            new KeepsakeDef("widows_veil", "Widow's Veil", "At the start of each fight, every enemy gets Weak 1.", KeepsakeEffectKind.EnemyStartStatus, 1, StatusKind.Weak),
+            new KeepsakeDef("seal_ring", "Steward's Seal-ring", "The first activation each fight gets 1 more Resolve.", KeepsakeEffectKind.FirstActivationResolve, 1),
+            new KeepsakeDef("marked_deck", "Marked Deck", "Draw 2 more cards on the first turn of each fight.", KeepsakeEffectKind.FirstTurnDraw, 2),
+            new KeepsakeDef("bone_charm", "Bone Charm", "Every hero's maximum health goes up by 4.", KeepsakeEffectKind.MaxHealth, 4),
+        };
+
+        static EventOutcome Heal(int n) => new EventOutcome(EventOutcomeKind.HealParty, n);
+        static EventOutcome HurtAll(int n) => new EventOutcome(EventOutcomeKind.HurtParty, n);
+        static EventOutcome HurtHero(int n) => new EventOutcome(EventOutcomeKind.HurtHero, n);
+        static EventOutcome Clue(string id) => new EventOutcome(EventOutcomeKind.GainClue, id: id);
+        static EventOutcome Keepsake(string id = null) => new EventOutcome(EventOutcomeKind.GainKeepsake, id: id);
+        static readonly EventOutcome NewCard = new EventOutcome(EventOutcomeKind.GainCard);
+        static readonly EventOutcome LoseCard = new EventOutcome(EventOutcomeKind.RemoveCard);
+        static EventOutcome Fight(string encounter = null) => new EventOutcome(EventOutcomeKind.Fight, id: encounter);
+
+        /// <summary>The Milestone 5 events (GAME_DESIGN.md). Each scene stays under 60 words.</summary>
+        public static EventDef[] Events() => new[]
+        {
+            new EventDef("chained_thrall", "The Chained Thrall",
+                "A servant chained to a pillar, half turned, grey to the elbows. He begs you not to kill him. He served the steward, he says, and he knows how the master calls his own.",
+                new EventChoice("Loosen his chains", "He clutches at whoever frees him, then talks.", hiddenByClue: "thrall_confession",
+                    outcomes: new[] { HurtHero(3), Clue("thrall_confession") }),
+                new EventChoice("Name his master", "At Vael's name he goes still, and tells you everything.", requiresClue: "ledger", hiddenByClue: "thrall_confession",
+                    outcomes: Clue("thrall_confession")),
+                new EventChoice("Leave him", "His begging follows you down the corridor.")),
+            new EventDef("chapel_register", "The Chapel Register",
+                "The chapel's register lies open on the lectern, every birth and burial of the Keep. The last page is torn, and the ink there is still wet.",
+                new EventChoice("Read the torn page", "The words cut whoever reads them. One is a name the steward hasn't used in years.", hiddenByClue: "true_name",
+                    outcomes: new[] { HurtHero(4), Clue("true_name") }),
+                new EventChoice("Burn the register", "Whatever it held, no one will use it now. You leave something of your own in the flames.",
+                    outcomes: LoseCard)),
+            new EventDef("bell_widow", "The Bell-founder's Widow",
+                "An old woman sits among the broken bells of the founder's yard. Her husband silvered them for the siege. She will trade, she says. Everyone trades in the Keep.",
+                new EventChoice("Trade her something from the deck", "She hands over a silvered clapper and takes what you give without looking at it.", hiddenByClue: "silvered_bells",
+                    outcomes: new[] { LoseCard, Clue("silvered_bells") }),
+                new EventChoice("Take her veil", "She lifts the black veil from her face and gives it to you. Her eyes are white.",
+                    outcomes: Keepsake("widows_veil")),
+                new EventChoice("Leave her", "She goes back to polishing a bell that will never ring.")),
+            new EventDef("drowned_well", "The Drowned Well",
+                "A well in the lower court, its water clear and cold. Something glints at the bottom of the bucket rope. Something else moves in the dark below it.",
+                new EventChoice("Drink", "The water is clean. It is the first clean thing in the Keep.", outcomes: Heal(6)),
+                new EventChoice("Draw up the bucket", "You pull the rope. What was holding the other end comes up with it.",
+                    outcomes: new[] { Keepsake(), Fight("drowned_watch") })),
+            new EventDef("quartermaster", "The Quartermaster's Store",
+                "The siege stores, picked over and rotting. Behind a false wall the quartermaster kept his own supplies, and the shelf is still stocked. The rest is behind a rusted grate.",
+                new EventChoice("Take from the shelf", "Not everything here has gone bad.", outcomes: NewCard),
+                new EventChoice("Force the grate", "The grate gives, and so does a hand behind it.", outcomes: new[] { HurtHero(6), Keepsake() })),
+            new EventDef("siege_graves", "The Siege Graves",
+                "The dead of the siege were buried in the inner yard in a hurry, and shallow. Some graves have been opened from below.",
+                new EventChoice("Dig", "The dead kept their things. Getting them is cold, slow work.", outcomes: new[] { HurtAll(3), Keepsake() }),
+                new EventChoice("Pray over them", "You say the words the chaplain would have said, and leave something with them.", outcomes: LoseCard),
+                new EventChoice("Lay them to rest", "The seal is broken; nothing holds them now. You give them what peace you can, and some of it comes back to you.",
+                    requiresClue: "broken_seal", outcomes: Heal(8))),
+            new EventDef("survivor", "The Survivor",
+                "A young woman steps out of a doorway, unhurt and very clean. Her family is trapped below, she says. She knows a way. Please, follow her.",
+                new EventChoice("Follow her", "She leads you to a dead end, and they are waiting there.", outcomes: Fight()),
+                new EventChoice("Send her away", "She doesn't argue. She just goes back into the dark."),
+                new EventChoice("Name her master", "She knows the name in the Ledger, and she runs, dropping what she carried.",
+                    requiresClue: "ledger", outcomes: Keepsake())),
+            new EventDef("mirror_hall", "The Mirror Hall",
+                "A long gallery of mirrors, all but one smashed. In the last one your reflections stand a little straighter than you do.",
+                new EventChoice("Face the mirror", "One of you stares until the reflection looks away. They come back stronger.",
+                    outcomes: new EventOutcome(EventOutcomeKind.MaxHealthHero, 4)),
+                new EventChoice("Break it", "One of you shatters it barehanded. Something you carried breaks with it.",
+                    outcomes: new[] { HurtHero(5), LoseCard })),
+        };
 
         public const string VaelId = "vael";
 
@@ -232,12 +308,12 @@ namespace WhereDarknessDwells.Core
                     "Break the chain",
                     "Something of Vael's is kept in the cistern below the Keep. The Cistern is now on your map.",
                     new ClueEffect(ClueEffectKind.RevealSecretRoom)),
-                new ClueDef("thrall_confession", "The Thrall's Confession", ClueSource.Investigation | ClueSource.Event, 1, 6, 2,
+                new ClueDef("thrall_confession", "The Thrall's Confession", ClueSource.Event, 1, 6, 2,
                     "A chained servant, half turned, begs you not to kill him. He served the steward. He'll talk if you loosen the chain.",
                     "Loosen his chains",
                     "The thrall told you how Vael calls his servants, and you broke the call. Vael will fight alone.",
                     new ClueEffect(ClueEffectKind.RemoveBossAllies)),
-                new ClueDef("true_name", "His True Name", ClueSource.Elite | ClueSource.Event | ClueSource.Investigation, 2, 6, 4,
+                new ClueDef("true_name", "His True Name", ClueSource.Elite | ClueSource.Event, 2, 6, 4,
                     "The chapel register. Its last page is torn but legible: the steward's name before he took the Keep's.",
                     "Read it aloud",
                     "The name he was born with still binds him. Once per fight, speak it to stop his Blood Tithe.",

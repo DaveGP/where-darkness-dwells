@@ -179,8 +179,8 @@ otherwise.
 
 ### Choosing the party
 
-- The party screen shows four heroes. You pick three before entering the Keep.
-- Every pair of heroes has one dual card, which makes six. The starting deck is the chosen heroes' four
+- The party screen shows six heroes. You pick three before entering the Keep.
+- Every pair of heroes has one dual card, which makes fifteen. The starting deck is the chosen heroes' four
   cards each plus the three dual cards for their pairs, so it is still 15 cards.
 - Rewards only offer cards that someone in the party can play.
 
@@ -219,7 +219,7 @@ Each event is used at most once per run, picked from the "rewards" stream. These
 | The Chapel Register | Read the torn page for His True Name (one hero loses 4), or burn it to remove a card. |
 | The Bell-founder's Widow | Trade her a card from the deck for the Silvered Bells, or take her Widow's Veil. |
 | The Drowned Well | Drink (the party heals 6), or draw up the bucket for a Keepsake and a fight with the Drowned Watch. |
-| The Quartermaster's Store | Take a card from three rare ones, or a Keepsake that costs one hero 6 health. |
+| The Quartermaster's Store | Choose one of three cards, or a Keepsake that costs one hero 6 health. |
 | The Siege Graves | Dig for a Keepsake (every hero loses 3), or pray to remove a card. With the Broken Seal, a third choice heals everyone 8. |
 | The Survivor | She begs you to follow her. If you do, it is an ambush: a fight. With the Ledger, you recognise the steward's servant and take her Keepsake. |
 | The Mirror Hall | One hero you choose gains 4 maximum health, or removes a card at the cost of 5 health. |
@@ -228,12 +228,14 @@ With events in place, the clues return to the sources in the table above: the Th
 from its event, and His True Name from an Elite or its event. The Silvered Bells come from an Investigation
 or the Widow.
 
-### The fourth hero
+### Three new heroes **(decided: David, 2026-10-17)**
 
-Open question 4. Proposed: **Corvin, the Penitent** (colour Bone, health 32), a healer who pays in his own
-blood. His cards heal allies and cleanse Bleed, and some get stronger when he is hurt. That fills a gap,
-because the party has no healing in combat, and it fits a Keep run by a man who bargained in blood. He
-brings a new mechanic, **heal an ally**, and uses the existing statuses.
+David chose to add all three proposed heroes, so the party is a choice of 3 from 6. Their cards are
+designed in Milestone 5b.
+- **Corvin, the Penitent:** a healer who pays in his own blood. He heals allies and cleanses Bleed, and some
+  of his cards get stronger when he is hurt. New effect: heal an ally.
+- **A duelist:** counterattacks when hit. New status: Riposte.
+- **A bell-ringer:** Weak and Exposed on every enemy at once. Uses the existing statuses.
 
 ## Narrative style
 
@@ -262,8 +264,8 @@ brings a new mechanic, **heal an ally**, and uses the existing statuses.
 3. ~~**Downed heroes.**~~ **Decided (Milestone 3): stand back up with a quarter of max health.** Over 300 runs in the
    balance tool, a hero brought back with 1 health fell again in the next fight 45% of the time, against 35% with a
    quarter. David chose the quarter so a fall still costs something without making that hero useless.
-4. **Fourth hero.** Who is it? This is needed so choosing a party is a real decision. Proposed in Milestone 5:
-   Corvin, the Penitent (see above).
+4. ~~**Fourth hero.**~~ **Decided (Milestone 5): three new heroes, and a choice of 3 from 6.** See "Three new
+   heroes" above.
 5. **Platform.** Steam, itch.io or both? This changes Milestone 7, not the earlier ones.
 6. **Meta-progression.** Should anything unlock between runs, such as new heroes or villains? Currently a
    non-goal.

@@ -196,9 +196,52 @@ namespace WhereDarknessDwells.Core
         public override string ToString() => Id;
     }
 
+    public enum KeepsakeEffectKind
+    {
+        /// <summary>The first card played each fight costs Amount less Resolve, never below 0.</summary>
+        FirstCardDiscount,
+        /// <summary>Every hero starts each fight with Amount Block.</summary>
+        StartBlock,
+        /// <summary>After each won fight, every hero who is still standing heals Amount.</summary>
+        HealAfterWin,
+        /// <summary>At the start of each fight, every enemy gets Amount stacks of Status.</summary>
+        EnemyStartStatus,
+        /// <summary>The first activation each fight gets Amount more Resolve.</summary>
+        FirstActivationResolve,
+        /// <summary>Draw Amount more cards on the first turn of each fight.</summary>
+        FirstTurnDraw,
+        /// <summary>Every hero's maximum health goes up by Amount, and they heal Amount when it is found.</summary>
+        MaxHealth,
+    }
+
+    /// <summary>A passive item the party keeps for the rest of the run. Its one effect is a kind Core understands.</summary>
+    public sealed class KeepsakeDef
+    {
+        public readonly string Id;
+        public readonly string Name;
+        /// <summary>What it does, as the player reads it.</summary>
+        public readonly string Text;
+        public readonly KeepsakeEffectKind Kind;
+        public readonly int Amount;
+        /// <summary>Only used by <see cref="KeepsakeEffectKind.EnemyStartStatus"/>.</summary>
+        public readonly StatusKind Status;
+
+        public KeepsakeDef(string id, string name, string text, KeepsakeEffectKind kind, int amount, StatusKind status = default)
+        {
+            Id = id;
+            Name = name;
+            Text = text;
+            Kind = kind;
+            Amount = amount;
+            Status = status;
+        }
+
+        public override string ToString() => Name;
+    }
+
     /// <summary>
-    /// Everything a run is built from: the party, the starting deck, the cards that can be offered as rewards, and
-    /// the encounters for each kind of room. Later villains add their own boss and clues here.
+    /// Everything a run is built from: the party, the starting deck, the cards that can be offered as rewards, the
+    /// encounters for each kind of room, the Keepsakes and events that can turn up, and the villain behind it all.
     /// </summary>
     public sealed class ExpeditionDef
     {
@@ -210,11 +253,18 @@ namespace WhereDarknessDwells.Core
         public readonly IReadOnlyList<EncounterDef> Encounters;
         /// <summary>The villain behind this expedition: its clues and what they change. Null for a run without a mystery.</summary>
         public readonly VillainDef Villain;
+        /// <summary>The Keepsakes Elites and events can give, each at most once a run.</summary>
+        public readonly IReadOnlyList<KeepsakeDef> Keepsakes;
+        /// <summary>The events Event rooms draw from, each at most once a run.</summary>
+        public readonly IReadOnlyList<EventDef> Events;
 
         public ExpeditionDef(string id, IEnumerable<string> party, IEnumerable<string> startingDeck,
-            IEnumerable<string> rewardCards, IEnumerable<EncounterDef> encounters, VillainDef villain = null)
+            IEnumerable<string> rewardCards, IEnumerable<EncounterDef> encounters, VillainDef villain = null,
+            IEnumerable<KeepsakeDef> keepsakes = null, IEnumerable<EventDef> events = null)
         {
             Villain = villain;
+            Keepsakes = (keepsakes ?? Enumerable.Empty<KeepsakeDef>()).ToArray();
+            Events = (events ?? Enumerable.Empty<EventDef>()).ToArray();
             Id = id;
             Party = (party ?? Enumerable.Empty<string>()).ToArray();
             StartingDeck = (startingDeck ?? Enumerable.Empty<string>()).ToArray();
@@ -223,6 +273,8 @@ namespace WhereDarknessDwells.Core
         }
 
         public EncounterDef Encounter(string id) => Encounters.FirstOrDefault(e => e.Id == id);
+
+        public KeepsakeDef Keepsake(string id) => Keepsakes.FirstOrDefault(k => k.Id == id);
 
         public EncounterDef Boss => Encounters.FirstOrDefault(e => e.Kind == EncounterKind.Boss);
     }
