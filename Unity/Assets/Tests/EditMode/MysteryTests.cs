@@ -240,6 +240,29 @@ namespace WhereDarknessDwells.Tests
             Assert.Fail("No seed won an Elite fight.");
         }
 
+        [Test]
+        public void ABrokenVillainIsRefusedWithItsProblems()
+        {
+            ExpeditionDef good = StarterContent.Expedition();
+            var villain = new VillainDef("broken", "nobody", "Someone",
+                new[]
+                {
+                    new ClueDef("late_door", "A Late Door", ClueSource.Investigation, 0, 5, 1, "A door.", "Open it", "It opens.",
+                        new ClueEffect(ClueEffectKind.RevealSecretRoom)),
+                    new ClueDef("blank", "A Blank Page", ClueSource.Investigation, 0, 6, 1, "", "", "Nothing.",
+                        new ClueEffect(ClueEffectKind.CancelBossIntent, cancelKind: IntentKind.Heal)),
+                },
+                new SecretRoomDef("A Cellar", 4, "Dark.", "Look", 1, 10), "The end.", "The true end.");
+            var broken = new ExpeditionDef("broken", good.Party, good.StartingDeck, good.RewardCards, good.Encounters, villain);
+
+            IReadOnlyList<string> problems = StarterContent.Library().Validate(broken);
+            Assert.That(problems, Has.Member("Villain 'broken' has unknown boss enemy 'nobody'."));
+            Assert.That(problems, Has.Member("Clue 'late_door' can be found after the secret room it reveals."));
+            Assert.That(problems, Has.Member("Clue 'blank' can be found in an Investigation, so it needs a scene and a search label."));
+            Assert.That(problems, Has.Member("Clue 'blank' grants a cancel with no button label."));
+            Assert.That(StarterContent.Library().Validate(good), Is.Empty);
+        }
+
         static RunState ToInvestigation(out MapRoom room)
         {
             foreach (ulong seed in Enumerable.Range(1, 100).Select(s => (ulong)s))

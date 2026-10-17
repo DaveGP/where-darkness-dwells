@@ -21,18 +21,22 @@ MonoBehaviour:
     target: 1
     amount: 13
     status: 0
+    vague: ''
   - description: 'Blood oath: Bleed 4'
     kind: 2
     target: 0
     amount: 4
     status: 2
+    vague: ''
   - description: 'Sweep 7 to all'
     kind: 0
     target: 2
     amount: 7
     status: 0
+    vague: ''
   - description: 'Crimson guard 14'
     kind: 1
     target: 3
     amount: 14
     status: 0
+    vague: ''

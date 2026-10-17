@@ -5,7 +5,7 @@ using WhereDarknessDwells.Core;
 
 namespace WhereDarknessDwells.Content
 {
-    /// <summary>What a run is built from: the party, the starting deck, the reward cards and the encounter table.</summary>
+    /// <summary>What a run is built from: the party, the starting deck, the reward cards, the encounter table and the villain.</summary>
     [CreateAssetMenu(menuName = "Where Darkness Dwells/Expedition", fileName = "Expedition")]
     public sealed class ExpeditionAsset : ScriptableObject
     {
@@ -17,6 +17,8 @@ namespace WhereDarknessDwells.Content
         [Tooltip("Cards that can be offered after a won fight.")]
         [SerializeField] CardAsset[] rewardCards = new CardAsset[0];
         [SerializeField] EncounterData[] encounters = new EncounterData[0];
+        [Tooltip("Who is behind it all. Empty for an expedition without a mystery.")]
+        [SerializeField] VillainAsset villain;
 
         public string Id => id;
 
@@ -25,7 +27,8 @@ namespace WhereDarknessDwells.Content
             (party ?? new HeroAsset[0]).Select(h => h != null ? h.Id : "(empty slot)"),
             (startingDeck ?? new CardAsset[0]).Select(c => c != null ? c.Id : "(empty slot)"),
             (rewardCards ?? new CardAsset[0]).Select(c => c != null ? c.Id : "(empty slot)"),
-            (encounters ?? new EncounterData[0]).Select(e => e.ToDef()));
+            (encounters ?? new EncounterData[0]).Select(e => e.ToDef()),
+            villain != null ? villain.ToDef() : null);
     }
 
     [Serializable]

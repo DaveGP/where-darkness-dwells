@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ac2ce0bba84d57ac262cdd389fc7ab, type: 3}
+  m_Name: TheThrallsConfession
+  m_EditorClassIdentifier: 
+  id: thrall_confession
+  displayName: 'The Thrall''s Confession'
+  sources: 5
+  minLayer: 1
+  maxLayer: 6
+  searchCost: 2
+  scene: 'A chained servant, half turned, begs you not to kill him. He served the steward. He''ll talk if you loosen the chain.'
+  searchLabel: 'Loosen his chains'
+  journal: 'The thrall told you how Vael calls his servants, and you broke the call. Vael will fight alone.'
+  effects:
+  - kind: 3
+    amount: 0
+    cancelKind: 0
+    label: ''

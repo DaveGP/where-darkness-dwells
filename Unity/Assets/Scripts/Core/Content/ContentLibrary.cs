@@ -136,7 +136,11 @@ namespace WhereDarknessDwells.Core
             if (v.Clues.Select(c => c.Id).Distinct().Count() != v.Clues.Count) problems.Add($"{name} has two clues with the same id.");
             foreach (ClueDef c in v.Clues)
             {
+                if (string.IsNullOrEmpty(c.Id)) { problems.Add($"{name} has a clue with no id."); continue; }
                 if (c.Effects.Count == 0) problems.Add($"Clue '{c.Id}' changes nothing.");
+                if (string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.Journal)) problems.Add($"Clue '{c.Id}' needs a name and a journal entry.");
+                if ((c.Sources & ClueSource.Investigation) != 0 && (string.IsNullOrEmpty(c.Scene) || string.IsNullOrEmpty(c.SearchLabel)))
+                    problems.Add($"Clue '{c.Id}' can be found in an Investigation, so it needs a scene and a search label.");
                 if (c.SearchCost < 0) problems.Add($"Clue '{c.Id}' has a negative search cost.");
                 if ((c.Sources & ClueSource.Investigation) != 0 && c.MinLayer > c.MaxLayer) problems.Add($"Clue '{c.Id}' has its first layer after its last.");
                 if (c.Has(ClueEffectKind.RevealSecretRoom))

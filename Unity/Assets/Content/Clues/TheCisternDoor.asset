@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ac2ce0bba84d57ac262cdd389fc7ab, type: 3}
+  m_Name: TheCisternDoor
+  m_EditorClassIdentifier: 
+  id: cistern_door
+  displayName: 'The Cistern Door'
+  sources: 1
+  minLayer: 0
+  maxLayer: 3
+  searchCost: 3
+  scene: 'Water drips through the floor. Under a rotten rug, an iron door, chained shut, leads down toward the cistern.'
+  searchLabel: 'Break the chain'
+  journal: 'Something of Vael''s is kept in the cistern below the Keep. The Cistern is now on your map.'
+  effects:
+  - kind: 2
+    amount: 0
+    cancelKind: 0
+    label: ''

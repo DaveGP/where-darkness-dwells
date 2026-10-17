@@ -31,7 +31,9 @@ namespace WhereDarknessDwells.Content
         [Min(0)] public int amount;
         [Tooltip("Only used by Apply Status.")]
         public StatusKind status;
+        [Tooltip("What the party sees instead while the enemy is hidden from them, such as \"He drinks\". Empty for most enemies.")]
+        public string vague;
 
-        public IntentDef ToDef() => new IntentDef(kind, target, amount, description, status);
+        public IntentDef ToDef() => new IntentDef(kind, target, amount, description, status, string.IsNullOrEmpty(vague) ? null : vague);
     }
 }
