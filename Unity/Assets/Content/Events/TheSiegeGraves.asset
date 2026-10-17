@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb0ac7c13ee47b6a6bf7b8f61a1f7e4, type: 3}
+  m_Name: TheSiegeGraves
+  m_EditorClassIdentifier: 
+  id: siege_graves
+  title: 'The Siege Graves'
+  scene: 'The dead of the siege were buried in the inner yard in a hurry, and shallow. Some graves have been opened from below.'
+  choices:
+  - label: 'Dig'
+    result: 'The dead kept their things. Getting them is cold, slow work.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 1
+      amount: 3
+      id: ''
+    - kind: 6
+      amount: 0
+      id: ''
+  - label: 'Pray over them'
+    result: 'You say the words the chaplain would have said, and leave something with them.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 8
+      amount: 0
+      id: ''
+  - label: 'Lay them to rest'
+    result: 'The seal is broken; nothing holds them now. You give them what peace you can, and some of it comes back to you.'
+    requiresClue: {fileID: 11400000, guid: d52364dc37df4f65996bd89b52d64a68, type: 2}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 0
+      amount: 8
+      id: ''

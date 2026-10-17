@@ -32,8 +32,11 @@ namespace WhereDarknessDwells.Editor
             AddCamera();
 
             AddCombatScreen(database, PanelSettingsAsset(), out SerializedObject fields);
-            SetList(fields, "party", database.Expedition.ToDef().Party.Select(id => database.Heroes.First(h => h.Id == id)).ToList());
-            SetList(fields, "deck", database.Expedition.ToDef().StartingDeck.Select(id => database.Cards.First(c => c.Id == id)).ToList());
+            // The test fight uses the first three heroes and their starting cards.
+            ExpeditionDef expedition = database.Expedition.ToDef();
+            List<string> party = expedition.Heroes.Take(RunState.PartySize).ToList();
+            SetList(fields, "party", party.Select(id => database.Heroes.First(h => h.Id == id)).ToList());
+            SetList(fields, "deck", RunState.StartingCards(database.Build(out _), expedition, party).Select(id => database.Cards.First(c => c.Id == id)).ToList());
             SetList(fields, "enemies", StarterContent.FirstEncounter.Select(id => database.Enemies.First(e => e.Id == id)).ToList());
             fields.ApplyModifiedPropertiesWithoutUndo();
 

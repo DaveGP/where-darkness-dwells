@@ -9,8 +9,8 @@ using WhereDarknessDwells.Core;
 namespace WhereDarknessDwells.Game
 {
     /// <summary>
-    /// The run screens: party, map, reward, Sanctuary, Investigation, the secret room, unwritten rooms, the journal and
-    /// the run's end. It shows a
+    /// The run screens: party, map, reward, Sanctuary, Investigation, the secret room, events, card removal, unwritten
+    /// rooms, the journal and the run's end. It shows a
     /// <see cref="RunState"/> and turns clicks into its Try* commands, then shows whichever screen the run's phase
     /// calls for. Fights are handed to the <see cref="CombatScreen"/>, which hands them back when they are over.
     /// </summary>
@@ -29,12 +29,18 @@ namespace WhereDarknessDwells.Game
         RunState _run;
         // What the party just found, shown once before the map: a title and its text. Null when there is nothing new.
         (string title, string text)? _found;
+        // The heroes ticked on the party screen, in the order they were picked.
+        readonly List<string> _chosen = new List<string>();
+        // The event choice waiting for the player to say which hero it falls on; -1 when none.
+        int _pendingChoice = -1;
 
-        VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _foundView, _unwrittenView, _endView;
+        VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
-        Label _depth, _deckCount, _seedLabel, _mapHint, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
+        VisualElement _eventChoices, _eventHeroes, _removeGrid;
+        Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
-        Button _rest, _newExpedition, _useSecret, _journal;
+        Label _partyHint, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
+        Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue;
 
         void OnEnable()
         {
@@ -45,6 +51,8 @@ namespace WhereDarknessDwells.Game
             _sanctuaryView = _root.Q("sanctuary-view");
             _investigationView = _root.Q("investigation-view");
             _secretView = _root.Q("secret-view");
+            _eventView = _root.Q("event-view");
+            _removeView = _root.Q("remove-view");
             _foundView = _root.Q("found-view");
             _unwrittenView = _root.Q("unwritten-view");
             _endView = _root.Q("end-view");
@@ -58,6 +66,17 @@ namespace WhereDarknessDwells.Game
             _searchers = _root.Q("searchers");
             _journalPanel = _root.Q("journal-panel");
             _journalEntries = _root.Q("journal-entries");
+            _eventChoices = _root.Q("event-choices");
+            _eventHeroes = _root.Q("event-heroes");
+            _removeGrid = _root.Q("remove-grid");
+            _keepsakeCount = _root.Q<Label>("keepsake-count");
+            _partyHint = _root.Q<Label>("party-hint");
+            _eventTitle = _root.Q<Label>("event-title");
+            _eventScene = _root.Q<Label>("event-scene");
+            _eventHeroHelp = _root.Q<Label>("event-hero-help");
+            _eventHint = _root.Q<Label>("event-hint");
+            _removeText = _root.Q<Label>("remove-text");
+            _removeHint = _root.Q<Label>("remove-hint");
             _depth = _root.Q<Label>("depth");
             _deckCount = _root.Q<Label>("deck-count");
             _seedLabel = _root.Q<Label>("seed");
@@ -81,8 +100,10 @@ namespace WhereDarknessDwells.Game
             _newExpedition = _root.Q<Button>("new-expedition");
             _useSecret = _root.Q<Button>("use-secret");
             _journal = _root.Q<Button>("journal");
+            _enterKeep = _root.Q<Button>("enter-keep");
+            _foundContinue = _root.Q<Button>("found-continue");
 
-            _root.Q<Button>("enter-keep").clicked += StartRun;
+            _enterKeep.clicked += StartRun;
             _root.Q<Button>("skip-reward").clicked += () => Apply(() => _run.TryTakeReward(null), "Skipped the reward.");
             _rest.clicked += () => Apply(() => _run.TryRest(), "Rested.");
             _root.Q<Button>("reflect").clicked += () => ShowReflect(true);
@@ -91,7 +112,7 @@ namespace WhereDarknessDwells.Game
             _root.Q<Button>("leave-investigation").clicked += () => Apply(() => _run.TryLeaveRoom(), "Left the Investigation without searching.");
             _root.Q<Button>("leave-secret").clicked += () => Apply(() => _run.TryLeaveRoom(), "Left the secret room.");
             _useSecret.clicked += UseSecret;
-            _root.Q<Button>("found-continue").clicked += () =>
+            _foundContinue.clicked += () =>
             {
                 _found = null;
                 ShowPhase();
@@ -124,30 +145,70 @@ namespace WhereDarknessDwells.Game
         void ShowParty()
         {
             _run = null;
+            _chosen.Clear();
+            DrawParty();
+            DrawTopBar();
+            Show(_partyView);
+        }
+
+        /// <summary>Every hero to choose from, with the chosen ones marked. Clicking a hero picks them or puts them back.</summary>
+        void DrawParty()
+        {
             _partyHeroes.Clear();
-            foreach (string id in _expedition.Party)
+            foreach (string id in _expedition.Heroes)
             {
                 HeroDef hero = _library.Hero(id);
                 VisualElement view = Views.Copy(heroPanel, "hero");
                 view.AddToClassList("party-hero");
                 view.AddToClassList(Views.OwnerClass(hero.Colour));
+                view.EnableInClassList("is-chosen", _chosen.Contains(id));
                 view.Q<Label>("name").text = hero.Name;
                 view.Q<Label>("title").text = hero.Title;
                 view.Q<Label>("health").text = $"{hero.MaxHealth} / {hero.MaxHealth}";
                 foreach (string hidden in new[] { "block", "guard", "incoming", "activate", "state" }) view.Q(hidden).AddToClassList("hidden");
+                // The hero's own starting cards, so the choice says what each one does.
+                var cards = new Label(string.Join("\n", _expedition.StartingDeck.Distinct().Select(_library.Card)
+                    .Where(c => c.Owners.Count == 1 && c.IsOwnedBy(id)).Select(c => $"{c.Name}: {c.Text}")));
+                cards.AddToClassList("party-hero-cards");
+                view.Add(cards);
+                view.RegisterCallback<ClickEvent>(_ => ToggleHero(id));
                 _partyHeroes.Add(view);
             }
-            DrawTopBar();
-            Show(_partyView);
+            string why = RunState.WhyCantChoose(_expedition, _chosen);
+            _enterKeep.SetEnabled(why == null);
+            _partyHint.text = why == null ? $"{string.Join(", ", _chosen.Select(h => _library.Hero(h).Name))} go in."
+                : $"{why} Chosen: {_chosen.Count} of {RunState.PartySize}.";
+        }
+
+        void ToggleHero(string id)
+        {
+            if (_chosen.Contains(id)) _chosen.Remove(id);
+            else if (_chosen.Count < RunState.PartySize) _chosen.Add(id);
+            else
+            {
+                _partyHint.text = $"Three heroes are chosen. Click one of them to leave them behind first.";
+                return;
+            }
+            DrawParty();
         }
 
         void StartRun()
         {
+            string why = RunState.WhyCantChoose(_expedition, _chosen);
+            if (why != null)
+            {
+                Debug.Log($"[Run] Refused: {why}");
+                _partyHint.text = why;
+                return;
+            }
             _found = null;
+            _pendingChoice = -1;
             // A short seed, so it can be typed back into the Seed field to replay the expedition.
             ulong runSeed = seed != 0 ? (ulong)seed : (ulong)(Environment.TickCount & 0xFFFFF) + 1;
-            _run = new RunState(_library, _expedition, runSeed);
-            Debug.Log($"[Run] Expedition started: seed {runSeed}, {_run.Map.Rooms.Count} rooms.");
+            // The party in the order the screen lists them, whatever order they were clicked in.
+            List<string> party = _expedition.Heroes.Where(_chosen.Contains).ToList();
+            _run = new RunState(_library, _expedition, runSeed, party);
+            Debug.Log($"[Run] Expedition started: seed {runSeed}, party {string.Join(", ", party)}, {_run.Map.Rooms.Count} rooms.");
             ShowPhase();
         }
 
@@ -174,6 +235,8 @@ namespace WhereDarknessDwells.Game
                 _mapHint.text = result.Reason;
                 _rewardHint.text = result.Reason;
                 _investigationHint.text = result.Reason;
+                _eventHint.text = result.Reason;
+                _removeHint.text = result.Reason;
                 return;
             }
             Debug.Log($"[Run] {done}");
@@ -208,6 +271,21 @@ namespace WhereDarknessDwells.Game
             }, $"Used the secret room: {secret.ActionLabel}.");
         }
 
+        void ChooseEvent(int index, string heroId)
+        {
+            EventDef ev = _run.CurrentEvent;
+            EventChoice choice = ev.Choices[index];
+            Apply(() =>
+            {
+                RunResult result = _run.TryChooseEvent(index, heroId);
+                if (!result.Ok) return result;
+                _pendingChoice = -1;
+                // Shown before the map or the fight. A card choice or removal shows it on its own screen.
+                if (_run.Phase == RunPhase.ChooseRoom || _run.Phase == RunPhase.Combat) _found = (ev.Title, _run.EventResult);
+                return result;
+            }, $"Event {ev.Id}: chose \"{choice.Label}\"{(heroId != null ? $" for {heroId}" : "")}.");
+        }
+
         /// <summary>The boss by the name the party knows it by.</summary>
         string BossName() => _run.HasEffect(ClueEffectKind.RevealBoss) ? _library.Enemy(_run.Villain.BossEnemyId).Name : _run.Villain.HiddenName;
 
@@ -216,7 +294,7 @@ namespace WhereDarknessDwells.Game
         void ShowPhase()
         {
             DrawTopBar();
-            if (_run.Phase == RunPhase.ChooseRoom && _found != null)
+            if ((_run.Phase == RunPhase.ChooseRoom || _run.Phase == RunPhase.Combat) && _found != null)
             {
                 ShowFound();
                 return;
@@ -236,6 +314,8 @@ namespace WhereDarknessDwells.Game
                 case RunPhase.Sanctuary: ShowSanctuary(); break;
                 case RunPhase.Investigation: ShowInvestigation(); break;
                 case RunPhase.Secret: ShowSecret(); break;
+                case RunPhase.Event: ShowEvent(); break;
+                case RunPhase.RemoveCard: ShowRemoveCard(); break;
                 case RunPhase.Unwritten: ShowUnwritten(); break;
                 default: ShowEnd(); break;
             }
@@ -244,7 +324,7 @@ namespace WhereDarknessDwells.Game
         void Show(VisualElement view)
         {
             _root.style.display = DisplayStyle.Flex;
-            foreach (VisualElement v in new[] { _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _foundView, _unwrittenView, _endView })
+            foreach (VisualElement v in new[] { _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView })
                 v.EnableInClassList("hidden", v != view);
             ShowJournal(false);
         }
@@ -261,9 +341,15 @@ namespace WhereDarknessDwells.Game
         void ShowReward()
         {
             _rewardHint.text = "";
+            // What else this reward brought: an event's result, an Elite's clue or Keepsake.
+            var found = new List<string>();
+            if (_run.Route.Count > 0 && _run.CurrentRoom.Kind == RoomKind.Event && !string.IsNullOrEmpty(_run.EventResult)) found.Add(_run.EventResult);
             ClueDef clue = _run.RewardClue == null ? null : _run.Villain.Clue(_run.RewardClue);
-            _rewardClue.text = clue == null ? "" : $"Among the fallen you find a clue: {clue.Name}. {clue.Journal}";
-            _rewardClue.EnableInClassList("hidden", clue == null);
+            if (clue != null) found.Add($"Among the fallen you find a clue: {clue.Name}. {clue.Journal}");
+            KeepsakeDef keepsake = _run.RewardKeepsake == null ? null : _expedition.Keepsake(_run.RewardKeepsake);
+            if (keepsake != null) found.Add($"You take a Keepsake: {keepsake.Name}. {keepsake.Text}");
+            _rewardClue.text = string.Join("\n\n", found);
+            _rewardClue.EnableInClassList("hidden", found.Count == 0);
             _rewardCards.Clear();
             foreach (string id in _run.RewardOffer)
             {
@@ -340,19 +426,111 @@ namespace WhereDarknessDwells.Game
             Show(_secretView);
         }
 
+        void ShowEvent()
+        {
+            EventDef ev = _run.CurrentEvent;
+            _eventTitle.text = ev.Title;
+            _eventScene.text = ev.Scene;
+            _eventHint.text = "";
+            _eventChoices.Clear();
+            for (int i = 0; i < ev.Choices.Count; i++)
+            {
+                EventChoice choice = ev.Choices[i];
+                if (!_run.IsChoiceShown(choice)) continue;
+                int index = i;
+                // A choice that needs a clue says so, so the player sees what their clues opened up.
+                string because = choice.RequiresClue != null ? $"\n({_run.Villain.Clue(choice.RequiresClue).Name})" : "";
+                var button = new Button(() =>
+                {
+                    if (!choice.NeedsAHero) ChooseEvent(index, null);
+                    else
+                    {
+                        _pendingChoice = index;
+                        ShowEvent();
+                    }
+                }) { text = choice.Label + because };
+                button.AddToClassList("choice-button");
+                button.EnableInClassList("is-selected", index == _pendingChoice);
+                _eventChoices.Add(button);
+            }
+
+            // Who the chosen choice falls on: one button per hero, with what it costs them.
+            _eventHeroes.Clear();
+            EventChoice pending = _pendingChoice >= 0 ? ev.Choices[_pendingChoice] : null;
+            _eventHeroHelp.text = pending == null ? ""
+                : pending.HeroCost > 0 ? $"{pending.Label}: who pays {pending.HeroCost} health?" : $"{pending.Label}: which hero?";
+            if (pending != null)
+            {
+                foreach (string id in _run.Party)
+                {
+                    string hero = id;
+                    var button = new Button(() => ChooseEvent(_pendingChoice, hero))
+                    {
+                        text = $"{_library.Hero(hero).Name} ({_run.Health(hero)} / {_run.MaxHealth(hero)} health)" +
+                            (pending.HeroCost > 0 ? $"\n-{pending.HeroCost}" : ""),
+                    };
+                    button.AddToClassList("choice-button");
+                    button.AddToClassList("searcher");
+                    button.EnableInClassList("is-unavailable", _run.Health(hero) <= pending.HeroCost);
+                    _eventHeroes.Add(button);
+                }
+            }
+            Show(_eventView);
+        }
+
+        void ShowRemoveCard()
+        {
+            _removeText.text = string.IsNullOrEmpty(_run.EventResult) ? "Choose a card to remove from the deck." : _run.EventResult;
+            _removeHint.text = "";
+            _removeGrid.Clear();
+            foreach (CardInstance card in _run.Deck)
+            {
+                CardInstance c = card;
+                VisualElement view = Views.Card(cardView, _run.CardOf(c), _library);
+                view.RegisterCallback<ClickEvent>(_ => Apply(() => _run.TryReflect(c.Id), $"Removed {c} from the deck."));
+                _removeGrid.Add(view);
+            }
+            Show(_removeView);
+        }
+
         void ShowFound()
         {
             _foundTitle.text = _found.Value.title;
             _foundText.text = _found.Value.text;
+            _foundContinue.text = _run.Phase == RunPhase.Combat ? "Fight" : "Return to the map";
             Show(_foundView);
         }
 
-        /// <summary>The journal: every clue about the villain, found ones with their text and the rest as blanks.</summary>
+        /// <summary>The journal: every clue about the villain, found ones with their text and the rest as blanks, then the Keepsakes.</summary>
         void ShowJournal(bool open)
         {
             _journalPanel.EnableInClassList("hidden", !open);
             _journalEntries.Clear();
-            if (!open || _run?.Villain == null) return;
+            if (!open || _run == null) return;
+            if (_run.Villain != null) AddClues();
+            AddKeepsakes();
+        }
+
+        void AddKeepsakes()
+        {
+            foreach (string id in _run.Keepsakes)
+            {
+                KeepsakeDef keepsake = _expedition.Keepsake(id);
+                var entry = new VisualElement();
+                entry.AddToClassList("journal-entry");
+                entry.AddToClassList("is-keepsake");
+                var name = new Label($"Keepsake: {keepsake.Name}");
+                name.AddToClassList("journal-entry-name");
+                entry.Add(name);
+                var text = new Label(keepsake.Text);
+                text.AddToClassList("journal-entry-text");
+                entry.Add(text);
+                _journalEntries.Add(entry);
+            }
+        }
+
+        void AddClues()
+        {
             foreach (ClueDef clue in _run.Villain.Clues)
             {
                 bool found = _run.CluesFound.Contains(clue.Id);
@@ -386,8 +564,8 @@ namespace WhereDarknessDwells.Game
 
         void ShowUnwritten()
         {
-            _unwrittenTitle.text = "Event";
-            _unwrittenText.text = "Someone was here not long ago. There is no one to meet yet: events arrive in Milestone 5.";
+            _unwrittenTitle.text = "An empty room";
+            _unwrittenText.text = "Someone was here not long ago: a cold candle, a dropped glove. Whoever it was has gone.";
             Show(_unwrittenView);
         }
 
@@ -402,7 +580,7 @@ namespace WhereDarknessDwells.Game
                 : $"The darkness takes the party on layer {_run.CurrentRoom.Layer + 1}.";
             _endSummary.text = $"Rooms entered {_run.Route.Count}   Fights won {_run.FightsWon}   " +
                 (_run.Villain != null ? $"Clues {_run.CluesFound.Count} of {_run.Villain.Clues.Count}   " : "") +
-                $"Deck {_run.Deck.Count} cards   Seed {_run.Seed}";
+                $"Keepsakes {_run.Keepsakes.Count}   Deck {_run.Deck.Count} cards   Seed {_run.Seed}";
             _newExpedition.RemoveFromClassList("hidden");
             Show(_endView);
         }
@@ -412,6 +590,7 @@ namespace WhereDarknessDwells.Game
             _partyHealth.Clear();
             _depth.text = "";
             _deckCount.text = "";
+            _keepsakeCount.text = "";
             _seedLabel.text = "";
             _journal.EnableInClassList("hidden", _run?.Villain == null);
             if (_run == null) return;
@@ -437,6 +616,7 @@ namespace WhereDarknessDwells.Game
                 _partyHealth.Add(chip);
             }
             _deckCount.text = $"Deck {_run.Deck.Count}";
+            _keepsakeCount.text = _run.Keepsakes.Count == 0 ? "" : $"Keepsakes {_run.Keepsakes.Count}";
             _seedLabel.text = $"Seed {_run.Seed}";
         }
     }

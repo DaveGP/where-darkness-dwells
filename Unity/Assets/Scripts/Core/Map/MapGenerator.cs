@@ -21,10 +21,10 @@ namespace WhereDarknessDwells.Core
         // How often each kind of room appears after the first layer, out of 100.
         static readonly (RoomKind kind, int weight)[] Weights =
         {
-            (RoomKind.Combat, 45),
-            (RoomKind.Investigation, 20),
-            (RoomKind.Event, 15),
-            (RoomKind.Sanctuary, 10),
+            (RoomKind.Combat, 42),
+            (RoomKind.Investigation, 18),
+            (RoomKind.Event, 22),
+            (RoomKind.Sanctuary, 8),
             (RoomKind.Elite, 10),
         };
 

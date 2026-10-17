@@ -12,7 +12,9 @@ namespace WhereDarknessDwells.Balance
     ///
     /// From the repository root: dotnet run -c Release --project tools/Balance -- [fight|run] [seeds]
     ///   fight: the first encounter only. A good fight is one the careful player usually wins with some damage taken.
-    ///   run:   whole expeditions through the map to Vael.
+    ///   run:     whole expeditions through the map to Vael, with Bram, Wren and Ashe.
+    ///   parties: the careful player's whole expeditions with each of the 20 parties of three.
+    ///   boss:    the boss fight alone with each clue.
     /// </summary>
     public static class Program
     {
@@ -24,6 +26,11 @@ namespace WhereDarknessDwells.Balance
             if (mode == "boss")
             {
                 BossReport(content, seeds);
+                return;
+            }
+            if (mode == "parties")
+            {
+                PartiesReport(content, seeds);
                 return;
             }
             if (mode == "fight")
@@ -76,6 +83,27 @@ namespace WhereDarknessDwells.Balance
             }
         }
 
+        static void PartiesReport(ContentLibrary content, int seeds)
+        {
+            string[] all = StarterContent.AllHeroes;
+            var rows = new List<(string party, double won, double boss, double keepsakes, double stalled)>();
+            for (int a = 0; a < all.Length; a++)
+            for (int b = a + 1; b < all.Length; b++)
+            for (int c = b + 1; c < all.Length; c++)
+            {
+                string[] party = { all[a], all[b], all[c] };
+                List<Expedition.Result> runs = Enumerable.Range(1, seeds).Select(seed => Expedition.Play(content, seed, Careful.Choose,
+                    Careful.SeekingRoom, Careful.ChooseReward, Careful.AtSanctuary, seekClues: true, party: party)).ToList();
+                rows.Add((string.Join(", ", party), 100.0 * runs.Count(r => r.Won) / seeds, 100.0 * runs.Count(r => r.ReachedBoss) / seeds,
+                    runs.Average(r => r.Keepsakes), 100.0 * runs.Count(r => r.Stalled) / seeds));
+            }
+            foreach (var row in rows.OrderByDescending(r => r.won))
+                Console.WriteLine($"{row.party,-24} wins {row.won,5:0.0}%  reach Vael {row.boss,5:0.0}%  Keepsakes {row.keepsakes:0.0}  stalemates {row.stalled,4:0.0}%");
+            Console.WriteLine($"average                  wins {rows.Average(r => r.won),5:0.0}%");
+            foreach (string hero in all)
+                Console.WriteLine($"  parties with {hero,-7} wins {rows.Where(r => r.party.Contains(hero)).Average(r => r.won),5:0.0}%");
+        }
+
         static void FightReport(string name, int seeds, Func<int, Fight.Result> play)
         {
             List<Fight.Result> results = Enumerable.Range(1, seeds).Select(play).ToList();
@@ -111,10 +139,12 @@ namespace WhereDarknessDwells.Balance
             var clues = runs.SelectMany(r => r.Clues).GroupBy(c => c).Select(g => $"{g.Key} {100.0 * g.Count() / seeds:0}%");
             Console.WriteLine($"          clues found per run {runs.Average(r => r.Clues.Count):0.0}: " + string.Join(", ", clues) +
                 $"; used the Cistern {100.0 * runs.Count(r => r.UsedSecret) / seeds:0}%");
+            Console.WriteLine($"          events per run {runs.Average(r => r.EventChoices.Count):0.0}; choices: " + string.Join(", ",
+                runs.SelectMany(r => r.EventChoices).GroupBy(c => c).OrderBy(g => g.Key).Select(g => $"{g.Key} {g.Count()}")));
             var bossWins = runs.Where(r => r.Won).ToList();
             if (bossWins.Count > 0) Console.WriteLine($"          boss fight rounds on a win {bossWins.Average(r => r.Fights.Last().Round):0.0}");
             var bossFights = runs.Where(r => r.ReachedBoss).Select(r => r.Fights.Last()).ToList();
-            Console.WriteLine($"          per boss fight: heals {bossFights.Average(f => f.Log.Count(e => e.Kind == CombatEventKind.Healed)):0.0}" +
+            Console.WriteLine($"          per boss fight: Vael's heals {bossFights.Average(f => f.Log.Count(e => e.Kind == CombatEventKind.Healed && e.SourceId.StartsWith("vael"))):0.0}" +
                 $", cancelled {bossFights.Average(f => f.Log.Count(e => e.Kind == CombatEventKind.IntentCancelled)):0.00}");
 
             var lostAt = runs.Where(r => !r.Won).GroupBy(r => r.EndedIn).OrderBy(g => g.Key)
@@ -203,11 +233,15 @@ namespace WhereDarknessDwells.Balance
             };
         }
 
-        public static void PlayOut(CombatState combat, Policy policy, Random random)
+        /// <summary>Plays the fight to its end. False when 100 rounds pass without one: a stalemate.</summary>
+        public static bool PlayOut(CombatState combat, Policy policy, Random random)
         {
-            for (int step = 0; step < 3000 && !combat.IsOver; step++)
-                if (!policy(combat, random).ApplyTo(combat).Ok) throw new InvalidOperationException("The player chose a refused command.");
-            if (!combat.IsOver) throw new InvalidOperationException("A fight never finished.");
+            while (!combat.IsOver && combat.Round <= 100)
+            {
+                Command c = policy(combat, random);
+                if (!c.ApplyTo(combat).Ok) throw new InvalidOperationException("The player chose a refused command.");
+            }
+            return combat.IsOver;
         }
 
         /// <summary>Every card play the rules would accept right now, with each valid target.</summary>
@@ -249,12 +283,16 @@ namespace WhereDarknessDwells.Balance
             public List<string> CardsTaken = new List<string>();
             public IReadOnlyList<string> Clues = new List<string>();
             public bool UsedSecret;
+            /// <summary>A fight neither side could win.</summary>
+            public bool Stalled;
+            public int Keepsakes;
+            public List<string> EventChoices = new List<string>();
         }
 
         public static Result Play(ContentLibrary content, int seed, Policy fight, Func<RunState, Random, MapRoom> room,
-            Func<RunState, Random, string> reward, Action<RunState, Random> sanctuary, bool seekClues)
+            Func<RunState, Random, string> reward, Action<RunState, Random> sanctuary, bool seekClues, string[] party = null)
         {
-            var run = new RunState(content, StarterContent.Expedition(), (ulong)seed);
+            var run = new RunState(content, StarterContent.Expedition(), (ulong)seed, party);
             var random = new Random(seed);
             var result = new Result();
             var stoodUp = new HashSet<string>();
@@ -273,7 +311,16 @@ namespace WhereDarknessDwells.Balance
                         break;
                     case RunPhase.Combat:
                         int before = run.Party.Sum(run.Health);
-                        Fight.PlayOut(run.Combat, fight, random);
+                        if (!Fight.PlayOut(run.Combat, fight, random))
+                        {
+                            result.Stalled = true;
+                            Console.Error.WriteLine($"stalemate: seed {seed}, {string.Join(", ", run.Party)}, {run.CurrentRoom.EncounterId}: " +
+                                string.Join(", ", run.Combat.Heroes.Concat(run.Combat.Enemies).Select(c => $"{c.Id} {c.Health} block {c.Block} " +
+                                    string.Join(" ", c.Statuses.Select(x => $"{x.Key} {x.Value}")))) + " deck " + string.Join(" ", run.Deck.Select(c => c.DefId)) + $" intents " + string.Join(",", run.Combat.Enemies.Select(e => e.Intent?.Description)));
+                            result.EndedIn = run.CurrentRoom.Kind == RoomKind.Boss ? "Vael (stalemate)" : "stalemate";
+                            result.ReachedBoss |= run.CurrentRoom.Kind == RoomKind.Boss;
+                            return result;
+                        }
                         result.Encounters.Add((run.CurrentRoom.EncounterId, 100 * (before - run.Combat.Heroes.Sum(h => h.Health)) / run.Party.Sum(run.MaxHealth), run.Combat.Phase == CombatPhase.Won));
                         result.Fights.Add(run.Combat);
                         result.FightKinds.Add((run.CurrentRoom.Kind, run.Combat.Phase == CombatPhase.Won));
@@ -301,6 +348,14 @@ namespace WhereDarknessDwells.Balance
                     case RunPhase.Secret:
                         Must(seekClues ? run.TryUseSecret() : run.TryLeaveRoom());
                         break;
+                    case RunPhase.Event:
+                        (int choice, string hero) = EventPolicy.Choose(run, seekClues);
+                        result.EventChoices.Add($"{run.CurrentEvent.Id}: {run.CurrentEvent.Choices[choice].Label}");
+                        Must(run.TryChooseEvent(choice, hero));
+                        break;
+                    case RunPhase.RemoveCard:
+                        Must(run.TryReflect(EventPolicy.WeakestCard(run).Id));
+                        break;
                     case RunPhase.Unwritten:
                         Must(run.TryLeaveRoom());
                         break;
@@ -310,6 +365,7 @@ namespace WhereDarknessDwells.Balance
             result.Won = run.Phase == RunPhase.Won;
             result.FightsWon = run.FightsWon;
             result.Clues = run.CluesFound.ToList();
+            result.Keepsakes = run.Keepsakes.Count;
             result.UsedSecret = run.SecretUsed;
             result.EndedIn = run.Phase == RunPhase.Won ? "won" : run.CurrentRoom.Kind == RoomKind.Boss ? "Vael" : $"layer {run.CurrentRoom.Layer + 1} {run.CurrentRoom.Kind}";
             return result;
@@ -395,6 +451,7 @@ namespace WhereDarknessDwells.Balance
                     case RoomKind.Sanctuary: return health < 65 ? 3 : 0.5;
                     case RoomKind.Elite: return health > 75 ? 2 : -2;
                     case RoomKind.Combat: return 1;
+                    case RoomKind.Event: return 1.5;
                     default: return 0;
                 }
             }
@@ -415,6 +472,7 @@ namespace WhereDarknessDwells.Balance
                     case RoomKind.Sanctuary: return health < 65 ? 3 : 0.5;
                     case RoomKind.Elite: return health > 75 ? 2 : -2;
                     case RoomKind.Combat: return 1;
+                    case RoomKind.Event: return 1.5;
                     default: return 0;
                 }
             }
@@ -435,6 +493,54 @@ namespace WhereDarknessDwells.Balance
             if (missing < 15 && weakest != null) run.TryReflect(weakest.Id);
             else run.TryRest();
         }
+    }
+
+    /// <summary>
+    /// How the scripted players choose in events: a rough value for each result, with the healthiest hero paying
+    /// when a choice costs one hero health. Fights are avoided when the party is hurt.
+    /// </summary>
+    public static class EventPolicy
+    {
+        public static (int choice, string hero) Choose(RunState run, bool seekClues)
+        {
+            int health = Expedition.HealthPercent(run);
+            string payer = run.Party.OrderByDescending(run.Health).First();
+            int best = -1;
+            double bestValue = double.MinValue;
+            for (int i = 0; i < run.CurrentEvent.Choices.Count; i++)
+            {
+                EventChoice c = run.CurrentEvent.Choices[i];
+                if (!run.IsChoiceShown(c)) continue;
+                if (c.NeedsAHero && run.Health(payer) <= c.HeroCost + 6) continue;
+                double value = c.Outcomes.Sum(o => Value(o, run, health, seekClues));
+                if (value > bestValue) { bestValue = value; best = i; }
+            }
+            // Every event has a choice that costs no health, so one is always left.
+            if (best < 0) best = Enumerable.Range(0, run.CurrentEvent.Choices.Count).First(i => run.IsChoiceShown(run.CurrentEvent.Choices[i]) && run.CurrentEvent.Choices[i].HeroCost == 0);
+            return (best, run.CurrentEvent.Choices[best].NeedsAHero ? payer : null);
+        }
+
+        static double Value(EventOutcome o, RunState run, int health, bool seekClues)
+        {
+            switch (o.Kind)
+            {
+                case EventOutcomeKind.GainClue: return seekClues && !run.CluesFound.Contains(o.Id) ? 6 : 0;
+                case EventOutcomeKind.GainKeepsake: return 4;
+                case EventOutcomeKind.GainCard: return 1.5;
+                case EventOutcomeKind.RemoveCard: return 1;
+                case EventOutcomeKind.MaxHealthHero: return 2;
+                case EventOutcomeKind.HealParty: return o.Amount * (100 - health) / 100.0;
+                case EventOutcomeKind.HealHero: return o.Amount * 0.3;
+                case EventOutcomeKind.HurtParty: return -o.Amount * 0.6;
+                case EventOutcomeKind.HurtHero: return -o.Amount * 0.3;
+                case EventOutcomeKind.Fight: return health > 60 ? 0 : -6;
+                default: return 0;
+            }
+        }
+
+        /// <summary>The card to give up: Stand Guard if the deck has one, otherwise the cheapest card.</summary>
+        public static CardInstance WeakestCard(RunState run) =>
+            run.Deck.FirstOrDefault(c => c.DefId == "stand_guard") ?? run.Deck.OrderBy(c => run.CardOf(c).Cost).First();
     }
 
     /// <summary>Plays random cards on random targets, picks random rooms and cards, and always rests.</summary>

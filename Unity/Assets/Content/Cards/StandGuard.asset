@@ -18,7 +18,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
   cost: 1
   target: 2
-  text: 'Guard another ally until your next turn: attacks aimed at them hit Bram. Bram gains 4 Block.'
+  text: 'Guard another ally until your next turn. Bram gains 4 Block.'
   effects:
   - kind: 3
     scope: 0

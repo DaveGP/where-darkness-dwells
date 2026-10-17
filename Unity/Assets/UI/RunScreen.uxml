@@ -7,6 +7,7 @@
             <ui:Label name="depth" class="round" />
             <ui:VisualElement name="party-health" class="party-health" />
             <ui:Label name="deck-count" class="deck-count" />
+            <ui:Label name="keepsake-count" class="deck-count" />
             <ui:Label name="seed" class="seed" />
             <ui:Button name="journal" text="Journal" class="journal-button hidden" />
         </ui:VisualElement>
@@ -14,7 +15,9 @@
         <ui:VisualElement name="party-view" class="view centred">
             <ui:Label text="The Black Keep" class="view-title" />
             <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep, where the siege ended and something else began. Three of you go in." class="view-text" />
+            <ui:Label text="Choose three heroes." class="view-subtext" />
             <ui:VisualElement name="party-heroes" class="party-heroes" />
+            <ui:Label name="party-hint" class="hint" />
             <ui:Button name="enter-keep" text="Enter the Keep" class="big-button" />
         </ui:VisualElement>
 
@@ -68,6 +71,24 @@
                 <ui:Button name="use-secret" class="choice-button" />
                 <ui:Button name="leave-secret" text="Leave it and return to the map" class="choice-button" />
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="event-view" class="view centred">
+            <ui:Label name="event-title" class="view-title" />
+            <ui:Label name="event-scene" class="view-text" />
+            <ui:VisualElement name="event-choices" class="choice-row" />
+            <ui:Label name="event-hero-help" class="view-subtext" />
+            <ui:VisualElement name="event-heroes" class="choice-row" />
+            <ui:Label name="event-hint" class="hint" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="remove-view" class="view centred">
+            <ui:Label text="Leave a card behind" class="view-title" />
+            <ui:Label name="remove-text" class="view-text" />
+            <ui:ScrollView class="deck-grid-scroll">
+                <ui:VisualElement name="remove-grid" class="deck-grid" />
+            </ui:ScrollView>
+            <ui:Label name="remove-hint" class="hint" />
         </ui:VisualElement>
 
         <ui:VisualElement name="found-view" class="view centred">

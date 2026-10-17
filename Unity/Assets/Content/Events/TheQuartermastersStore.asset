@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb0ac7c13ee47b6a6bf7b8f61a1f7e4, type: 3}
+  m_Name: TheQuartermastersStore
+  m_EditorClassIdentifier: 
+  id: quartermaster
+  title: 'The Quartermaster''s Store'
+  scene: 'The siege stores, picked over and rotting. Behind a false wall the quartermaster kept his own supplies, and the shelf is still stocked. The rest is behind a rusted grate.'
+  choices:
+  - label: 'Take from the shelf'
+    result: 'Not everything here has gone bad.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 7
+      amount: 0
+      id: ''
+  - label: 'Force the grate'
+    result: 'The grate gives, and so does a hand behind it.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 3
+      amount: 6
+      id: ''
+    - kind: 6
+      amount: 0
+      id: ''

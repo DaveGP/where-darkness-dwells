@@ -38,7 +38,7 @@ namespace WhereDarknessDwells.Core
             Health = health;
         }
 
-        internal static Combatant ForHero(HeroDef hero, int health) => new Combatant(hero.Id, hero.Name, hero, null, hero.MaxHealth, health);
+        internal static Combatant ForHero(HeroDef hero, int maxHealth, int health) => new Combatant(hero.Id, hero.Name, hero, null, maxHealth, health);
 
         internal static Combatant ForEnemy(EnemyDef enemy, int index, string name, int health) =>
             new Combatant($"{enemy.Id}#{index}", name ?? enemy.Name, null, enemy, enemy.MaxHealth, health);

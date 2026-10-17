@@ -50,7 +50,7 @@ namespace WhereDarknessDwells.Game
                 case RoomKind.Combat: return "A fight. Win it to choose 1 of 3 cards for the deck.";
                 case RoomKind.Elite: return "A harder fight. Win it to choose 1 of 3 cards for the deck.";
                 case RoomKind.Investigation: return "Search the room for a clue about who rules the Keep. Searching costs one hero some health.";
-                case RoomKind.Event: return "A short scene with choices. Events arrive in Milestone 5; for now the room is empty.";
+                case RoomKind.Event: return "A short scene with choices. Some cost health, some give Keepsakes, cards or clues, and some start a fight.";
                 case RoomKind.Sanctuary: return "Rest to heal everyone 30% of their health, or Reflect to remove a card from the deck.";
                 case RoomKind.Secret: return "A hidden room your clues led you to. Every room on the layer before leads down to it.";
                 default: return "Whatever waits at the heart of the Keep. Win here to end the expedition.";

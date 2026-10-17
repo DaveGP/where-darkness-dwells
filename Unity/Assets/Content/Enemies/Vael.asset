@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: vael
   displayName: 'Vael, the Bloodbound Steward'
-  maxHealth: 140
+  maxHealth: 150
   intents:
   - description: 'Blood lash 10'
     kind: 0
@@ -46,3 +46,9 @@ MonoBehaviour:
     amount: 16
     status: 0
     vague: 'He chooses one of you'
+  - description: 'Bloodrage: Fury 3'
+    kind: 2
+    target: 3
+    amount: 3
+    status: 5
+    vague: 'His veins darken'

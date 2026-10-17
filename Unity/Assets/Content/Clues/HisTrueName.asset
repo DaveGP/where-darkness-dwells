@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: true_name
   displayName: 'His True Name'
-  sources: 7
+  sources: 6
   minLayer: 2
   maxLayer: 6
   searchCost: 4

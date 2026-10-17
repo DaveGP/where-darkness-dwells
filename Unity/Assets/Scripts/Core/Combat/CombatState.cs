@@ -58,9 +58,11 @@ namespace WhereDarknessDwells.Core
             _heroes = heroIds.Select(id =>
             {
                 HeroDef def = content.Hero(id);
-                int health = def.MaxHealth;
-                if (heroHealth != null && heroHealth.TryGetValue(id, out int carried)) health = Math.Max(0, Math.Min(carried, def.MaxHealth));
-                return Combatant.ForHero(def, health);
+                _modifiers.MaxHealthBonus.TryGetValue(id, out int bonus);
+                int max = def.MaxHealth + bonus;
+                int health = max;
+                if (heroHealth != null && heroHealth.TryGetValue(id, out int carried)) health = Math.Max(0, Math.Min(carried, max));
+                return Combatant.ForHero(def, max, health);
             }).ToList();
             _enemies = enemyIds.Select((id, i) =>
             {
@@ -86,6 +88,8 @@ namespace WhereDarknessDwells.Core
             _content = other._content;
             _modifiers = other._modifiers;
             CancelsLeft = other.CancelsLeft;
+            CardsPlayed = other.CardsPlayed;
+            Activations = other.Activations;
             _rng = other._rng.Copy();
             _heroes = other._heroes.Select(c => c.Copy()).ToList();
             _enemies = other._enemies.Select(c => c.Copy()).ToList();
@@ -119,9 +123,23 @@ namespace WhereDarknessDwells.Core
         /// <summary>Everything that has happened in this fight, in order.</summary>
         public IReadOnlyList<CombatEvent> Log => _log;
 
+        /// <summary>What the run brings to this fight: clue effects and Keepsakes.</summary>
+        public CombatModifiers Modifiers => _modifiers;
+
         /// <summary>The once-per-fight cancel the run's clues allow, or null. See <see cref="TryCancelIntent"/>.</summary>
         public CancelAbility Cancel => _modifiers.Cancel;
         public int CancelsLeft { get; private set; }
+        /// <summary>Cards played and heroes activated so far this fight. Some Keepsakes only help the first.</summary>
+        public int CardsPlayed { get; private set; }
+        public int Activations { get; private set; }
+
+        /// <summary>The Resolve a card in the hand costs right now, after Keepsakes.</summary>
+        public int CostOf(CardInstance card)
+        {
+            int cost = CardOf(card).Cost;
+            if (CardsPlayed == 0) cost -= _modifiers.Keepsake(KeepsakeEffectKind.FirstCardDiscount);
+            return Math.Max(0, cost);
+        }
 
         /// <summary>True while the party only sees this enemy's intents as vague text, with no numbers.</summary>
         public bool IsVague(Combatant enemy) => enemy?.Enemy != null && _modifiers.VagueIntents.Contains(enemy.Enemy.Id);
@@ -152,6 +170,7 @@ namespace WhereDarknessDwells.Core
                 if (_heroes.All(h => h.IsDown)) { Lose(); return; }
                 foreach (Combatant hero in _heroes.Where(h => h.IsDown)) KnockDown(hero);
                 BeginRound();
+                ApplyStartingKeepsakes();
                 foreach (Combatant enemy in _enemies) ShowIntent(enemy);
             });
         }
@@ -169,7 +188,8 @@ namespace WhereDarknessDwells.Core
                 Phase = CombatPhase.Activation;
                 ActiveHeroId = hero.Id;
                 Emit(CombatEventKind.HeroActivated, hero.Id);
-                SetResolve(ResolvePerActivation);
+                SetResolve(ResolvePerActivation + (Activations == 0 ? _modifiers.Keepsake(KeepsakeEffectKind.FirstActivationResolve) : 0));
+                Activations++;
             });
         }
 
@@ -200,7 +220,8 @@ namespace WhereDarknessDwells.Core
             {
                 _hand.Remove(card);
                 Emit(CombatEventKind.CardPlayed, actor.Id, target?.Id, cardInstanceId: card.Id);
-                SetResolve(Resolve - def.Cost);
+                SetResolve(Resolve - CostOf(card));
+                CardsPlayed++;
                 foreach (EffectDef effect in def.Effects)
                 {
                     Apply(effect, actor, target);
@@ -279,12 +300,24 @@ namespace WhereDarknessDwells.Core
             CardDef def = CardOf(card);
             if (Phase != CombatPhase.Activation) return $"Activate {OwnerNames(def)} to play {def.Name}.";
             if (!def.IsOwnedBy(ActiveHeroId)) return $"Only {OwnerNames(def)} can play {def.Name}.";
-            if (def.Cost > Resolve) return $"{def.Name} needs {def.Cost} Resolve; {Name(ActiveHeroId)} has {Resolve}.";
+            if (CostOf(card) > Resolve) return $"{def.Name} needs {CostOf(card)} Resolve; {Name(ActiveHeroId)} has {Resolve}.";
             if (def.Target == CardTarget.Enemy && _enemies.All(e => e.IsDown)) return "There's no enemy to target.";
             return null;
         }
 
         public bool CanPlay(int cardInstanceId) => WhyCantPlay(cardInstanceId) == null;
+
+        /// <summary>For tests: moves a card from any pile into the hand.</summary>
+        internal void PutInHandForTest(int cardInstanceId)
+        {
+            foreach (List<CardInstance> pile in new[] { _draw, _discard, _setAside })
+            {
+                CardInstance card = pile.FirstOrDefault(c => c.Id == cardInstanceId);
+                if (card == null) continue;
+                pile.Remove(card);
+                _hand.Add(card);
+            }
+        }
 
         /// <summary>
         /// What the enemies' shown intents would do if they acted now, in order: the same events the enemy phase
@@ -353,6 +386,21 @@ namespace WhereDarknessDwells.Core
                 case EffectKind.Draw:
                     Draw(effect.Amount, MaxHandSize);
                     break;
+
+                case EffectKind.Heal:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target)) Heal(t, effect.Amount);
+                    break;
+
+                case EffectKind.Cleanse:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target)) SetStatus(t, effect.Status, 0);
+                    break;
+
+                case EffectKind.LoseHealth:
+                    int lost = Math.Min(effect.Amount, actor.Health - 1);
+                    if (lost <= 0) break;
+                    actor.Health -= lost;
+                    Emit(CombatEventKind.Damaged, actor.Id, actor.Id, lost);
+                    break;
             }
         }
 
@@ -362,6 +410,7 @@ namespace WhereDarknessDwells.Core
             {
                 case EffectScope.AllEnemies: return _enemies.Where(e => !e.IsDown).ToList();
                 case EffectScope.ActingHero: return new[] { actor };
+                case EffectScope.AllHeroes: return _heroes.Where(h => !h.IsDown).ToList();
                 default: return target == null || target.IsDown ? Enumerable.Empty<Combatant>() : new[] { target };
             }
         }
@@ -415,9 +464,7 @@ namespace WhereDarknessDwells.Core
                     break;
 
                 case IntentKind.Heal:
-                    int healed = Math.Min(intent.Amount, enemy.MaxHealth - enemy.Health);
-                    enemy.Health += healed;
-                    Emit(CombatEventKind.Healed, enemy.Id, enemy.Id, healed);
+                    Heal(enemy, intent.Amount);
                     break;
 
                 case IntentKind.Attack:
@@ -431,8 +478,9 @@ namespace WhereDarknessDwells.Core
                     break;
 
                 case IntentKind.ApplyStatus:
-                    foreach (Combatant hero in IntentTargets(enemy))
-                        SetStatus(hero, intent.Status, hero.Status(intent.Status) + intent.Amount);
+                    IEnumerable<Combatant> targets = intent.Target == IntentTarget.Self ? new[] { enemy } : IntentTargets(enemy);
+                    foreach (Combatant target in targets)
+                        SetStatus(target, intent.Status, target.Status(intent.Status) + intent.Amount);
                     break;
             }
 
@@ -463,8 +511,22 @@ namespace WhereDarknessDwells.Core
         {
             if (attacker.IsHero && defender.Enemy != null && _modifiers.BonusDamageTo.TryGetValue(defender.Enemy.Id, out int bonus))
                 baseDamage += bonus;
+            baseDamage += attacker.Status(StatusKind.Fury);
             int damage = DamageRules.Attack(baseDamage, attacker.Status(StatusKind.Weak) > 0, defender.Status(StatusKind.Exposed) > 0);
             TakeDamage(attacker.Id, defender, damage, ignoresBlock: false);
+
+            // A hero with Riposte who is still standing strikes back: flat damage, through the attacker's Block.
+            int riposte = defender.Status(StatusKind.Riposte);
+            if (riposte > 0 && defender.IsHero && !attacker.IsHero && !defender.IsDown && !IsOver)
+                TakeDamage(defender.Id, attacker, riposte, ignoresBlock: false);
+        }
+
+        void Heal(Combatant target, int amount)
+        {
+            if (target.IsDown) return;
+            int healed = Math.Min(amount, target.MaxHealth - target.Health);
+            target.Health += healed;
+            Emit(CombatEventKind.Healed, target.Id, target.Id, healed);
         }
 
         void TakeDamage(string sourceId, Combatant target, int damage, bool ignoresBlock)
@@ -540,8 +602,21 @@ namespace WhereDarknessDwells.Core
             {
                 hero.Block = 0;
                 hero.GuardedBy = null;
+                SetStatus(hero, StatusKind.Riposte, 0);
             }
             Draw(HandSize - _hand.Count, HandSize);
+        }
+
+        /// <summary>The Keepsakes that act once, as the fight starts: Block for the heroes, statuses on the enemies, extra cards.</summary>
+        void ApplyStartingKeepsakes()
+        {
+            int block = _modifiers.Keepsake(KeepsakeEffectKind.StartBlock);
+            if (block > 0)
+                foreach (Combatant hero in _heroes.Where(h => !h.IsDown)) GainBlock(hero, block);
+            foreach (KeepsakeDef k in _modifiers.Keepsakes.Where(k => k.Kind == KeepsakeEffectKind.EnemyStartStatus))
+                foreach (Combatant enemy in _enemies.Where(e => !e.IsDown)) SetStatus(enemy, k.Status, enemy.Status(k.Status) + k.Amount);
+            int draw = _modifiers.Keepsake(KeepsakeEffectKind.FirstTurnDraw);
+            if (draw > 0) Draw(draw, MaxHandSize);
         }
 
         /// <summary>Bleed hurts, then Bleed, Exposed and Weak each lose a stack. Hex never fades by itself.</summary>

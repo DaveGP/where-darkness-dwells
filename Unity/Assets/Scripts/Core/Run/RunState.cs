@@ -18,7 +18,11 @@ namespace WhereDarknessDwells.Core
         Investigation,
         /// <summary>The villain's secret room: act there at a cost, or leave.</summary>
         Secret,
-        /// <summary>An Event room, which Milestone 5 fills in. The party just carries on.</summary>
+        /// <summary>An Event room: choose one of <see cref="RunState.CurrentEvent"/>'s choices with <see cref="RunState.TryChooseEvent"/>.</summary>
+        Event,
+        /// <summary>An event asked the party to remove a card from the deck: choose it with <see cref="RunState.TryReflect"/>.</summary>
+        RemoveCard,
+        /// <summary>An Event room with no event left to tell. The party just carries on.</summary>
         Unwritten,
         Won,
         Lost,
@@ -31,6 +35,8 @@ namespace WhereDarknessDwells.Core
     public sealed class RunState
     {
         public const int RewardChoices = 3;
+        /// <summary>How many heroes go into the Keep.</summary>
+        public const int PartySize = 3;
         /// <summary>A hero who fell in a won fight stands back up with this share of their maximum health, rounded down (at least 1).</summary>
         public const int StandUpPercent = 25;
         /// <summary>Resting heals each hero this share of their maximum health, rounded down.</summary>
@@ -43,24 +49,45 @@ namespace WhereDarknessDwells.Core
         readonly Dictionary<string, int> _health;
         readonly List<int> _route = new List<int>();
         readonly List<string> _clues = new List<string>();
+        readonly List<string> _keepsakes = new List<string>();
+        readonly List<string> _eventsSeen = new List<string>();
+        readonly Dictionary<string, int> _maxHealthBonus = new Dictionary<string, int>();
         List<string> _offer = new List<string>();
         int _nextCardId;
 
-        public RunState(ContentLibrary content, ExpeditionDef expedition, ulong seed)
+        /// <param name="party">The chosen heroes; null for the expedition's first <see cref="PartySize"/>. Check it with <see cref="WhyCantChoose"/>.</param>
+        public RunState(ContentLibrary content, ExpeditionDef expedition, ulong seed, IReadOnlyList<string> party = null)
         {
             _content = content ?? throw new ArgumentNullException(nameof(content));
             Expedition = expedition ?? throw new ArgumentNullException(nameof(expedition));
             IReadOnlyList<string> problems = content.Validate(expedition);
             if (problems.Count > 0) throw new ArgumentException("The expedition can't be used: " + string.Join(" ", problems), nameof(expedition));
+            party = party ?? expedition.Heroes.Take(PartySize).ToList();
+            string wrong = WhyCantChoose(expedition, party);
+            if (wrong != null) throw new ArgumentException(wrong, nameof(party));
+            Party = party.ToArray();
 
             Seed = seed;
             _seedRng = new Rng(seed);
             _rewardRng = _seedRng.Stream("rewards");
             Map = MapGenerator.Generate(expedition, _seedRng.Stream("map"));
-            _deck = expedition.StartingDeck.Select((id, i) => new CardInstance(i + 1, id)).ToList();
+            _deck = StartingCards(content, expedition, Party).Select((id, i) => new CardInstance(i + 1, id)).ToList();
             _nextCardId = _deck.Count + 1;
-            _health = expedition.Party.ToDictionary(id => id, id => content.Hero(id).MaxHealth);
+            _health = Party.ToDictionary(id => id, id => content.Hero(id).MaxHealth);
         }
+
+        /// <summary>Why this party can't go into the Keep, written for the player, or null if it can.</summary>
+        public static string WhyCantChoose(ExpeditionDef expedition, IReadOnlyList<string> party)
+        {
+            if (party == null || party.Count != PartySize) return $"Choose {PartySize} heroes.";
+            if (party.Distinct().Count() != party.Count) return "Choose each hero only once.";
+            if (party.Any(h => !expedition.Heroes.Contains(h))) return "Choose heroes from the list.";
+            return null;
+        }
+
+        /// <summary>The party's starting deck: each hero's own cards and the dual cards whose owners are all in the party.</summary>
+        public static IEnumerable<string> StartingCards(ContentLibrary content, ExpeditionDef expedition, IReadOnlyList<string> party) =>
+            expedition.StartingDeck.Where(id => content.Card(id).Owners.All(party.Contains));
 
         public ExpeditionDef Expedition { get; }
         public ulong Seed { get; }
@@ -76,10 +103,11 @@ namespace WhereDarknessDwells.Core
         /// <summary>The card ids to choose from in the Reward phase.</summary>
         public IReadOnlyList<string> RewardOffer => _offer;
 
-        public IReadOnlyList<string> Party => Expedition.Party;
+        /// <summary>The heroes in this run, in the order they were chosen.</summary>
+        public IReadOnlyList<string> Party { get; }
         public IReadOnlyList<CardInstance> Deck => _deck;
         public int Health(string heroId) => _health.TryGetValue(heroId, out int h) ? h : 0;
-        public int MaxHealth(string heroId) => _content.Hero(heroId).MaxHealth;
+        public int MaxHealth(string heroId) => _content.Hero(heroId).MaxHealth + (_maxHealthBonus.TryGetValue(heroId, out int bonus) ? bonus : 0);
         public CardDef CardOf(CardInstance card) => _content.Card(card.DefId);
 
         public bool IsOver => Phase == RunPhase.Won || Phase == RunPhase.Lost;
@@ -98,6 +126,24 @@ namespace WhereDarknessDwells.Core
         public string EndingText => Phase != RunPhase.Won || Villain == null ? null : TrueEnding ? Villain.TrueEnding : Villain.Ending;
 
         public bool HasEffect(ClueEffectKind kind) => Effects(kind).Any();
+
+        /// <summary>The Keepsakes found so far, in the order they were found.</summary>
+        public IReadOnlyList<string> Keepsakes => _keepsakes;
+        /// <summary>The Keepsake the last won fight gave (an Elite's), shown with the reward; null if none.</summary>
+        public string RewardKeepsake { get; private set; }
+
+        /// <summary>The event in the Event room the party is in, or null.</summary>
+        public EventDef CurrentEvent { get; private set; }
+        /// <summary>What the last event choice did, for the interface to show once. Null when there is nothing to show.</summary>
+        public string EventResult { get; private set; }
+
+        /// <summary>Whether a choice of the current event is shown, given the clues found so far.</summary>
+        public bool IsChoiceShown(EventChoice choice) =>
+            (choice.RequiresClue == null || _clues.Contains(choice.RequiresClue)) &&
+            (choice.HiddenByClue == null || !_clues.Contains(choice.HiddenByClue));
+
+        int KeepsakeTotal(KeepsakeEffectKind kind) =>
+            _keepsakes.Select(Expedition.Keepsake).Where(k => k.Kind == kind).Sum(k => k.Amount);
 
         IEnumerable<ClueEffect> Effects(ClueEffectKind kind) =>
             _clues.SelectMany(id => Villain.Clue(id).Effects).Where(e => e.Kind == kind);
@@ -122,11 +168,15 @@ namespace WhereDarknessDwells.Core
                 EncounterDef encounter = Expedition.Encounter(room.EncounterId);
                 bool boss = room.Kind == RoomKind.Boss;
                 IReadOnlyList<string> enemies = boss ? BossEnemies() : encounter.EnemyIds;
-                var combat = new CombatState(_content, Party, _deck, enemies, _seedRng.Stream("combat " + room.Id), _health,
-                    boss ? BossModifiers() : null);
-                CombatResult start = combat.Start();
-                if (!start.Ok) return RunResult.Refused(start.Reason);
-                Combat = combat;
+                RunResult started = StartFight(room, enemies, boss);
+                if (!started.Ok) return started;
+            }
+
+            EventDef nextEvent = null;
+            if (room.Kind == RoomKind.Event)
+            {
+                List<EventDef> unseen = Expedition.Events.Where(e => !_eventsSeen.Contains(e.Id)).ToList();
+                if (unseen.Count > 0) nextEvent = unseen[_rewardRng.Next(unseen.Count)];
             }
 
             CurrentRoom = room;
@@ -139,8 +189,23 @@ namespace WhereDarknessDwells.Core
                 case RoomKind.Sanctuary: Phase = RunPhase.Sanctuary; break;
                 case RoomKind.Investigation: Phase = RunPhase.Investigation; break;
                 case RoomKind.Secret: Phase = RunPhase.Secret; break;
-                default: Phase = RunPhase.Unwritten; break;
+                default:
+                    CurrentEvent = nextEvent;
+                    EventResult = null;
+                    if (nextEvent != null) _eventsSeen.Add(nextEvent.Id);
+                    Phase = nextEvent != null ? RunPhase.Event : RunPhase.Unwritten;
+                    break;
             }
+            return RunResult.Success;
+        }
+
+        RunResult StartFight(MapRoom room, IReadOnlyList<string> enemies, bool boss)
+        {
+            var combat = new CombatState(_content, Party, _deck, enemies, _seedRng.Stream("combat " + room.Id), _health,
+                boss ? BossModifiers() : FightModifiers());
+            CombatResult start = combat.Start();
+            if (!start.Ok) return RunResult.Refused(start.Reason);
+            Combat = combat;
             return RunResult.Success;
         }
 
@@ -160,7 +225,9 @@ namespace WhereDarknessDwells.Core
                 return RunResult.Success;
             }
 
-            foreach (Combatant hero in Combat.Heroes) _health[hero.Id] = hero.IsDown ? StandUpHealth(hero.Id) : hero.Health;
+            int heal = KeepsakeTotal(KeepsakeEffectKind.HealAfterWin);
+            foreach (Combatant hero in Combat.Heroes)
+                _health[hero.Id] = hero.IsDown ? StandUpHealth(hero.Id) : Math.Min(MaxHealth(hero.Id), hero.Health + heal);
             FightsWon++;
             if (CurrentRoom.Kind == RoomKind.Boss)
             {
@@ -168,8 +235,10 @@ namespace WhereDarknessDwells.Core
                 return RunResult.Success;
             }
 
-            // An Elite can carry a clue, such as the villain's true name.
+            // An Elite gives a Keepsake, and can carry a clue, such as the villain's true name.
             RewardClue = null;
+            RewardKeepsake = null;
+            if (CurrentRoom.Kind == RoomKind.Elite) RewardKeepsake = GainKeepsake(null);
             if (CurrentRoom.Kind == RoomKind.Elite && Villain != null)
             {
                 ClueDef clue = Villain.Clues.FirstOrDefault(c => (c.Sources & ClueSource.Elite) != 0 && !_clues.Contains(c.Id));
@@ -180,11 +249,119 @@ namespace WhereDarknessDwells.Core
                 }
             }
 
-            List<string> pool = Expedition.RewardCards.ToList();
+            OfferCards();
+            return RunResult.Success;
+        }
+
+        void OfferCards()
+        {
+            // Only cards someone in the party can play.
+            List<string> pool = Expedition.RewardCards.Where(id => _content.Card(id).Owners.Any(Party.Contains)).ToList();
             _rewardRng.Shuffle(pool);
             _offer = pool.Take(RewardChoices).ToList();
             Phase = RunPhase.Reward;
+        }
+
+        /// <summary>
+        /// Adds a Keepsake to the party: <paramref name="id"/>, or a random one they don't have when it is null.
+        /// Returns its id, or null when there is none left to give.
+        /// </summary>
+        string GainKeepsake(string id)
+        {
+            if (id == null)
+            {
+                List<string> left = Expedition.Keepsakes.Select(k => k.Id).Where(k => !_keepsakes.Contains(k)).ToList();
+                if (left.Count == 0) return null;
+                id = left[_rewardRng.Next(left.Count)];
+            }
+            if (_keepsakes.Contains(id)) return null;
+            _keepsakes.Add(id);
+            KeepsakeDef keepsake = Expedition.Keepsake(id);
+            if (keepsake.Kind == KeepsakeEffectKind.MaxHealth)
+                foreach (string hero in Party) RaiseMaxHealth(hero, keepsake.Amount);
+            return id;
+        }
+
+        void RaiseMaxHealth(string heroId, int amount)
+        {
+            _maxHealthBonus[heroId] = (_maxHealthBonus.TryGetValue(heroId, out int bonus) ? bonus : 0) + amount;
+            _health[heroId] = Math.Min(MaxHealth(heroId), _health[heroId] + amount);
+        }
+
+        /// <summary>
+        /// Event: takes choice <paramref name="choice"/> (an index into the event's choices). A choice that affects
+        /// one hero needs <paramref name="heroId"/>. Its results apply at once; a card choice, card removal or fight
+        /// follows as its own phase.
+        /// </summary>
+        public RunResult TryChooseEvent(int choice, string heroId = null)
+        {
+            if (Phase != RunPhase.Event) return RunResult.Refused("There's no event here.");
+            if (choice < 0 || choice >= CurrentEvent.Choices.Count) return RunResult.Refused("There is no such choice.");
+            EventChoice picked = CurrentEvent.Choices[choice];
+            if (!IsChoiceShown(picked)) return RunResult.Refused("That choice isn't open to you.");
+            if (picked.NeedsAHero)
+            {
+                if (heroId == null || !Party.Contains(heroId)) return RunResult.Refused("Choose a hero from your party.");
+                if (_health[heroId] <= picked.HeroCost)
+                    return RunResult.Refused($"{_content.Hero(heroId).Name} is too hurt for that: it costs {picked.HeroCost} health.");
+            }
+
+            var lines = new List<string> { picked.Result };
+            EventOutcome step = null;
+            foreach (EventOutcome o in picked.Outcomes)
+            {
+                switch (o.Kind)
+                {
+                    case EventOutcomeKind.HealParty:
+                        foreach (string h in Party) _health[h] = Math.Min(MaxHealth(h), _health[h] + o.Amount);
+                        break;
+                    case EventOutcomeKind.HurtParty:
+                        foreach (string h in Party) _health[h] = Math.Max(1, _health[h] - o.Amount);
+                        break;
+                    case EventOutcomeKind.HealHero:
+                        _health[heroId] = Math.Min(MaxHealth(heroId), _health[heroId] + o.Amount);
+                        break;
+                    case EventOutcomeKind.HurtHero:
+                        _health[heroId] -= o.Amount;
+                        break;
+                    case EventOutcomeKind.MaxHealthHero:
+                        RaiseMaxHealth(heroId, o.Amount);
+                        break;
+                    case EventOutcomeKind.GainClue:
+                        if (!_clues.Contains(o.Id))
+                        {
+                            _clues.Add(o.Id);
+                            lines.Add($"Clue found: {Villain.Clue(o.Id).Name}. {Villain.Clue(o.Id).Journal}");
+                        }
+                        break;
+                    case EventOutcomeKind.GainKeepsake:
+                        string keepsake = GainKeepsake(o.Id);
+                        if (keepsake != null) lines.Add($"Keepsake found: {Expedition.Keepsake(keepsake).Name}. {Expedition.Keepsake(keepsake).Text}");
+                        break;
+                    default:
+                        step = o;
+                        break;
+                }
+            }
+            EventResult = string.Join("\n\n", lines.Where(l => !string.IsNullOrEmpty(l)));
+
+            if (step == null) Phase = RunPhase.ChooseRoom;
+            else if (step.Kind == EventOutcomeKind.GainCard) OfferCards();
+            else if (step.Kind == EventOutcomeKind.RemoveCard) Phase = RunPhase.RemoveCard;
+            else
+            {
+                EncounterDef encounter = step.Id != null ? Expedition.Encounter(step.Id) : PickNormalEncounter(CurrentRoom.Layer);
+                RunResult started = StartFight(CurrentRoom, encounter.EnemyIds, boss: false);
+                if (!started.Ok) return started;
+                Phase = RunPhase.Combat;
+            }
             return RunResult.Success;
+        }
+
+        EncounterDef PickNormalEncounter(int layer)
+        {
+            List<EncounterDef> fits = Expedition.Encounters.Where(e => e.Kind == EncounterKind.Normal && e.FitsLayer(layer)).ToList();
+            return fits[_rewardRng.Next(fits.Count)];
         }
 
         /// <summary>Adds one of the offered cards to the deck, or skips the reward when <paramref name="cardId"/> is null.</summary>
@@ -195,6 +372,7 @@ namespace WhereDarknessDwells.Core
             if (cardId != null) _deck.Add(new CardInstance(_nextCardId++, cardId));
             _offer = new List<string>();
             RewardClue = null;
+            RewardKeepsake = null;
             Phase = RunPhase.ChooseRoom;
             return RunResult.Success;
         }
@@ -245,10 +423,17 @@ namespace WhereDarknessDwells.Core
         /// <summary>For tests: sets a hero's health between rooms.</summary>
         internal void SetHealthForTest(string heroId, int health) => _health[heroId] = health;
 
-        /// <summary>What the clues found so far change in the boss fight.</summary>
+        /// <summary>What the run brings to an ordinary fight: its Keepsakes and the heroes' extra maximum health.</summary>
+        internal CombatModifiers FightModifiers() =>
+            new CombatModifiers(keepsakes: _keepsakes.Select(Expedition.Keepsake), maxHealthBonus: _maxHealthBonus);
+
+        /// <summary>For tests: the party has this Keepsake.</summary>
+        internal void GiveKeepsake(string id) => GainKeepsake(id);
+
+        /// <summary>What the clues found so far change in the boss fight, as well as what every fight gets.</summary>
         internal CombatModifiers BossModifiers()
         {
-            if (Villain == null) return null;
+            if (Villain == null) return FightModifiers();
             string boss = Villain.BossEnemyId;
             bool known = HasEffect(ClueEffectKind.RevealBoss);
             int bonus = Effects(ClueEffectKind.BonusDamageToBoss).Sum(e => e.Amount);
@@ -258,7 +443,9 @@ namespace WhereDarknessDwells.Core
                 vagueIntents: known ? null : new[] { boss },
                 bonusDamageTo: bonus == 0 ? null : new Dictionary<string, int> { { boss, bonus } },
                 healthLossPercent: SecretUsed ? new Dictionary<string, int> { { boss, Villain.SecretRoom.BossHealthLossPercent } } : null,
-                cancel: cancel == null ? null : new CancelAbility(cancel.Label, boss, cancel.CancelKind));
+                cancel: cancel == null ? null : new CancelAbility(cancel.Label, boss, cancel.CancelKind),
+                keepsakes: _keepsakes.Select(Expedition.Keepsake),
+                maxHealthBonus: _maxHealthBonus);
         }
 
         /// <summary>Sanctuary: every hero heals 30% of their maximum health.</summary>
@@ -274,10 +461,10 @@ namespace WhereDarknessDwells.Core
 
         public int RestHealAmount(string heroId) => MaxHealth(heroId) * RestHealPercent / 100;
 
-        /// <summary>Sanctuary: remove one card from the deck for the rest of the run.</summary>
+        /// <summary>Sanctuary, or an event that asks for it: remove one card from the deck for the rest of the run.</summary>
         public RunResult TryReflect(int cardInstanceId)
         {
-            if (Phase != RunPhase.Sanctuary) return RunResult.Refused("You can only reflect in a Sanctuary.");
+            if (Phase != RunPhase.Sanctuary && Phase != RunPhase.RemoveCard) return RunResult.Refused("You can only reflect in a Sanctuary.");
             CardInstance card = _deck.FirstOrDefault(c => c.Id == cardInstanceId);
             if (card == null) return RunResult.Refused("That card isn't in the deck.");
             if (_deck.Count == 1) return RunResult.Refused("The deck needs at least one card.");

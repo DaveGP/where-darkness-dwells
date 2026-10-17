@@ -60,6 +60,8 @@ namespace WhereDarknessDwells.Tests
                         Ok(searcher != null ? run.TrySearch(searcher) : run.TryLeaveRoom());
                         break;
                     case RunPhase.Secret: Ok(run.TryUseSecret()); break;
+                    case RunPhase.Event: log.Add("Chose " + ChooseFirst(run)); break;
+                    case RunPhase.RemoveCard: Ok(run.TryReflect(run.Deck[run.Deck.Count - 1].Id)); break;
                     case RunPhase.Unwritten: Ok(run.TryLeaveRoom()); break;
                 }
             }
@@ -184,16 +186,16 @@ namespace WhereDarknessDwells.Tests
         }
 
         [Test]
-        public void EventRoomsCanBeLeft()
+        public void EventRoomsHoldAnEvent()
         {
             foreach (ulong seed in Enumerable.Range(1, 50).Select(s => (ulong)s))
             {
                 RunState run = NewRun(seed);
                 MapRoom room = run.Map.Rooms.FirstOrDefault(r => r.Kind == RoomKind.Event);
                 if (room == null || !Walk(run, room)) continue;
-                Assert.That(run.Phase, Is.EqualTo(RunPhase.Unwritten));
-                Ok(run.TryLeaveRoom());
-                Assert.That(run.ReachableRooms, Is.EquivalentTo(run.Map.NextOf(room)));
+                Assert.That(run.Phase, Is.EqualTo(RunPhase.Event));
+                Assert.That(run.CurrentEvent, Is.Not.Null);
+                Assert.That(run.TryLeaveRoom().Ok, Is.False, "An event is left by one of its own choices.");
                 return;
             }
             Assert.Fail("No seed reached an Event room.");
@@ -283,9 +285,42 @@ namespace WhereDarknessDwells.Tests
                         Ok(run.TryTakeReward(null));
                         break;
                     case RunPhase.Sanctuary: Ok(run.TryReflect(run.Deck[run.Deck.Count - 1].Id)); break;
+                    case RunPhase.Event:
+                        ChooseFirst(run);
+                        if (!Finish(run)) return false;
+                        break;
                     default: Ok(run.TryLeaveRoom()); break;
                 }
             }
+            return true;
+        }
+
+        /// <summary>Takes the event's first choice that is shown and that the healthiest hero can pay for. Returns its label.</summary>
+        internal static string ChooseFirst(RunState run)
+        {
+            string hero = run.Party.OrderByDescending(run.Health).First();
+            for (int i = 0; i < run.CurrentEvent.Choices.Count; i++)
+            {
+                EventChoice choice = run.CurrentEvent.Choices[i];
+                if (!run.IsChoiceShown(choice) || (choice.NeedsAHero && run.Health(hero) <= choice.HeroCost)) continue;
+                Ok(run.TryChooseEvent(i, hero));
+                return choice.Label;
+            }
+            Assert.Fail($"No choice in {run.CurrentEvent} can be taken.");
+            return null;
+        }
+
+        /// <summary>Plays out whatever an event choice led to (a card choice, a removal or a fight). False if the party falls.</summary>
+        internal static bool Finish(RunState run)
+        {
+            if (run.Phase == RunPhase.Combat)
+            {
+                PlayFight(run.Combat);
+                Ok(run.TryFinishCombat());
+                if (run.Phase == RunPhase.Lost) return false;
+            }
+            if (run.Phase == RunPhase.Reward) Ok(run.TryTakeReward(null));
+            if (run.Phase == RunPhase.RemoveCard) Ok(run.TryReflect(run.Deck[run.Deck.Count - 1].Id));
             return true;
         }
 

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3f8b705c70a43c0b0ccc6b6620e7e4f, type: 3}
+  m_Name: WidowsVeil
+  m_EditorClassIdentifier: 
+  id: widows_veil
+  displayName: 'Widow''s Veil'
+  text: 'At the start of each fight, every enemy gets Weak 1.'
+  kind: 3
+  amount: 1
+  status: 1

@@ -12,6 +12,33 @@
     display: none;
 }
 
+/* ---------- buttons ---------- */
+
+/* Every button, so none falls back to the default theme's light grey under the screen's light text.
+   Map rooms are buttons too; RunScreen.uss loads later and restyles them. */
+.unity-button {
+    background-color: rgb(58, 46, 60);
+    border-color: rgb(110, 88, 70);
+    border-width: 1px;
+    border-radius: 4px;
+    color: rgb(240, 232, 214);
+}
+
+.unity-button:hover {
+    background-color: rgb(80, 64, 82);
+    color: rgb(255, 248, 230);
+}
+
+.unity-button:active {
+    background-color: rgb(44, 35, 46);
+}
+
+.unity-button:disabled {
+    background-color: rgb(34, 28, 36);
+    border-color: rgb(50, 42, 52);
+    color: rgb(150, 140, 146);
+}
+
 /* ---------- top bar ---------- */
 
 .top-bar {
@@ -297,6 +324,8 @@
     border-width: 2px;
     border-radius: 8px;
     border-color: rgb(80, 70, 76);
+    /* A long text is cut off at the bottom rather than pushing the colour bar and names out of the card. */
+    overflow: hidden;
     transition-property: translate, scale, opacity;
     transition-duration: 0.12s;
 }
@@ -327,6 +356,7 @@
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .swatch {
@@ -361,6 +391,7 @@
 }
 
 .card-target {
+    flex-shrink: 0;
     font-size: 12px;
     color: rgb(150, 140, 146);
     margin: 4px 0;
@@ -368,11 +399,14 @@
 
 .card-text {
     flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
     font-size: 14px;
     white-space: normal;
 }
 
 .card-owner-names {
+    flex-shrink: 0;
     font-size: 12px;
     -unity-text-align: middle-center;
     color: rgb(150, 140, 146);
@@ -528,6 +562,21 @@
     background-color: rgb(150, 112, 190);
 }
 
+.owner-bone .combatant-accent,
+.swatch.owner-bone {
+    background-color: rgb(214, 204, 180);
+}
+
+.owner-steel .combatant-accent,
+.swatch.owner-steel {
+    background-color: rgb(120, 156, 196);
+}
+
+.owner-bronze .combatant-accent,
+.swatch.owner-bronze {
+    background-color: rgb(176, 110, 62);
+}
+
 .card.owner-iron {
     background-color: rgb(52, 40, 30);
 }
@@ -538,6 +587,22 @@
 
 .card.owner-ash {
     background-color: rgb(42, 34, 52);
+}
+
+.card.owner-bone {
+    background-color: rgb(50, 47, 40);
+}
+
+.card.owner-steel {
+    background-color: rgb(30, 38, 50);
+}
+
+.card.owner-bronze {
+    background-color: rgb(50, 34, 26);
+}
+
+.card.is-discounted .card-cost {
+    color: rgb(140, 220, 140);
 }
 
 /* ---------- end of fight ---------- */

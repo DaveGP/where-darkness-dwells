@@ -86,6 +86,8 @@ the enemy that is about to hit hardest.
 | Weak | Deals 25% less attack damage | Loses 1 stack at the end of each round |
 | Bleed | Takes damage equal to its stacks at the end of the round, ignoring Block | Then loses 1 stack |
 | Hex | Does nothing by itself; Ashe's cards consume stacks for effects | Never ticks down |
+| Riposte | A hero's: when an enemy's attack hits them and they are still standing, the attacker takes that much damage | Removed at the start of the next player turn, like Block |
+| Fury | An enemy's: each of its attacks deals that much more base damage | Never ticks down |
 
 **Damage is calculated in a fixed order:** base damage, plus flat bonuses, then multiplied by Weak and then
 by Exposed. The result is rounded down, then Block absorbs what it can and the rest comes off health.
@@ -172,6 +174,78 @@ says otherwise.
   boss, show a hidden room, remove the boss's allies, grant a once-per-fight cancel, and unlock an ending.
   Nothing checks the villain's name.
 
+## Events, Keepsakes and the party (proposed, Milestone 5)
+
+These fill in what the tables above leave open. Each one is a default until David agrees or a playtest says
+otherwise.
+
+### Choosing the party
+
+- The party screen shows six heroes. You pick three before entering the Keep.
+- Every pair of heroes has one dual card, which makes fifteen. The starting deck is the chosen heroes' four
+  cards each plus the three dual cards for their pairs, so it is still 15 cards.
+- Rewards only offer cards that someone in the party can play.
+
+### Keepsakes
+
+A Keepsake is a passive item the party keeps for the rest of the run. Each one has a single effect that
+Core understands, so a new Keepsake is data. An Elite gives a Keepsake the party doesn't have yet, plus its
+card choice, and some event choices give one. These are the first eight:
+
+| Keepsake | Effect |
+| --- | --- |
+| Gaoler's Keyring | The first card each fight costs 1 less. |
+| Siege Lantern | Every hero starts each fight with 4 Block. |
+| Chapel Candle | After each won fight, every standing hero heals 3. |
+| Rusted Caltrops | At the start of each fight, every enemy gets Bleed 2. |
+| Widow's Veil | At the start of each fight, every enemy gets Weak 1. |
+| Steward's Seal-ring | The first activation each fight gets 1 more Resolve. |
+| Marked Deck | Draw 2 more cards on the first turn of each fight. |
+| Bone Charm | Each hero's maximum health goes up by 4, and they heal 4. |
+
+### Events
+
+An Event room shows a short scene (under 60 words) with 2 or 3 choices. A choice's results are data from a
+small set Core understands:
+- heal or hurt the party, or the hero you choose
+- gain a card (chosen from three) or remove one
+- gain a Keepsake or a clue
+- start a fight
+
+Some choices only appear once a clue has been found, and some cost a hero health, so who pays is your call.
+Each event is used at most once per run, picked from the "rewards" stream. These are the first eight:
+
+| Event | The choice |
+| --- | --- |
+| The Chained Thrall | Loosen his chains for the Thrall's Confession (one hero loses 3), or leave. With the Ledger, you can name his master instead, and he confesses for free. |
+| The Chapel Register | Read the torn page for His True Name (one hero loses 4), or burn it to remove a card. |
+| The Bell-founder's Widow | Trade her a card from the deck for the Silvered Bells, or take her Widow's Veil. |
+| The Drowned Well | Drink (the party heals 6), or draw up the bucket for a Keepsake and a fight with the Drowned Watch. |
+| The Quartermaster's Store | Choose one of three cards, or a Keepsake that costs one hero 6 health. |
+| The Siege Graves | Dig for a Keepsake (every hero loses 3), or pray to remove a card. With the Broken Seal, a third choice heals everyone 8. |
+| The Survivor | She begs you to follow her. If you do, it is an ambush: a fight. With the Ledger, you recognise the steward's servant and take her Keepsake. |
+| The Mirror Hall | One hero you choose gains 4 maximum health, or removes a card at the cost of 5 health. |
+
+With events in place, the clues return to the sources in the table above: the Thrall's Confession only comes
+from its event, and His True Name from an Elite or its event. The Silvered Bells come from an Investigation
+or the Widow.
+
+### Three new heroes **(decided: David, 2026-10-17)**
+
+David chose to add all three proposed heroes, so the party is a choice of 3 from 6.
+- **Corvin, the Penitent** (Bone, 32 health): a healer who pays in his own blood. He heals allies, cleanses
+  Bleed and Weak, and trades his health for Resolve. New effects: heal, cleanse, pay health.
+- **Mara, the Duelist** (Steel, 34 health): precise strikes, and Riposte to punish whoever attacks her.
+- **Hollis, the Bellwright** (Bronze, 32 health): bells that reach every enemy or every hero at once, with
+  Weak, Exposed and Block.
+
+### Vael's Bloodrage **(decided: David, 2026-10-17)**
+
+Some new parties heal faster than Vael hurts them and deal less than his Blood Tithe heals, so the fight could
+never end: 44% of Bram, Corvin and Hollis's boss fights in the balance tool. The fix: a sixth step in
+Vael's pattern, Bloodrage, gives him Fury 3, so each time his pattern comes round his attacks deal 3 more.
+Fury is a general enemy status (data), not a rule about Vael. With it, no boss fight stalled in 2,000 runs.
+
 ## Narrative style
 
 - Short, concrete writing, no more than about 60 words per event screen.
@@ -199,7 +273,8 @@ says otherwise.
 3. ~~**Downed heroes.**~~ **Decided (Milestone 3): stand back up with a quarter of max health.** Over 300 runs in the
    balance tool, a hero brought back with 1 health fell again in the next fight 45% of the time, against 35% with a
    quarter. David chose the quarter so a fall still costs something without making that hero useless.
-4. **Fourth hero.** Who is it? This is needed so choosing a party is a real decision.
+4. ~~**Fourth hero.**~~ **Decided (Milestone 5): three new heroes, and a choice of 3 from 6.** See "Three new
+   heroes" above.
 5. **Platform.** Steam, itch.io or both? This changes Milestone 7, not the earlier ones.
 6. **Meta-progression.** Should anything unlock between runs, such as new heroes or villains? Currently a
    non-goal.

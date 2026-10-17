@@ -21,11 +21,17 @@ namespace WhereDarknessDwells.Core
         public readonly IReadOnlyDictionary<string, int> HealthLossPercent;
         /// <summary>A once-per-fight ability to cancel one intent, or null.</summary>
         public readonly CancelAbility Cancel;
+        /// <summary>The party's Keepsakes. The fight applies the ones that act during a fight.</summary>
+        public readonly IReadOnlyList<KeepsakeDef> Keepsakes;
+        /// <summary>Maximum health a hero has gained in the run, keyed by hero id.</summary>
+        public readonly IReadOnlyDictionary<string, int> MaxHealthBonus;
 
         public CombatModifiers(IReadOnlyDictionary<string, string> names = null, IReadOnlyCollection<string> vagueIntents = null,
             IReadOnlyDictionary<string, int> bonusDamageTo = null, IReadOnlyDictionary<string, int> healthLossPercent = null,
-            CancelAbility cancel = null)
+            CancelAbility cancel = null, IEnumerable<KeepsakeDef> keepsakes = null, IReadOnlyDictionary<string, int> maxHealthBonus = null)
         {
+            MaxHealthBonus = maxHealthBonus ?? NoNumbers;
+            Keepsakes = keepsakes == null ? new KeepsakeDef[0] : new List<KeepsakeDef>(keepsakes).ToArray();
             Names = names ?? NoNames;
             VagueIntents = vagueIntents ?? new string[0];
             BonusDamageTo = bonusDamageTo ?? NoNumbers;
@@ -34,6 +40,14 @@ namespace WhereDarknessDwells.Core
         }
 
         public static readonly CombatModifiers None = new CombatModifiers();
+
+        /// <summary>The total Amount of the party's Keepsakes of one kind.</summary>
+        public int Keepsake(KeepsakeEffectKind kind)
+        {
+            int total = 0;
+            foreach (KeepsakeDef k in Keepsakes) if (k.Kind == kind) total += k.Amount;
+            return total;
+        }
     }
 
     /// <summary>Lets the party cancel an intent of one kind from one enemy, a set number of times per fight.</summary>

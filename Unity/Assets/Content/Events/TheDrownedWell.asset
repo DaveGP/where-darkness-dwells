@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb0ac7c13ee47b6a6bf7b8f61a1f7e4, type: 3}
+  m_Name: TheDrownedWell
+  m_EditorClassIdentifier: 
+  id: drowned_well
+  title: 'The Drowned Well'
+  scene: 'A well in the lower court, its water clear and cold. Something glints at the bottom of the bucket rope. Something else moves in the dark below it.'
+  choices:
+  - label: 'Drink'
+    result: 'The water is clean. It is the first clean thing in the Keep.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 0
+      amount: 6
+      id: ''
+  - label: 'Draw up the bucket'
+    result: 'You pull the rope. What was holding the other end comes up with it.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 6
+      amount: 0
+      id: ''
+    - kind: 9
+      amount: 0
+      id: 'drowned_watch'

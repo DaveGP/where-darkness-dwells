@@ -74,7 +74,9 @@ namespace WhereDarknessDwells.Core
                     if (i.Amount < 0) problems.Add($"Enemy '{e.Id}' has an action with a negative amount.");
                     bool self = i.Kind == IntentKind.Block || i.Kind == IntentKind.Heal;
                     if (self && i.Target != IntentTarget.Self) problems.Add($"Enemy '{e.Id}' blocks or heals someone other than itself.");
-                    if (!self && i.Target == IntentTarget.Self) problems.Add($"Enemy '{e.Id}' aims an attack or status at itself.");
+                    bool fury = i.Kind == IntentKind.ApplyStatus && i.Status == StatusKind.Fury;
+                    if (!self && !fury && i.Target == IntentTarget.Self) problems.Add($"Enemy '{e.Id}' aims an attack or status at itself.");
+                    if (fury && i.Target != IntentTarget.Self) problems.Add($"Enemy '{e.Id}' gives Fury to someone other than itself.");
                 }
             }
 
@@ -88,10 +90,19 @@ namespace WhereDarknessDwells.Core
             if (expedition == null) { problems.Add("There is no expedition."); return problems; }
             string name = $"Expedition '{expedition.Id}'";
 
-            if (expedition.Party.Count == 0) problems.Add($"{name} has no party.");
-            if (expedition.Party.Distinct().Count() != expedition.Party.Count) problems.Add($"{name} lists a hero twice.");
-            foreach (string hero in expedition.Party)
+            if (expedition.Heroes.Count < RunState.PartySize) problems.Add($"{name} needs at least {RunState.PartySize} heroes to choose from.");
+            if (expedition.Heroes.Distinct().Count() != expedition.Heroes.Count) problems.Add($"{name} lists a hero twice.");
+            foreach (string hero in expedition.Heroes)
                 if (!HasHero(hero)) problems.Add($"{name} has unknown hero '{hero}' in its party.");
+            // Every party must get a deck with each hero's cards and a dual card for each pair.
+            foreach (string hero in expedition.Heroes.Where(HasHero))
+                if (!expedition.StartingDeck.Where(HasCard).Any(c => Card(c).Owners.Count == 1 && Card(c).IsOwnedBy(hero)))
+                    problems.Add($"{name} has no starting card of {hero}'s own.");
+            List<string> known = expedition.Heroes.Where(HasHero).ToList();
+            for (int a = 0; a < known.Count; a++)
+            for (int b = a + 1; b < known.Count; b++)
+                if (!expedition.StartingDeck.Where(HasCard).Any(c => Card(c).Owners.Count == 2 && Card(c).IsOwnedBy(known[a]) && Card(c).IsOwnedBy(known[b])))
+                    problems.Add($"{name} has no starting dual card for {known[a]} and {known[b]}.");
 
             if (expedition.StartingDeck.Count == 0) problems.Add($"{name} has an empty starting deck.");
             foreach (string card in expedition.StartingDeck) CheckCard(card, "starting deck");
@@ -117,12 +128,65 @@ namespace WhereDarknessDwells.Core
                     problems.Add($"{name} has no elite encounter for layer {layer + 1}.");
             }
             if (expedition.Villain != null) ValidateVillain(expedition, problems);
+            ValidateKeepsakes(expedition, problems);
+            ValidateEvents(expedition, problems);
             return problems;
 
             void CheckCard(string id, string list)
             {
                 if (!HasCard(id)) { problems.Add($"{name} has unknown card '{id}' in its {list}."); return; }
-                if (!Card(id).Owners.Any(expedition.Party.Contains)) problems.Add($"{name} has '{id}' in its {list}, but no hero in the party owns it.");
+                if (!Card(id).Owners.All(expedition.Heroes.Contains)) problems.Add($"{name} has '{id}' in its {list}, but not every hero who owns it can be chosen.");
+            }
+        }
+
+        static void ValidateKeepsakes(ExpeditionDef expedition, List<string> problems)
+        {
+            if (expedition.Keepsakes.Select(k => k.Id).Distinct().Count() != expedition.Keepsakes.Count) problems.Add("Two Keepsakes share an id.");
+            foreach (KeepsakeDef k in expedition.Keepsakes)
+            {
+                if (string.IsNullOrEmpty(k.Id)) { problems.Add("A Keepsake has no id."); continue; }
+                if (string.IsNullOrEmpty(k.Name) || string.IsNullOrEmpty(k.Text)) problems.Add($"Keepsake '{k.Id}' needs a name and a text.");
+                if (k.Amount <= 0) problems.Add($"Keepsake '{k.Id}' needs an amount above 0.");
+            }
+        }
+
+        static void ValidateEvents(ExpeditionDef expedition, List<string> problems)
+        {
+            if (expedition.Events.Select(e => e.Id).Distinct().Count() != expedition.Events.Count) problems.Add("Two events share an id.");
+            VillainDef villain = expedition.Villain;
+            foreach (EventDef e in expedition.Events)
+            {
+                if (string.IsNullOrEmpty(e.Id)) { problems.Add("An event has no id."); continue; }
+                string name = $"Event '{e.Id}'";
+                if (string.IsNullOrEmpty(e.Title) || string.IsNullOrEmpty(e.Scene)) problems.Add($"{name} needs a title and a scene.");
+                if (e.Choices.Count < 2) problems.Add($"{name} needs at least 2 choices.");
+                // Clue-dependent choices aside, there must always be something to pick.
+                if (!e.Choices.Any(c => c.RequiresClue == null && c.HiddenByClue == null)) problems.Add($"{name} needs a choice that is always shown.");
+                foreach (EventChoice c in e.Choices)
+                {
+                    string choice = $"The choice '{c.Label}' in event '{e.Id}'";
+                    if (string.IsNullOrEmpty(c.Label)) problems.Add($"{name} has a choice with no label.");
+                    if (c.Outcomes.Count(o => o.NeedsAStep) > 1) problems.Add($"{choice} needs more than one extra step; keep it to one.");
+                    foreach (string clue in new[] { c.RequiresClue, c.HiddenByClue }.Where(id => id != null))
+                        if (villain?.Clue(clue) == null) problems.Add($"{choice} depends on unknown clue '{clue}'.");
+                    foreach (EventOutcome o in c.Outcomes)
+                    {
+                        bool needsAmount = o.Kind == EventOutcomeKind.HealParty || o.Kind == EventOutcomeKind.HurtParty || o.NeedsAHero;
+                        if (needsAmount && o.Amount <= 0) problems.Add($"{choice} has a {o.Kind} with no amount.");
+                        if (o.Kind == EventOutcomeKind.GainClue)
+                        {
+                            ClueDef found = villain?.Clue(o.Id);
+                            if (found == null) problems.Add($"{choice} gives unknown clue '{o.Id}'.");
+                            else if ((found.Sources & ClueSource.Event) == 0) problems.Add($"{choice} gives clue '{o.Id}', which isn't found in events.");
+                        }
+                        if (o.Kind == EventOutcomeKind.GainKeepsake && o.Id != null && expedition.Keepsake(o.Id) == null)
+                            problems.Add($"{choice} gives unknown Keepsake '{o.Id}'.");
+                        if (o.Kind == EventOutcomeKind.Fight && o.Id != null && expedition.Encounter(o.Id) == null)
+                            problems.Add($"{choice} starts unknown encounter '{o.Id}'.");
+                        if (o.Kind == EventOutcomeKind.Fight && o.Id != null && expedition.Encounter(o.Id)?.Kind == EncounterKind.Boss)
+                            problems.Add($"{choice} can't start the boss fight.");
+                    }
+                }
             }
         }
 

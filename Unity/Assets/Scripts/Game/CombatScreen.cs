@@ -42,6 +42,8 @@ namespace WhereDarknessDwells.Game
             { StatusKind.Weak, "Weak: deals 25% less attack damage. Loses 1 stack at the end of each round." },
             { StatusKind.Bleed, "Bleed: loses that much health at the end of the round, ignoring Block, then loses 1 stack." },
             { StatusKind.Hex, "Hex: does nothing by itself. Sister Ashe's cards use it up. Never fades." },
+            { StatusKind.Riposte, "Riposte: when an enemy's attack hits this hero and they're still standing, the attacker takes that much damage. Gone at the next player turn." },
+            { StatusKind.Fury, "Fury: each of its attacks deals that much more damage. Never fades." },
         };
 
         ContentLibrary _library;
@@ -434,6 +436,10 @@ namespace WhereDarknessDwells.Game
         {
             CardDef def = _combat.CardOf(card);
             VisualElement view = Views.Card(cardView, def, _library);
+            // A Keepsake can make the first card of a fight cheaper.
+            int cost = _combat.CostOf(card);
+            view.Q<Label>("cost").text = cost.ToString();
+            view.EnableInClassList("is-discounted", cost < def.Cost);
 
             string reason = _combat.WhyCantPlay(card.Id);
             view.EnableInClassList("is-unplayable", reason != null);
@@ -444,6 +450,8 @@ namespace WhereDarknessDwells.Game
 
             string help = reason ?? (def.Target == CardTarget.None ? $"Click to play {def.Name}." : $"Click {def.Name}, then choose {(def.Target == CardTarget.Enemy ? "an enemy" : "an ally")}.");
             if (boost != null) help += " " + boost;
+            // Guard is explained here rather than on the card, so the card's text stays short enough to fit.
+            if (def.Effects.Any(e => e.Kind == EffectKind.Guard)) help += " Guard: attacks aimed at that ally hit the guard instead.";
             view.RegisterCallback<PointerEnterEvent>(_ => SetHint(help, false));
             view.RegisterCallback<PointerLeaveEvent>(_ => SetHint("", false));
             view.RegisterCallback<ClickEvent>(e =>
