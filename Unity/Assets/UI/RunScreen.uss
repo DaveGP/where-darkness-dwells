@@ -81,10 +81,11 @@
     flex-direction: row;
 }
 
+/* The map takes whatever width the side panel leaves; MapView spreads the rooms over its measured size. */
 .map {
-    width: 1500px;
-    height: 900px;
-    margin: 40px 0 0 20px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 24px 0 24px 20px;
 }
 
 .map-lines {
@@ -142,7 +143,8 @@
 }
 
 .map-side {
-    flex-grow: 1;
+    width: 340px;
+    flex-shrink: 0;
     padding: 40px 24px;
 }
 
@@ -190,7 +192,7 @@
 }
 
 .deck-grid-scroll {
-    width: 1500px;
+    width: 90%;
     height: 560px;
 }
 

@@ -68,6 +68,11 @@ namespace WhereDarknessDwells.Game
             _root.Q<Button>("reflect-back").clicked += () => ShowReflect(false);
             _root.Q<Button>("leave-room").clicked += () => Apply(() => _run.TryLeaveRoom(), "Left the room.");
             _newExpedition.clicked += ShowParty;
+            // The map spreads its rooms over its measured size, so draw it again whenever that changes.
+            _map.RegisterCallback<GeometryChangedEvent>(e =>
+            {
+                if (e.oldRect.size != e.newRect.size && _run?.Phase == RunPhase.ChooseRoom) ShowMap();
+            });
 
             var problems = new List<string>();
             if (content == null) problems.Add("The run screen has no content database.");

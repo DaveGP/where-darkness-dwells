@@ -14,7 +14,7 @@ namespace WhereDarknessDwells.Game
     static class MapView
     {
         const float Margin = 90;
-        const float RoomGap = 190;
+        const float MaxRoomGap = 190;
 
         static readonly Color TravelledLine = new Color32(201, 162, 74, 255);
         static readonly Color OpenLine = new Color32(232, 222, 200, 255);
@@ -55,13 +55,17 @@ namespace WhereDarknessDwells.Game
             var visited = new HashSet<int>(run.Route);
             HashSet<MapRoom> ahead = Ahead(run);
 
-            // The canvas is a fixed 1500 x 900 in RunScreen.uss, and the panel scales the whole screen to the window.
-            const float width = 1500, height = 900;
+            // Spread the rooms over the canvas's measured size. Before its first layout, assume a typical size; the
+            // caller draws again when the size is known.
+            Rect area = canvas.contentRect;
+            float width = float.IsNaN(area.width) || area.width < 1 ? 1500 : area.width;
+            float height = float.IsNaN(area.height) || area.height < 1 ? 900 : area.height;
+            float roomGap = Math.Min(MaxRoomGap, (height - 80) / (MapGenerator.MaxRoomsPerLayer - 1));
             Vector2 Centre(MapRoom r)
             {
                 int count = r.Kind == RoomKind.Boss ? 1 : map.Layer(r.Layer).Count();
                 float x = Margin + r.Layer * (width - 2 * Margin) / map.LayerCount;
-                float y = height / 2 + (r.Column - (count - 1) / 2f) * RoomGap;
+                float y = height / 2 + (r.Column - (count - 1) / 2f) * roomGap;
                 return new Vector2(x, y);
             }
 
