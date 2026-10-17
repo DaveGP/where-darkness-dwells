@@ -1,0 +1,14 @@
+{
+    "name": "WhereDarknessDwells.Content",
+    "rootNamespace": "WhereDarknessDwells.Content",
+    "references": ["WhereDarknessDwells.Core"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
