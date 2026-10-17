@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 555c037bdc6a42a0843a2f3f8bdd0748, type: 3}
+  m_Name: Vael
+  m_EditorClassIdentifier: 
+  id: vael
+  boss: {fileID: 11400000, guid: f0ee62b80aa24fd5a68e9465dd0dd4dc, type: 2}
+  hiddenName: 'The Master of the Keep'
+  clues:
+  - {fileID: 11400000, guid: 1d6a6ef812e14e72810448a05d8eb694, type: 2}
+  - {fileID: 11400000, guid: 7cc6a5fd9e6e4e8989a4e70a53ce4003, type: 2}
+  - {fileID: 11400000, guid: 67e74fe45cff4ebdb1ce89bfcc80b45b, type: 2}
+  - {fileID: 11400000, guid: c5fed4fce6d04d7e81c849979a4915f2, type: 2}
+  - {fileID: 11400000, guid: 328f5311776e4ff28c2455ee4220c85b, type: 2}
+  - {fileID: 11400000, guid: d52364dc37df4f65996bd89b52d64a68, type: 2}
+  secretRoom:
+    enabled: 1
+    name: 'The Cistern'
+    layer: 4
+    scene: 'Black water, and in it, still beating, a heart bound in silver wire. Vael''s. He hid it where the siege couldn''t reach.'
+    actionLabel: 'Destroy the heart'
+    healthCostPerHero: 4
+    bossHealthLossPercent: 30
+  ending: 'Vael falls, and the Keep is quiet. In the village they''ll say the curse lifted on its own.'
+  trueEnding: 'Vael falls. Beneath the chapel the broken seal breathes out, and something that was never Vael turns over in its sleep. The Keep is quiet. It won''t stay quiet.'

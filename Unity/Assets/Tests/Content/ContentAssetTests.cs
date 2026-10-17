@@ -15,12 +15,14 @@ namespace WhereDarknessDwells.Tests
     {
         const string DatabasePath = "Assets/Content/ContentDatabase.asset";
 
-        static ContentLibrary Build(out List<string> problems)
+        static ContentDatabase Database()
         {
             var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>(DatabasePath);
             Assert.That(database, Is.Not.Null, $"No content database at {DatabasePath}.");
-            return database.Build(out problems);
+            return database;
         }
+
+        static ContentLibrary Build(out List<string> problems) => Database().Build(out problems);
 
         [Test]
         public void TheContentAssetsAreValid()
@@ -33,14 +35,15 @@ namespace WhereDarknessDwells.Tests
         public void EveryContentAssetIsInTheDatabase()
         {
             ContentLibrary library = Build(out _);
-            foreach (string guid in AssetDatabase.FindAssets("t:HeroAsset t:CardAsset t:EnemyAsset", new[] { "Assets/Content" }))
+            foreach (string guid in AssetDatabase.FindAssets("t:HeroAsset t:CardAsset t:EnemyAsset t:ClueAsset", new[] { "Assets/Content" }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 var asset = AssetDatabase.LoadMainAssetAtPath(path);
                 bool listed = asset is HeroAsset h ? library.HasHero(h.Id)
                     : asset is CardAsset c ? library.HasCard(c.Id)
-                    : asset is EnemyAsset e && library.HasEnemy(e.Id);
-                Assert.That(listed, Is.True, $"{path} isn't listed in the content database.");
+                    : asset is EnemyAsset e ? library.HasEnemy(e.Id)
+                    : asset is ClueAsset clue && Database().Expedition.ToDef().Villain?.Clue(clue.Id) != null;
+                Assert.That(listed, Is.True, $"{path} isn't listed in the content database (clues: in the expedition's villain).");
             }
         }
 
@@ -68,6 +71,10 @@ namespace WhereDarknessDwells.Tests
             Assert.That(asset.StartingDeck, Is.EquivalentTo(tested.StartingDeck));
             Assert.That(asset.RewardCards, Is.EquivalentTo(tested.RewardCards));
             Assert.That(asset.Encounters.Select(Describe), Is.EquivalentTo(tested.Encounters.Select(Describe)));
+
+            Assert.That(asset.Villain, Is.Not.Null, "The expedition has no villain.");
+            Assert.That(Describe(asset.Villain), Is.EqualTo(Describe(tested.Villain)));
+            Assert.That(asset.Villain.Clues.Select(Describe), Is.EqualTo(tested.Villain.Clues.Select(Describe)));
         }
 
         static string Describe(HeroDef h) => $"{h.Id}|{h.Name}|{h.Title}|{h.Colour}|{h.MaxHealth}";
@@ -80,6 +87,17 @@ namespace WhereDarknessDwells.Tests
 
         static string Describe(EnemyDef e) =>
             $"{e.Id}|{e.Name}|{e.MaxHealth}|" +
-            string.Join(";", e.Intents.Select(i => $"{i.Kind},{i.Target},{i.Amount},{i.Status},{i.Description}"));
+            string.Join(";", e.Intents.Select(i => $"{i.Kind},{i.Target},{i.Amount},{i.Status},{i.Description},{i.Vague}"));
+
+        static string Describe(VillainDef v)
+        {
+            SecretRoomDef r = v.SecretRoom;
+            return $"{v.Id}|{v.BossEnemyId}|{v.HiddenName}|{v.Ending}|{v.TrueEnding}|" +
+                (r == null ? "no secret room" : $"{r.Name},{r.Layer},{r.Scene},{r.ActionLabel},{r.HealthCostPerHero},{r.BossHealthLossPercent}");
+        }
+
+        static string Describe(ClueDef c) =>
+            $"{c.Id}|{c.Name}|{c.Sources}|{c.MinLayer}|{c.MaxLayer}|{c.SearchCost}|{c.Scene}|{c.SearchLabel}|{c.Journal}|" +
+            string.Join(";", c.Effects.Select(e => $"{e.Kind},{e.Amount},{e.CancelKind},{e.Label}"));
     }
 }

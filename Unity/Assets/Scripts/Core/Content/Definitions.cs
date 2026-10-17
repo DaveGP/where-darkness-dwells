@@ -114,7 +114,7 @@ namespace WhereDarknessDwells.Core
         public override string ToString() => Name;
     }
 
-    public enum IntentKind { Attack, Block, ApplyStatus }
+    public enum IntentKind { Attack, Block, ApplyStatus, Heal }
 
     /// <summary>Who an enemy's action is aimed at. The target is chosen when the intent is shown, so the player sees it.</summary>
     public enum IntentTarget { RandomHero, HealthiestHero, AllHeroes, Self }
@@ -127,19 +127,27 @@ namespace WhereDarknessDwells.Core
         public readonly StatusKind Status;
         /// <summary>Short text shown above the enemy, such as "Strike 7".</summary>
         public readonly string Description;
+        /// <summary>What the party sees instead while they don't understand this enemy yet, such as "Blood gathers". Optional.</summary>
+        public readonly string Vague;
 
-        public IntentDef(IntentKind kind, IntentTarget target, int amount, string description, StatusKind status = default)
+        public IntentDef(IntentKind kind, IntentTarget target, int amount, string description, StatusKind status = default, string vague = null)
         {
             Kind = kind;
             Target = target;
             Amount = amount;
             Description = description;
             Status = status;
+            Vague = vague;
         }
+
+        /// <summary>The same action, with the text shown while it is vague.</summary>
+        public IntentDef Vaguely(string vague) => new IntentDef(Kind, Target, Amount, Description, Status, vague);
 
         public static IntentDef Attack(int amount, IntentTarget target, string description) => new IntentDef(IntentKind.Attack, target, amount, description);
         public static IntentDef Block(int amount, string description) => new IntentDef(IntentKind.Block, IntentTarget.Self, amount, description);
         public static IntentDef Apply(StatusKind status, int stacks, IntentTarget target, string description) => new IntentDef(IntentKind.ApplyStatus, target, stacks, description, status);
+        /// <summary>The enemy restores this much of its own health.</summary>
+        public static IntentDef Heal(int amount, string description) => new IntentDef(IntentKind.Heal, IntentTarget.Self, amount, description);
     }
 
     public sealed class EnemyDef
@@ -200,10 +208,13 @@ namespace WhereDarknessDwells.Core
         public readonly IReadOnlyList<string> StartingDeck;
         public readonly IReadOnlyList<string> RewardCards;
         public readonly IReadOnlyList<EncounterDef> Encounters;
+        /// <summary>The villain behind this expedition: its clues and what they change. Null for a run without a mystery.</summary>
+        public readonly VillainDef Villain;
 
         public ExpeditionDef(string id, IEnumerable<string> party, IEnumerable<string> startingDeck,
-            IEnumerable<string> rewardCards, IEnumerable<EncounterDef> encounters)
+            IEnumerable<string> rewardCards, IEnumerable<EncounterDef> encounters, VillainDef villain = null)
         {
+            Villain = villain;
             Id = id;
             Party = (party ?? Enumerable.Empty<string>()).ToArray();
             StartingDeck = (startingDeck ?? Enumerable.Empty<string>()).ToArray();

@@ -12,7 +12,7 @@ namespace WhereDarknessDwells.Tests
         static void Ok(RunResult result) => Assert.That(result.Ok, Is.True, result.Reason);
 
         /// <summary>Plays the current fight with a simple policy: each standing hero in turn plays whatever they can.</summary>
-        static void PlayFight(CombatState combat)
+        internal static void PlayFight(CombatState combat)
         {
             for (int turn = 0; turn < 200 && !combat.IsOver; turn++)
             {
@@ -32,7 +32,7 @@ namespace WhereDarknessDwells.Tests
         }
 
         /// <summary>Plays a whole run, always taking the leftmost reachable room and the first card offered.</summary>
-        static List<string> PlayRun(RunState run)
+        internal static List<string> PlayRun(RunState run)
         {
             var log = new List<string>();
             for (int step = 0; step < 100 && !run.IsOver; step++)
@@ -54,6 +54,12 @@ namespace WhereDarknessDwells.Tests
                         Ok(run.TryTakeReward(run.RewardOffer[0]));
                         break;
                     case RunPhase.Sanctuary: Ok(run.TryRest()); break;
+                    case RunPhase.Investigation:
+                        string searcher = run.ClueHere == null ? null : run.Party.FirstOrDefault(h => run.Health(h) > run.ClueHere.SearchCost);
+                        if (searcher != null) log.Add("Found " + run.ClueHere.Id);
+                        Ok(searcher != null ? run.TrySearch(searcher) : run.TryLeaveRoom());
+                        break;
+                    case RunPhase.Secret: Ok(run.TryUseSecret()); break;
                     case RunPhase.Unwritten: Ok(run.TryLeaveRoom()); break;
                 }
             }
@@ -178,19 +184,19 @@ namespace WhereDarknessDwells.Tests
         }
 
         [Test]
-        public void UnwrittenRoomsCanBeLeft()
+        public void EventRoomsCanBeLeft()
         {
             foreach (ulong seed in Enumerable.Range(1, 50).Select(s => (ulong)s))
             {
                 RunState run = NewRun(seed);
-                MapRoom room = run.Map.Rooms.FirstOrDefault(r => r.Kind == RoomKind.Investigation || r.Kind == RoomKind.Event);
+                MapRoom room = run.Map.Rooms.FirstOrDefault(r => r.Kind == RoomKind.Event);
                 if (room == null || !Walk(run, room)) continue;
                 Assert.That(run.Phase, Is.EqualTo(RunPhase.Unwritten));
                 Ok(run.TryLeaveRoom());
                 Assert.That(run.ReachableRooms, Is.EquivalentTo(run.Map.NextOf(room)));
                 return;
             }
-            Assert.Fail("No seed reached an Investigation or Event room.");
+            Assert.Fail("No seed reached an Event room.");
         }
 
         [Test]
@@ -260,7 +266,7 @@ namespace WhereDarknessDwells.Tests
         }
 
         /// <summary>Walks the shortest connected route to <paramref name="goal"/>, winning fights and skipping rewards. False if the party fell.</summary>
-        static bool Walk(RunState run, MapRoom goal)
+        internal static bool Walk(RunState run, MapRoom goal)
         {
             while (run.CurrentRoom != goal)
             {
@@ -277,7 +283,7 @@ namespace WhereDarknessDwells.Tests
                         Ok(run.TryTakeReward(null));
                         break;
                     case RunPhase.Sanctuary: Ok(run.TryReflect(run.Deck[run.Deck.Count - 1].Id)); break;
-                    case RunPhase.Unwritten: Ok(run.TryLeaveRoom()); break;
+                    default: Ok(run.TryLeaveRoom()); break;
                 }
             }
             return true;

@@ -25,6 +25,8 @@ namespace WhereDarknessDwells.Core
         public IntentDef Intent { get; internal set; }
         public string IntentTargetId { get; internal set; }
         internal int IntentStep;
+        /// <summary>For an enemy: the party cancelled the intent it is showing, so it does nothing when it acts.</summary>
+        public bool IntentCancelled { get; internal set; }
 
         Combatant(string id, string name, HeroDef hero, EnemyDef enemy, int maxHealth, int health)
         {
@@ -38,8 +40,8 @@ namespace WhereDarknessDwells.Core
 
         internal static Combatant ForHero(HeroDef hero, int health) => new Combatant(hero.Id, hero.Name, hero, null, hero.MaxHealth, health);
 
-        internal static Combatant ForEnemy(EnemyDef enemy, int index) =>
-            new Combatant($"{enemy.Id}#{index}", enemy.Name, null, enemy, enemy.MaxHealth, enemy.MaxHealth);
+        internal static Combatant ForEnemy(EnemyDef enemy, int index, string name, int health) =>
+            new Combatant($"{enemy.Id}#{index}", name ?? enemy.Name, null, enemy, enemy.MaxHealth, health);
 
         internal Combatant Copy()
         {
@@ -50,6 +52,7 @@ namespace WhereDarknessDwells.Core
                 Intent = Intent,
                 IntentTargetId = IntentTargetId,
                 IntentStep = IntentStep,
+                IntentCancelled = IntentCancelled,
             };
             foreach (KeyValuePair<StatusKind, int> s in _statuses) copy._statuses[s.Key] = s.Value;
             return copy;

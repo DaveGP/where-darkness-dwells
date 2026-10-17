@@ -21,13 +21,16 @@ MonoBehaviour:
     target: 0
     amount: 6
     status: 0
+    vague: ''
   - description: 'Silt armour 10'
     kind: 1
     target: 3
     amount: 10
     status: 0
+    vague: ''
   - description: 'Drag under 10'
     kind: 0
     target: 0
     amount: 10
     status: 0
+    vague: ''

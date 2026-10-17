@@ -14,25 +14,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: vael
   displayName: 'Vael, the Bloodbound Steward'
-  maxHealth: 110
+  maxHealth: 140
   intents:
   - description: 'Blood lash 10'
     kind: 0
     target: 0
     amount: 10
     status: 0
+    vague: 'Blood gathers in his hand'
+  - description: 'Blood Tithe: heal 24'
+    kind: 3
+    target: 3
+    amount: 24
+    status: 0
+    vague: 'He drinks'
   - description: 'Hemorrhage: Bleed 2 to all'
     kind: 2
     target: 2
     amount: 2
     status: 2
-  - description: 'Sanguine ward 16'
+    vague: 'The air turns red'
+  - description: 'Sanguine ward 14'
     kind: 1
     target: 3
-    amount: 16
+    amount: 14
     status: 0
+    vague: 'He wraps himself in red'
   - description: 'Execute 16'
     kind: 0
     target: 1
     amount: 16
     status: 0
+    vague: 'He chooses one of you'

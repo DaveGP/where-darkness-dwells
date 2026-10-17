@@ -21,13 +21,16 @@ MonoBehaviour:
     target: 0
     amount: 5
     status: 0
+    vague: ''
   - description: 'Rend: Bleed 3'
     kind: 2
     target: 0
     amount: 3
     status: 2
+    vague: ''
   - description: 'Lunge 8'
     kind: 0
     target: 0
     amount: 8
     status: 0
+    vague: ''

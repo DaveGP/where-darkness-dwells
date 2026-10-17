@@ -6,8 +6,9 @@ using WhereDarknessDwells.Core;
 namespace WhereDarknessDwells.Balance
 {
     /// <summary>
-    /// Plays the game many times with two scripted players and prints how it went: "careful" looks one enemy phase
-    /// ahead before every choice, and "careless" plays at random.
+    /// Plays the game many times with scripted players and prints how it went: "careful" looks one enemy phase
+    /// ahead before every choice, and "careless" plays at random. In runs, "careful" plays twice: once ignoring
+    /// Investigations and the Cistern, and once seeking them, so the report shows what the clues are worth.
     ///
     /// From the repository root: dotnet run -c Release --project tools/Balance -- [fight|run] [seeds]
     ///   fight: the first encounter only. A good fight is one the careful player usually wins with some damage taken.
@@ -20,6 +21,11 @@ namespace WhereDarknessDwells.Balance
             string mode = args.Length > 0 ? args[0] : "run";
             int seeds = args.Length > 1 ? int.Parse(args[1]) : mode == "fight" ? 300 : 100;
             ContentLibrary content = StarterContent.Library();
+            if (mode == "boss")
+            {
+                BossReport(content, seeds);
+                return;
+            }
             if (mode == "fight")
             {
                 FightReport("careful", seeds, seed => Fight.Play(content, seed, Careful.Choose));
@@ -27,8 +33,46 @@ namespace WhereDarknessDwells.Balance
             }
             else
             {
-                RunReport("careful", seeds, seed => Expedition.Play(content, seed, Careful.Choose, Careful.ChooseRoom, Careful.ChooseReward, Careful.AtSanctuary));
-                RunReport("careless", seeds, seed => Expedition.Play(content, seed, Careless.Choose, Careless.ChooseRoom, Careless.ChooseReward, Careless.AtSanctuary));
+                RunReport("careful, no clues", seeds, seed => Expedition.Play(content, seed, Careful.Choose, Careful.ChooseRoom, Careful.ChooseReward, Careful.AtSanctuary, seekClues: false));
+                RunReport("careful, seeks clues", seeds, seed => Expedition.Play(content, seed, Careful.Choose, Careful.SeekingRoom, Careful.ChooseReward, Careful.AtSanctuary, seekClues: true));
+                RunReport("careless", seeds, seed => Expedition.Play(content, seed, Careless.Choose, Careless.ChooseRoom, Careless.ChooseReward, Careless.AtSanctuary, seekClues: true));
+            }
+        }
+
+        /// <summary>
+        /// The boss fight alone, with each clue on its own and with several together, so the report shows what each
+        /// clue is worth. The party starts at half health with the starting deck, about where a run arrives. The
+        /// Cistern's health cost is left out here, because a run pays it rooms earlier; "run" counts it.
+        /// </summary>
+        static void BossReport(ContentLibrary content, int seeds)
+        {
+            VillainDef villain = StarterContent.Expedition().Villain;
+            var sets = new List<(string name, string[] clues, bool secret)> { ("no clues", new string[0], false) };
+            foreach (ClueDef clue in villain.Clues.Where(c => !c.Has(ClueEffectKind.TrueEnding) && !c.Has(ClueEffectKind.RevealSecretRoom)))
+                sets.Add((clue.Id, new[] { clue.Id }, false));
+            sets.Add(("the Cistern", new[] { "cistern_door" }, true));
+            sets.Add(("bells, confession", new[] { "silvered_bells", "thrall_confession" }, false));
+            sets.Add(("bells, confession, Cistern", new[] { "silvered_bells", "thrall_confession", "cistern_door" }, true));
+            sets.Add(("all", villain.Clues.Select(c => c.Id).ToArray(), true));
+            foreach (var set in sets)
+            {
+                var fights = Enumerable.Range(1, seeds).Select(seed =>
+                {
+                    var run = new RunState(content, StarterContent.Expedition(), (ulong)seed);
+                    foreach (string id in set.clues) run.GiveClue(id);
+                    CombatModifiers m = run.BossModifiers();
+                    if (set.secret) m = new CombatModifiers(m.Names, m.VagueIntents, m.BonusDamageTo,
+                        new Dictionary<string, int> { { villain.BossEnemyId, villain.SecretRoom.BossHealthLossPercent } }, m.Cancel);
+                    var health = run.Party.ToDictionary(h => h, h => run.MaxHealth(h) / 2);
+                    var combat = new CombatState(content, run.Party, StarterContent.StartingDeck(), run.BossEnemies(),
+                        new Rng((ulong)seed).Stream("combat boss"), health, m);
+                    combat.Start();
+                    Fight.PlayOut(combat, Careful.Choose, new Random(seed));
+                    return combat;
+                }).ToList();
+                var lost = fights.Where(f => f.Phase == CombatPhase.Lost).ToList();
+                Console.WriteLine($"{set.name,-28} wins {100.0 * fights.Count(f => f.Phase == CombatPhase.Won) / seeds,5:0.0}%  rounds {fights.Average(f => f.Round),4:0.0}" +
+                    (lost.Count == 0 ? "" : $"  on a loss: boss health {lost.Average(f => f.Enemies.First(e => e.Enemy.Id == villain.BossEnemyId).Health):0}, others standing {lost.Average(f => f.Enemies.Count(e => !e.IsDown && e.Enemy.Id != villain.BossEnemyId)):0.0}"));
             }
         }
 
@@ -55,11 +99,23 @@ namespace WhereDarknessDwells.Balance
             List<Expedition.Result> runs = Enumerable.Range(1, seeds).Select(play).ToList();
             int won = runs.Count(r => r.Won);
             int reachedBoss = runs.Count(r => r.ReachedBoss);
-            Console.WriteLine($"{name,-9} wins {100.0 * won / seeds,5:0.0}%  reach Vael {100.0 * reachedBoss / seeds,5:0.0}%" +
+            Console.WriteLine($"{name}:\n          wins {100.0 * won / seeds,5:0.0}%  reach Vael {100.0 * reachedBoss / seeds,5:0.0}%" +
                 $"  fights won {runs.Average(r => r.FightsWon),4:0.0}  rounds per fight {runs.SelectMany(r => r.Fights).Average(f => f.Round),4:0.0}");
 
             var bossHealth = runs.Where(r => r.ReachedBoss).Select(r => r.HealthBeforeBossPercent).ToList();
             if (bossHealth.Count > 0) Console.WriteLine($"          party health entering Vael {bossHealth.Average(),3:0}%  (lowest {bossHealth.Min()}%)");
+
+            // What the clues are worth: how often a run that reached the boss with this many clues beat him.
+            Console.WriteLine("          beat the boss by clues found: " + string.Join(", ", runs.Where(r => r.ReachedBoss).GroupBy(r => r.Clues.Count).OrderBy(g => g.Key)
+                .Select(g => $"{g.Key} clues {100.0 * g.Count(r => r.Won) / g.Count():0}% of {g.Count()}")));
+            var clues = runs.SelectMany(r => r.Clues).GroupBy(c => c).Select(g => $"{g.Key} {100.0 * g.Count() / seeds:0}%");
+            Console.WriteLine($"          clues found per run {runs.Average(r => r.Clues.Count):0.0}: " + string.Join(", ", clues) +
+                $"; used the Cistern {100.0 * runs.Count(r => r.UsedSecret) / seeds:0}%");
+            var bossWins = runs.Where(r => r.Won).ToList();
+            if (bossWins.Count > 0) Console.WriteLine($"          boss fight rounds on a win {bossWins.Average(r => r.Fights.Last().Round):0.0}");
+            var bossFights = runs.Where(r => r.ReachedBoss).Select(r => r.Fights.Last()).ToList();
+            Console.WriteLine($"          per boss fight: heals {bossFights.Average(f => f.Log.Count(e => e.Kind == CombatEventKind.Healed)):0.0}" +
+                $", cancelled {bossFights.Average(f => f.Log.Count(e => e.Kind == CombatEventKind.IntentCancelled)):0.00}");
 
             var lostAt = runs.Where(r => !r.Won).GroupBy(r => r.EndedIn).OrderBy(g => g.Key)
                 .Select(g => $"{g.Key} {100.0 * g.Count() / seeds:0}%");
@@ -94,9 +150,11 @@ namespace WhereDarknessDwells.Balance
         public readonly int Card;
         public readonly string Target;
         public readonly bool EndActivation;
+        public readonly string CancelIntentOf;
 
-        Command(string activateHero, int card, string target, bool end)
+        Command(string activateHero, int card, string target, bool end, string cancel = null)
         {
+            CancelIntentOf = cancel;
             ActivateHero = activateHero;
             Card = card;
             Target = target;
@@ -106,9 +164,11 @@ namespace WhereDarknessDwells.Balance
         public static Command Activate(string heroId) => new Command(heroId, 0, null, false);
         public static Command Play(int card, string target) => new Command(null, card, target, false);
         public static readonly Command End = new Command(null, 0, null, true);
+        public static Command CancelIntent(string enemyId) => new Command(null, 0, null, false, enemyId);
 
         public CombatResult ApplyTo(CombatState combat) =>
-            ActivateHero != null ? combat.TryActivate(ActivateHero)
+            CancelIntentOf != null ? combat.TryCancelIntent(CancelIntentOf)
+            : ActivateHero != null ? combat.TryActivate(ActivateHero)
             : EndActivation ? combat.TryEndActivation()
             : combat.TryPlay(Card, Target);
     }
@@ -187,10 +247,12 @@ namespace WhereDarknessDwells.Balance
             /// <summary>Each fight's encounter and the share of the party's maximum health it cost.</summary>
             public List<(string encounter, int lostPercent, bool won)> Encounters = new List<(string, int, bool)>();
             public List<string> CardsTaken = new List<string>();
+            public IReadOnlyList<string> Clues = new List<string>();
+            public bool UsedSecret;
         }
 
         public static Result Play(ContentLibrary content, int seed, Policy fight, Func<RunState, Random, MapRoom> room,
-            Func<RunState, Random, string> reward, Action<RunState, Random> sanctuary)
+            Func<RunState, Random, string> reward, Action<RunState, Random> sanctuary, bool seekClues)
         {
             var run = new RunState(content, StarterContent.Expedition(), (ulong)seed);
             var random = new Random(seed);
@@ -229,6 +291,16 @@ namespace WhereDarknessDwells.Balance
                     case RunPhase.Sanctuary:
                         sanctuary(run, random);
                         break;
+                    case RunPhase.Investigation:
+                        // Searches with the healthiest hero who can pay, if that leaves them more than a few points.
+                        ClueDef clue = run.ClueHere;
+                        string searcher = clue == null || !seekClues ? null
+                            : run.Party.Where(h => run.Health(h) > clue.SearchCost + 6).OrderByDescending(run.Health).FirstOrDefault();
+                        Must(searcher != null ? run.TrySearch(searcher) : run.TryLeaveRoom());
+                        break;
+                    case RunPhase.Secret:
+                        Must(seekClues ? run.TryUseSecret() : run.TryLeaveRoom());
+                        break;
                     case RunPhase.Unwritten:
                         Must(run.TryLeaveRoom());
                         break;
@@ -237,6 +309,8 @@ namespace WhereDarknessDwells.Balance
             if (!run.IsOver) throw new InvalidOperationException($"Seed {seed} never finished.");
             result.Won = run.Phase == RunPhase.Won;
             result.FightsWon = run.FightsWon;
+            result.Clues = run.CluesFound.ToList();
+            result.UsedSecret = run.SecretUsed;
             result.EndedIn = run.Phase == RunPhase.Won ? "won" : run.CurrentRoom.Kind == RoomKind.Boss ? "Vael" : $"layer {run.CurrentRoom.Layer + 1} {run.CurrentRoom.Kind}";
             return result;
         }
@@ -257,6 +331,9 @@ namespace WhereDarknessDwells.Balance
     {
         public static Command Choose(CombatState now, Random random)
         {
+            // A cancel is free and once per fight, and only a heal can be cancelled, so use it the first time it fits.
+            Combatant cancellable = now.Cancel == null ? null : now.Enemies.FirstOrDefault(e => now.WhyCantCancel(e.Id) == null);
+            if (cancellable != null && Environment.GetEnvironmentVariable("NO_CANCEL") == null) return Command.CancelIntent(cancellable.Id);
             IEnumerable<Command> options = now.Phase == CombatPhase.ChooseHero
                 ? now.Heroes.Where(h => !h.IsDown).Select(h => Command.Activate(h.Id))
                 : Fight.LegalPlays(now).Append(Command.End);
@@ -296,11 +373,17 @@ namespace WhereDarknessDwells.Balance
             foreach (Combatant e in c.Enemies.Where(e => !e.IsDown))
             {
                 int bleed = e.Status(StatusKind.Bleed);
-                score -= e.Health * 1.2 + 15;
+                // Each point of an enemy's health is worth more the more damage it deals for its size, so the player
+                // clears small, dangerous enemies first instead of pouring damage into the biggest health bar.
+                score -= e.Health * (1.2 + 8 * Threat(e.Enemy) / e.MaxHealth) + 15;
                 score += bleed * (bleed + 1) / 2 * 1.0 + e.Status(StatusKind.Hex) * 2.5 + e.Status(StatusKind.Exposed) * 2 + e.Status(StatusKind.Weak) * 2;
             }
             return score;
         }
+
+        /// <summary>The damage an enemy deals in an average round.</summary>
+        static double Threat(EnemyDef enemy) => enemy.Intents.Average(i => i.Kind != IntentKind.Attack ? 0
+            : i.Amount * (i.Target == IntentTarget.AllHeroes ? 3 : 1));
 
         public static MapRoom ChooseRoom(RunState run, Random random)
         {
@@ -316,6 +399,27 @@ namespace WhereDarknessDwells.Balance
                 }
             }
             return run.ReachableRooms.OrderByDescending(Value).ThenBy(r => r.Column).First();
+        }
+
+        /// <summary>Like <see cref="ChooseRoom"/>, but heads for Investigations and always takes the Cistern.</summary>
+        public static MapRoom SeekingRoom(RunState run, Random random)
+        {
+            int health = Expedition.HealthPercent(run);
+            bool Leads(MapRoom from, RoomKind kind) => from.Kind == kind || run.Map.NextOf(from).Any(n => Leads(n, kind));
+            double Value(MapRoom r)
+            {
+                switch (r.Kind)
+                {
+                    case RoomKind.Secret: return 5;
+                    case RoomKind.Investigation: return health > 45 ? 2.5 : 0.5;
+                    case RoomKind.Sanctuary: return health < 65 ? 3 : 0.5;
+                    case RoomKind.Elite: return health > 75 ? 2 : -2;
+                    case RoomKind.Combat: return 1;
+                    default: return 0;
+                }
+            }
+            // Ties go to the room with an Investigation still ahead of it.
+            return run.ReachableRooms.OrderByDescending(Value).ThenByDescending(r => Leads(r, RoomKind.Investigation)).ThenBy(r => r.Column).First();
         }
 
         /// <summary>Takes the offered card for the hero with the fewest cards in the deck, so every hero stays useful.</summary>

@@ -58,6 +58,11 @@ namespace WhereDarknessDwells.Core
             GuaranteeRoute(map, layers, rng);
             foreach (MapRoom room in rooms.Where(r => r.Kind == RoomKind.Combat || r.Kind == RoomKind.Elite))
                 room.EncounterId = PickEncounter(expedition, room, rng);
+            if (expedition.Villain != null)
+            {
+                PlaceClues(expedition.Villain, rooms, rng);
+                if (expedition.Villain.SecretRoom != null) AddSecretRoom(map, layers, expedition.Villain.SecretRoom, rooms.Count);
+            }
             return map;
         }
 
@@ -117,6 +122,36 @@ namespace WhereDarknessDwells.Core
             if (!route.Any(r => r.Kind == RoomKind.Sanctuary)) plain[stop++].Kind = RoomKind.Sanctuary;
             for (int found = route.Count(r => r.Kind == RoomKind.Investigation); found < InvestigationsOnRoute; found++)
                 plain[stop++].Kind = RoomKind.Investigation;
+        }
+
+        /// <summary>Gives each Investigation room, in random order, a different clue that can be found on its layer.</summary>
+        static void PlaceClues(VillainDef villain, List<MapRoom> rooms, Rng rng)
+        {
+            List<MapRoom> investigations = rooms.Where(r => r.Kind == RoomKind.Investigation).ToList();
+            rng.Shuffle(investigations);
+            var unplaced = villain.Clues.Where(c => (c.Sources & ClueSource.Investigation) != 0).ToList();
+            foreach (MapRoom room in investigations)
+            {
+                List<ClueDef> fits = unplaced.Where(c => room.Layer >= c.MinLayer && room.Layer <= c.MaxLayer).ToList();
+                if (fits.Count == 0) continue;
+                ClueDef clue = fits[rng.Next(fits.Count)];
+                room.ClueId = clue.Id;
+                unplaced.Remove(clue);
+            }
+        }
+
+        /// <summary>
+        /// Puts the secret room below the last room of its layer, linked from the last room of the layer before and
+        /// to the last room of the layer after, so its links can't cross any others.
+        /// </summary>
+        static void AddSecretRoom(MapGraph map, List<List<MapRoom>> layers, SecretRoomDef secret, int id)
+        {
+            List<MapRoom> layer = layers[secret.Layer];
+            var room = new MapRoom(id, secret.Layer, layer.Count) { Kind = RoomKind.Secret };
+            room.NextIds.Add(layers[secret.Layer + 1].Last().Id);
+            map.Secret = room;
+            // Every room on the layer before has a way down, so finding the door is always worth something.
+            foreach (MapRoom from in layers[secret.Layer - 1]) map._secretFrom.Add(from.Id);
         }
 
         static string PickEncounter(ExpeditionDef expedition, MapRoom room, Rng rng)

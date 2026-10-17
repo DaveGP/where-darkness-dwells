@@ -35,6 +35,7 @@ namespace WhereDarknessDwells.Core
         readonly List<CardInstance> _discard = new List<CardInstance>();
         readonly List<CardInstance> _setAside = new List<CardInstance>();
         readonly List<CombatEvent> _log = new List<CombatEvent>();
+        readonly CombatModifiers _modifiers;
         List<CombatEvent> _pending;
 
         /// <param name="heroIds">The party in seat order.</param>
@@ -42,9 +43,12 @@ namespace WhereDarknessDwells.Core
         /// <param name="enemyIds">The enemies in the fight, left to right.</param>
         /// <param name="rng">The combat's random stream: shuffles and enemy targets.</param>
         /// <param name="heroHealth">Health carried in from the run; heroes not listed start at full health.</param>
+        /// <param name="modifiers">What the run's clues change in this fight; null for none.</param>
         public CombatState(ContentLibrary content, IReadOnlyList<string> heroIds, IEnumerable<CardInstance> deck,
-            IReadOnlyList<string> enemyIds, Rng rng, IReadOnlyDictionary<string, int> heroHealth = null)
+            IReadOnlyList<string> enemyIds, Rng rng, IReadOnlyDictionary<string, int> heroHealth = null, CombatModifiers modifiers = null)
         {
+            _modifiers = modifiers ?? CombatModifiers.None;
+            CancelsLeft = _modifiers.Cancel?.Uses ?? 0;
             _content = content ?? throw new ArgumentNullException(nameof(content));
             _rng = rng ?? throw new ArgumentNullException(nameof(rng));
             if (heroIds == null || heroIds.Count == 0) throw new ArgumentException("A fight needs at least one hero.", nameof(heroIds));
@@ -58,7 +62,13 @@ namespace WhereDarknessDwells.Core
                 if (heroHealth != null && heroHealth.TryGetValue(id, out int carried)) health = Math.Max(0, Math.Min(carried, def.MaxHealth));
                 return Combatant.ForHero(def, health);
             }).ToList();
-            _enemies = enemyIds.Select((id, i) => Combatant.ForEnemy(content.Enemy(id), i)).ToList();
+            _enemies = enemyIds.Select((id, i) =>
+            {
+                EnemyDef def = content.Enemy(id);
+                _modifiers.Names.TryGetValue(id, out string name);
+                _modifiers.HealthLossPercent.TryGetValue(id, out int loss);
+                return Combatant.ForEnemy(def, i, name, Math.Max(1, def.MaxHealth - def.MaxHealth * loss / 100));
+            }).ToList();
 
             foreach (CardInstance card in deck ?? throw new ArgumentNullException(nameof(deck)))
             {
@@ -74,6 +84,8 @@ namespace WhereDarknessDwells.Core
         CombatState(CombatState other)
         {
             _content = other._content;
+            _modifiers = other._modifiers;
+            CancelsLeft = other.CancelsLeft;
             _rng = other._rng.Copy();
             _heroes = other._heroes.Select(c => c.Copy()).ToList();
             _enemies = other._enemies.Select(c => c.Copy()).ToList();
@@ -106,6 +118,17 @@ namespace WhereDarknessDwells.Core
         public IReadOnlyList<CardInstance> SetAside => _setAside;
         /// <summary>Everything that has happened in this fight, in order.</summary>
         public IReadOnlyList<CombatEvent> Log => _log;
+
+        /// <summary>The once-per-fight cancel the run's clues allow, or null. See <see cref="TryCancelIntent"/>.</summary>
+        public CancelAbility Cancel => _modifiers.Cancel;
+        public int CancelsLeft { get; private set; }
+
+        /// <summary>True while the party only sees this enemy's intents as vague text, with no numbers.</summary>
+        public bool IsVague(Combatant enemy) => enemy?.Enemy != null && _modifiers.VagueIntents.Contains(enemy.Enemy.Id);
+
+        /// <summary>The text the party sees for an enemy's action: exact, or vague while they don't understand it.</summary>
+        public string IntentText(Combatant enemy, IntentDef intent) =>
+            intent == null ? null : IsVague(enemy) ? intent.Vague ?? "Something stirs" : intent.Description;
 
         public bool IsOver => Phase == CombatPhase.Won || Phase == CombatPhase.Lost;
 
@@ -214,6 +237,35 @@ namespace WhereDarknessDwells.Core
             });
         }
 
+        /// <summary>Uses the run's cancel ability on an enemy's shown intent, so it does nothing this round.</summary>
+        public CombatResult TryCancelIntent(string enemyId)
+        {
+            string reason = WhyCantCancel(enemyId);
+            if (reason != null) return CombatResult.Refused(reason);
+            Combatant enemy = Find(enemyId);
+            return Run(() =>
+            {
+                CancelsLeft--;
+                enemy.IntentCancelled = true;
+                Emit(CombatEventKind.IntentCancelled, enemy.Id, intent: enemy.Intent);
+            });
+        }
+
+        /// <summary>Why the cancel ability can't be used on this enemy now, or null if it can.</summary>
+        public string WhyCantCancel(string enemyId)
+        {
+            CancelAbility cancel = _modifiers.Cancel;
+            if (cancel == null) return "The party has no way to do that yet.";
+            string over = Over();
+            if (over != null) return over;
+            if (CancelsLeft <= 0) return $"{cancel.Label} has already been used this fight.";
+            Combatant enemy = _enemies.FirstOrDefault(e => e.Id == enemyId);
+            if (enemy == null || enemy.IsDown || enemy.Enemy.Id != cancel.EnemyId) return $"{cancel.Label} only works on {_content.Enemy(cancel.EnemyId).Name}.";
+            if (enemy.IntentCancelled) return "That action is already cancelled.";
+            if (enemy.Intent == null || enemy.Intent.Kind != cancel.Kind) return $"{cancel.Label} only stops a {cancel.Kind.ToString().ToLowerInvariant()}.";
+            return null;
+        }
+
         /// <summary>
         /// Why a card in the hand can't be played right now, written for the player, or null if it can (given a
         /// valid target). The interface uses this to dim cards and explain them.
@@ -320,6 +372,7 @@ namespace WhereDarknessDwells.Core
         {
             IntentDef intent = enemy.Enemy.Intents[enemy.IntentStep % enemy.Enemy.Intents.Count];
             enemy.Intent = intent;
+            enemy.IntentCancelled = false;
             enemy.IntentTargetId = PickTarget(intent.Target)?.Id;
             Emit(CombatEventKind.IntentShown, enemy.Id, enemy.IntentTargetId, intent.Amount, intent: intent);
         }
@@ -347,12 +400,24 @@ namespace WhereDarknessDwells.Core
         {
             IntentDef intent = enemy.Intent;
             enemy.Block = 0; // An enemy's Block lasts through the player's turn and drops when it acts again.
+            if (enemy.IntentCancelled)
+            {
+                enemy.IntentCancelled = false;
+                enemy.IntentStep++;
+                return;
+            }
             Emit(CombatEventKind.EnemyActed, enemy.Id, enemy.IntentTargetId, intent.Amount, intent: intent);
 
             switch (intent.Kind)
             {
                 case IntentKind.Block:
                     GainBlock(enemy, intent.Amount);
+                    break;
+
+                case IntentKind.Heal:
+                    int healed = Math.Min(intent.Amount, enemy.MaxHealth - enemy.Health);
+                    enemy.Health += healed;
+                    Emit(CombatEventKind.Healed, enemy.Id, enemy.Id, healed);
                     break;
 
                 case IntentKind.Attack:
@@ -396,6 +461,8 @@ namespace WhereDarknessDwells.Core
 
         void Attack(Combatant attacker, Combatant defender, int baseDamage)
         {
+            if (attacker.IsHero && defender.Enemy != null && _modifiers.BonusDamageTo.TryGetValue(defender.Enemy.Id, out int bonus))
+                baseDamage += bonus;
             int damage = DamageRules.Attack(baseDamage, attacker.Status(StatusKind.Weak) > 0, defender.Status(StatusKind.Exposed) > 0);
             TakeDamage(attacker.Id, defender, damage, ignoresBlock: false);
         }

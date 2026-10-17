@@ -21,13 +21,16 @@ MonoBehaviour:
     target: 2
     amount: 1
     status: 0
+    vague: ''
   - description: 'Hammer 9'
     kind: 0
     target: 1
     amount: 9
     status: 0
+    vague: ''
   - description: 'Brace 6'
     kind: 1
     target: 3
     amount: 6
     status: 0
+    vague: ''

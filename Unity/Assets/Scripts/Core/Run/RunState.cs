@@ -14,7 +14,11 @@ namespace WhereDarknessDwells.Core
         Reward,
         /// <summary>Rest or Reflect.</summary>
         Sanctuary,
-        /// <summary>An Investigation or Event room, which later milestones fill in. The party just carries on.</summary>
+        /// <summary>Search the room for its clue at a cost, or leave.</summary>
+        Investigation,
+        /// <summary>The villain's secret room: act there at a cost, or leave.</summary>
+        Secret,
+        /// <summary>An Event room, which Milestone 5 fills in. The party just carries on.</summary>
         Unwritten,
         Won,
         Lost,
@@ -38,6 +42,7 @@ namespace WhereDarknessDwells.Core
         readonly List<CardInstance> _deck;
         readonly Dictionary<string, int> _health;
         readonly List<int> _route = new List<int>();
+        readonly List<string> _clues = new List<string>();
         List<string> _offer = new List<string>();
         int _nextCardId;
 
@@ -80,11 +85,28 @@ namespace WhereDarknessDwells.Core
         public bool IsOver => Phase == RunPhase.Won || Phase == RunPhase.Lost;
         public int FightsWon { get; private set; }
 
+        public VillainDef Villain => Expedition.Villain;
+        /// <summary>The clues found so far, in the order they were found.</summary>
+        public IReadOnlyList<string> CluesFound => _clues;
+        /// <summary>The clue the last won fight gave (an Elite's), shown with the reward; null if none.</summary>
+        public string RewardClue { get; private set; }
+        public bool SecretRevealed => Map.Secret != null && _clues.Any(id => Villain.Clue(id).Has(ClueEffectKind.RevealSecretRoom));
+        /// <summary>True once the party has acted in the secret room.</summary>
+        public bool SecretUsed { get; private set; }
+        /// <summary>After a won run: whether it earned the villain's true ending.</summary>
+        public bool TrueEnding => Phase == RunPhase.Won && HasEffect(ClueEffectKind.TrueEnding);
+        public string EndingText => Phase != RunPhase.Won || Villain == null ? null : TrueEnding ? Villain.TrueEnding : Villain.Ending;
+
+        public bool HasEffect(ClueEffectKind kind) => Effects(kind).Any();
+
+        IEnumerable<ClueEffect> Effects(ClueEffectKind kind) =>
+            _clues.SelectMany(id => Villain.Clue(id).Effects).Where(e => e.Kind == kind);
+
         /// <summary>The rooms the party can enter next: the first layer at the start, then the exits of the current room.</summary>
         public IEnumerable<MapRoom> ReachableRooms =>
             Phase != RunPhase.ChooseRoom ? Enumerable.Empty<MapRoom>()
             : CurrentRoom == null ? Map.Layer(0)
-            : Map.NextOf(CurrentRoom);
+            : Map.NextOf(CurrentRoom, SecretRevealed);
 
         // ---------- commands ----------
 
@@ -98,7 +120,10 @@ namespace WhereDarknessDwells.Core
             if (room.EncounterId != null)
             {
                 EncounterDef encounter = Expedition.Encounter(room.EncounterId);
-                var combat = new CombatState(_content, Party, _deck, encounter.EnemyIds, _seedRng.Stream("combat " + room.Id), _health);
+                bool boss = room.Kind == RoomKind.Boss;
+                IReadOnlyList<string> enemies = boss ? BossEnemies() : encounter.EnemyIds;
+                var combat = new CombatState(_content, Party, _deck, enemies, _seedRng.Stream("combat " + room.Id), _health,
+                    boss ? BossModifiers() : null);
                 CombatResult start = combat.Start();
                 if (!start.Ok) return RunResult.Refused(start.Reason);
                 Combat = combat;
@@ -112,6 +137,8 @@ namespace WhereDarknessDwells.Core
                 case RoomKind.Elite:
                 case RoomKind.Boss: Phase = RunPhase.Combat; break;
                 case RoomKind.Sanctuary: Phase = RunPhase.Sanctuary; break;
+                case RoomKind.Investigation: Phase = RunPhase.Investigation; break;
+                case RoomKind.Secret: Phase = RunPhase.Secret; break;
                 default: Phase = RunPhase.Unwritten; break;
             }
             return RunResult.Success;
@@ -141,6 +168,18 @@ namespace WhereDarknessDwells.Core
                 return RunResult.Success;
             }
 
+            // An Elite can carry a clue, such as the villain's true name.
+            RewardClue = null;
+            if (CurrentRoom.Kind == RoomKind.Elite && Villain != null)
+            {
+                ClueDef clue = Villain.Clues.FirstOrDefault(c => (c.Sources & ClueSource.Elite) != 0 && !_clues.Contains(c.Id));
+                if (clue != null)
+                {
+                    _clues.Add(clue.Id);
+                    RewardClue = clue.Id;
+                }
+            }
+
             List<string> pool = Expedition.RewardCards.ToList();
             _rewardRng.Shuffle(pool);
             _offer = pool.Take(RewardChoices).ToList();
@@ -155,8 +194,71 @@ namespace WhereDarknessDwells.Core
             if (cardId != null && !_offer.Contains(cardId)) return RunResult.Refused("That card isn't on offer.");
             if (cardId != null) _deck.Add(new CardInstance(_nextCardId++, cardId));
             _offer = new List<string>();
+            RewardClue = null;
             Phase = RunPhase.ChooseRoom;
             return RunResult.Success;
+        }
+
+        /// <summary>The clue in the Investigation room the party is in, or null if it holds none or it was already found.</summary>
+        public ClueDef ClueHere =>
+            Phase == RunPhase.Investigation && CurrentRoom.ClueId != null && !_clues.Contains(CurrentRoom.ClueId) ? Villain.Clue(CurrentRoom.ClueId) : null;
+
+        /// <summary>Investigation: <paramref name="heroId"/> pays the search's health cost and the party finds the clue.</summary>
+        public RunResult TrySearch(string heroId)
+        {
+            if (Phase != RunPhase.Investigation) return RunResult.Refused("There's nothing to search here.");
+            ClueDef clue = ClueHere;
+            if (clue == null) return RunResult.Refused("There's nothing more to find in this room.");
+            if (!Party.Contains(heroId)) return RunResult.Refused("Choose a hero from your party.");
+            string name = _content.Hero(heroId).Name;
+            if (_health[heroId] <= clue.SearchCost) return RunResult.Refused($"{name} is too hurt to search: it costs {clue.SearchCost} health.");
+            _health[heroId] -= clue.SearchCost;
+            _clues.Add(clue.Id);
+            Phase = RunPhase.ChooseRoom;
+            return RunResult.Success;
+        }
+
+        /// <summary>Secret room: every hero pays its health cost (none drops below 1) and the boss is weakened.</summary>
+        public RunResult TryUseSecret()
+        {
+            if (Phase != RunPhase.Secret) return RunResult.Refused("There's nothing to do here.");
+            foreach (string hero in Party) _health[hero] = Math.Max(1, _health[hero] - Villain.SecretRoom.HealthCostPerHero);
+            SecretUsed = true;
+            Phase = RunPhase.ChooseRoom;
+            return RunResult.Success;
+        }
+
+        /// <summary>Who the boss fight is against, once the clues found so far are counted.</summary>
+        internal IReadOnlyList<string> BossEnemies()
+        {
+            IReadOnlyList<string> all = Expedition.Boss.EnemyIds;
+            return Villain != null && HasEffect(ClueEffectKind.RemoveBossAllies) ? all.Where(id => id == Villain.BossEnemyId).ToList() : all;
+        }
+
+        /// <summary>For tests: the party has found this clue, however they came by it.</summary>
+        internal void GiveClue(string clueId)
+        {
+            if (Villain?.Clue(clueId) == null) throw new ArgumentException($"No clue '{clueId}'.");
+            if (!_clues.Contains(clueId)) _clues.Add(clueId);
+        }
+
+        /// <summary>For tests: sets a hero's health between rooms.</summary>
+        internal void SetHealthForTest(string heroId, int health) => _health[heroId] = health;
+
+        /// <summary>What the clues found so far change in the boss fight.</summary>
+        internal CombatModifiers BossModifiers()
+        {
+            if (Villain == null) return null;
+            string boss = Villain.BossEnemyId;
+            bool known = HasEffect(ClueEffectKind.RevealBoss);
+            int bonus = Effects(ClueEffectKind.BonusDamageToBoss).Sum(e => e.Amount);
+            ClueEffect cancel = Effects(ClueEffectKind.CancelBossIntent).FirstOrDefault();
+            return new CombatModifiers(
+                names: known ? null : new Dictionary<string, string> { { boss, Villain.HiddenName } },
+                vagueIntents: known ? null : new[] { boss },
+                bonusDamageTo: bonus == 0 ? null : new Dictionary<string, int> { { boss, bonus } },
+                healthLossPercent: SecretUsed ? new Dictionary<string, int> { { boss, Villain.SecretRoom.BossHealthLossPercent } } : null,
+                cancel: cancel == null ? null : new CancelAbility(cancel.Label, boss, cancel.CancelKind));
         }
 
         /// <summary>Sanctuary: every hero heals 30% of their maximum health.</summary>
@@ -184,10 +286,10 @@ namespace WhereDarknessDwells.Core
             return RunResult.Success;
         }
 
-        /// <summary>Leaves an Investigation or Event room, which has nothing in it until a later milestone.</summary>
+        /// <summary>Leaves an Investigation, secret or Event room without doing anything there.</summary>
         public RunResult TryLeaveRoom()
         {
-            if (Phase != RunPhase.Unwritten) return RunResult.Refused("There's nothing to leave.");
+            if (Phase != RunPhase.Unwritten && Phase != RunPhase.Investigation && Phase != RunPhase.Secret) return RunResult.Refused("There's nothing to leave.");
             Phase = RunPhase.ChooseRoom;
             return RunResult.Success;
         }

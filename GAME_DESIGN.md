@@ -139,6 +139,39 @@ rumours: a plague, a curse, a missing lord. The clues reveal who is really respo
 A typical route finds 3 or 4 of the 6 clues. You can win without any clues, but each one makes the boss
 noticeably easier or changes the ending. The journal shows found clues and blank spaces for missing ones.
 
+### How the clues work (Milestone 4)
+
+These fill in details the table above leaves open. Each one is a default until David agrees or a playtest
+says otherwise.
+
+- **Investigation rooms.** When the map is made, each Investigation room is given one clue that isn't
+  already placed. Entering shows a short scene (under 60 words) with two choices: a search with a cost
+  (one hero of your choice loses some health) that finds the clue, or leaving with nothing. The cost
+  depends on the clue, so what to give up is a real decision. The Broken Seal only appears on layers 5
+  to 7.
+- **Clues that come from Events** (the Thrall's Confession, and His True Name from an Event) can also turn
+  up in Investigations until Events exist in Milestone 5. His True Name can also come from an Elite
+  reward, as the table says.
+- **Before the Ledger,** the boss is shown as "The Master of the Keep". His intents read as vague lines such as
+  "Blood gathers", with no numbers or previews. The Ledger shows his real name and exact intents.
+- **The Cistern** is a hidden room on layer 5. It is always generated, but only shown once the Cistern
+  Door is found, so the door only appears on layers 1 to 4. Every room on layer 4 leads down to it, and it
+  leads on to one room on layer 6. Entering it, each
+  hero loses 4 health to destroy Vael's heart, and he starts the fight with 30% less health.
+- **Thralls.** The boss fight is Vael plus two Blood Thralls. The Thrall's Confession removes them.
+- **Blood Tithe** is one of Vael's intents: he heals. **Speak his name** is a button in the boss fight,
+  usable once and free, that cancels a Blood Tithe he is showing.
+- **Silvered Bells:** +2 to the damage of every card that hits Vael. It is a flat bonus, so it is added
+  before Weak and Exposed, following the damage order.
+- **Endings.** Beating Vael gives the ending "The Keep is quiet". With the Broken Seal, the true ending
+  follows: what the steward bargained with is still beneath the chapel.
+- **The journal** is a button on the map. It shows six slots, each found clue with its text and what it
+  changed, and the rest as blanks.
+- **Data, not code.** A villain (`VillainDef`) lists its boss encounter, its clues and each clue's
+  effects. An effect is one of a few kinds Core understands: reveal the boss, bonus damage against the
+  boss, show a hidden room, remove the boss's allies, grant a once-per-fight cancel, and unlock an ending.
+  Nothing checks the villain's name.
+
 ## Narrative style
 
 - Short, concrete writing, no more than about 60 words per event screen.

@@ -324,9 +324,12 @@ namespace WhereDarknessDwells.Game
             guard.text = hero.GuardedBy == null ? "" : $"Guarded by {_combat.Find(hero.GuardedBy).Name}";
             guard.EnableInClassList("hidden", hero.GuardedBy == null);
 
-            // What the enemies' shown intents would take off this hero if the activation ended now.
-            int incoming = _preview.Where(e => e.Kind == CombatEventKind.Damaged && e.TargetId == hero.Id).Sum(e => e.Amount);
-            bool falls = _preview.Any(e => e.Kind == CombatEventKind.HeroDowned && e.SourceId == hero.Id);
+            // What the enemies' shown intents would take off this hero if the activation ended now. Enemies the party
+            // only sees vaguely are left out, and so is whether the hero would fall when one of them is in the fight.
+            int incoming = _preview.Where(e => e.Kind == CombatEventKind.Damaged && e.TargetId == hero.Id && !IsVague(e.SourceId)).Sum(e => e.Amount);
+            bool falls = _combat.Enemies.Any(_combat.IsVague)
+                ? incoming >= hero.Health
+                : _preview.Any(e => e.Kind == CombatEventKind.HeroDowned && e.SourceId == hero.Id);
             Label incomingBadge = view.Q<Label>("incoming");
             incomingBadge.text = falls ? $"Incoming {incoming}: would fall" : $"Incoming {incoming}";
             incomingBadge.EnableInClassList("hidden", incoming == 0 || hero.IsDown);
@@ -360,15 +363,21 @@ namespace WhereDarknessDwells.Game
             DrawBlockAndStatuses(view, enemy);
 
             bool showIntent = !enemy.IsDown && !_combat.IsOver && enemy.Intent != null;
-            view.Q(className: "intent").EnableInClassList("hidden", !showIntent);
+            bool vague = _combat.IsVague(enemy);
+            VisualElement intent = view.Q(className: "intent");
+            intent.EnableInClassList("hidden", !showIntent);
+            intent.EnableInClassList("is-vague", vague);
+            intent.EnableInClassList("is-cancelled", enemy.IntentCancelled);
             if (showIntent)
             {
-                view.Q<Label>("intent").text = enemy.Intent.Description;
-                view.Q<Label>("intent-target").text = IntentTargetText(enemy);
+                // A vague intent shows only its line: no numbers, no target and no outcome.
+                view.Q<Label>("intent").text = _combat.IntentText(enemy, enemy.Intent) + (enemy.IntentCancelled ? " (cancelled)" : "");
+                view.Q<Label>("intent-target").text = vague || enemy.IntentCancelled ? "" : IntentTargetText(enemy);
             }
             Label outcome = view.Q<Label>("intent-outcome");
-            outcome.text = showIntent ? OutcomeText(enemy) : "";
+            outcome.text = showIntent && !vague ? OutcomeText(enemy) : "";
             outcome.EnableInClassList("hidden", outcome.text.Length == 0);
+            DrawCancel(view, enemy);
 
             Label state = view.Q<Label>("state");
             state.text = "Defeated";
@@ -378,6 +387,28 @@ namespace WhereDarknessDwells.Game
             view.RegisterCallback<ClickEvent>(_ => OnCombatantClicked(enemy));
             return view;
         }
+
+        /// <summary>
+        /// The button for the run's cancel ability (such as "Speak his name"), on the enemy it works on. It stays
+        /// visible but dimmed while it can't be used, and says why on hover.
+        /// </summary>
+        void DrawCancel(VisualElement view, Combatant enemy)
+        {
+            CancelAbility cancel = _combat.Cancel;
+            Button button = view.Q<Button>("cancel-intent");
+            bool shown = cancel != null && enemy.Enemy.Id == cancel.EnemyId && !enemy.IsDown && !_combat.IsOver && _combat.CancelsLeft > 0;
+            button.EnableInClassList("hidden", !shown);
+            if (!shown) return;
+            string reason = _combat.WhyCantCancel(enemy.Id);
+            button.text = cancel.Label;
+            button.EnableInClassList("is-unavailable", reason != null);
+            string help = reason ?? $"{cancel.Label}: cancel this {cancel.Kind.ToString().ToLowerInvariant()}. Once per fight.";
+            button.RegisterCallback<PointerEnterEvent>(_ => SetHint(help, false));
+            button.RegisterCallback<PointerLeaveEvent>(_ => SetHint("", false));
+            button.clicked += () => Apply(() => _combat.TryCancelIntent(enemy.Id));
+        }
+
+        bool IsVague(string combatantId) => combatantId != null && _combat.IsVague(_combat.Find(combatantId));
 
         /// <summary>What this enemy's intent would really do now, after Block, Weak, Exposed and Guard.</summary>
         string OutcomeText(Combatant enemy)
@@ -481,6 +512,10 @@ namespace WhereDarknessDwells.Game
                     case CombatEventKind.BlockGained:
                         text = $"+{e.Amount} Block";
                         style = "floater-block";
+                        break;
+                    case CombatEventKind.Healed:
+                        text = $"+{e.Amount}";
+                        style = "floater-heal";
                         break;
                     case CombatEventKind.StatusChanged:
                         string key = $"{e.TargetId}/{e.Status}";

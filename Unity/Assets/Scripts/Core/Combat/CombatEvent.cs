@@ -17,6 +17,10 @@ namespace WhereDarknessDwells.Core
         Redirected,
         IntentShown,
         EnemyActed,
+        /// <summary>The party cancelled an enemy's shown intent. SourceId is the enemy.</summary>
+        IntentCancelled,
+        /// <summary>An enemy restored health. TargetId is the enemy, Amount what it regained.</summary>
+        Healed,
         HeroDowned,
         EnemyDefeated,
         CardsSetAside,

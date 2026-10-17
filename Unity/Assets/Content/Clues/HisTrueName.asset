@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ac2ce0bba84d57ac262cdd389fc7ab, type: 3}
+  m_Name: HisTrueName
+  m_EditorClassIdentifier: 
+  id: true_name
+  displayName: 'His True Name'
+  sources: 7
+  minLayer: 2
+  maxLayer: 6
+  searchCost: 4
+  scene: 'The chapel register. Its last page is torn but legible: the steward''s name before he took the Keep''s.'
+  searchLabel: 'Read it aloud'
+  journal: 'The name he was born with still binds him. Once per fight, speak it to stop his Blood Tithe.'
+  effects:
+  - kind: 4
+    amount: 0
+    cancelKind: 3
+    label: 'Speak his name'

@@ -6,6 +6,7 @@
             <ui:Label name="intent-target" text="at Wren" class="intent-target" />
             <ui:Label name="intent-outcome" text="Wren loses 6" class="intent-outcome" />
         </ui:VisualElement>
+        <ui:Button name="cancel-intent" text="Speak his name" class="cancel-intent hidden" />
         <ui:Label name="name" text="Enemy" class="combatant-name" />
         <ui:VisualElement class="bar">
             <ui:VisualElement name="health-fill" class="bar-fill" />

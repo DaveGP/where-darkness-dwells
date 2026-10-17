@@ -21,13 +21,16 @@ MonoBehaviour:
     target: 0
     amount: 6
     status: 0
+    vague: ''
   - description: 'Raise shield 8'
     kind: 1
     target: 3
     amount: 8
     status: 0
+    vague: ''
   - description: 'Cleave 12'
     kind: 0
     target: 1
     amount: 12
     status: 0
+    vague: ''

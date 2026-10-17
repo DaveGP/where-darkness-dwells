@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ac2ce0bba84d57ac262cdd389fc7ab, type: 3}
+  m_Name: TheStewardsLedger
+  m_EditorClassIdentifier: 
+  id: ledger
+  displayName: 'The Steward''s Ledger'
+  sources: 1
+  minLayer: 0
+  maxLayer: 6
+  searchCost: 3
+  scene: 'The steward''s study. Accounts cover every wall, each entry signed V. A locked drawer holds the last ledger.'
+  searchLabel: 'Force the drawer'
+  journal: 'Vael, the steward, paid the thing beneath the chapel in blood, one name a week. You know who rules the Keep now, and you''ll see his every move.'
+  effects:
+  - kind: 0
+    amount: 0
+    cancelKind: 0
+    label: ''

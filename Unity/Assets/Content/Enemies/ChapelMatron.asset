@@ -21,13 +21,16 @@ MonoBehaviour:
     target: 2
     amount: 2
     status: 1
+    vague: ''
   - description: 'Smite 12'
     kind: 0
     target: 0
     amount: 12
     status: 0
+    vague: ''
   - description: 'Lament 5 to all'
     kind: 0
     target: 2
     amount: 5
     status: 0
+    vague: ''
