@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 3, a complete run (in progress).** Milestones 1 and 2 were merged on 2026-10-17.
+**Current milestone: 4, the mystery (in progress).** Milestones 1 to 3 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -105,7 +105,7 @@ Status: done, merged on 2026-10-17 (PR #5).
 - **Acceptance criteria:** start a run, choose a route, clear rooms, take rewards, and reach the boss or
   defeat.
 
-Status (2026-10-17): written, waiting for a check in David's Editor.
+Status: done, merged on 2026-10-17 (PR #6). David played a run to victory over Vael in the Editor.
 
 **3a. Run rules in Core**
 - `Map/MapGenerator` builds the floor from the run's "map" stream and `Run/RunState` carries the party's health
@@ -126,6 +126,9 @@ Status (2026-10-17): written, waiting for a check in David's Editor.
   the build. `RunFlow` shows the party, map, reward, Sanctuary, empty rooms and the run's end, and hands each fight
   to the combat screen, which hands it back when it's over. `MapView` draws the map from the run's state.
 - The Combat scene still plays one test fight on its own.
+
+Follow-up from David's playtest: the map's starting point wasn't clear. Mark the entrance and make the rooms you
+can enter stand out more (Milestone 6 at the latest).
 
 ## Milestone 4: the mystery
 
