@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatScreen.uss" />
+    <ui:VisualElement class="combatant enemy">
+        <ui:VisualElement class="intent">
+            <ui:Label name="intent" text="Strike 6" class="intent-text" />
+            <ui:Label name="intent-target" text="at Wren" class="intent-target" />
+        </ui:VisualElement>
+        <ui:Label name="name" text="Enemy" class="combatant-name" />
+        <ui:VisualElement class="bar">
+            <ui:VisualElement name="health-fill" class="bar-fill" />
+            <ui:Label name="health" text="20 / 20" class="bar-text" />
+        </ui:VisualElement>
+        <ui:VisualElement class="badges">
+            <ui:Label name="block" text="Block 0" class="badge block-badge" />
+        </ui:VisualElement>
+        <ui:VisualElement name="statuses" class="statuses" />
+        <ui:Label name="state" text="Defeated" class="combatant-state" />
+    </ui:VisualElement>
+</ui:UXML>

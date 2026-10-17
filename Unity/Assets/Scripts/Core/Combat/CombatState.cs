@@ -92,6 +92,10 @@ namespace WhereDarknessDwells.Core
 
         public Combatant Find(string id) => _heroes.Concat(_enemies).FirstOrDefault(c => c.Id == id);
 
+        /// <summary>The card with this instance id, wherever it is in the fight, or null.</summary>
+        public CardInstance FindCard(int instanceId) =>
+            _hand.Concat(_draw).Concat(_discard).Concat(_setAside).FirstOrDefault(c => c.Id == instanceId);
+
         // ---------- commands ----------
 
         /// <summary>Shuffles the deck, deals the first hand, and shows the enemies' first intents.</summary>
@@ -277,7 +281,7 @@ namespace WhereDarknessDwells.Core
             IntentDef intent = enemy.Enemy.Intents[enemy.IntentStep % enemy.Enemy.Intents.Count];
             enemy.Intent = intent;
             enemy.IntentTargetId = PickTarget(intent.Target)?.Id;
-            Emit(CombatEventKind.IntentShown, enemy.Id, enemy.IntentTargetId, intent.Amount);
+            Emit(CombatEventKind.IntentShown, enemy.Id, enemy.IntentTargetId, intent.Amount, intent: intent);
         }
 
         Combatant PickTarget(IntentTarget rule)
@@ -303,7 +307,7 @@ namespace WhereDarknessDwells.Core
         {
             IntentDef intent = enemy.Intent;
             enemy.Block = 0; // An enemy's Block lasts through the player's turn and drops when it acts again.
-            Emit(CombatEventKind.EnemyActed, enemy.Id, enemy.IntentTargetId, intent.Amount);
+            Emit(CombatEventKind.EnemyActed, enemy.Id, enemy.IntentTargetId, intent.Amount, intent: intent);
 
             switch (intent.Kind)
             {
@@ -502,8 +506,8 @@ namespace WhereDarknessDwells.Core
         }
 
         void Emit(CombatEventKind kind, string sourceId = null, string targetId = null, int amount = 0, int blocked = 0,
-            StatusKind status = default, int cardInstanceId = 0) =>
-            _pending.Add(new CombatEvent(kind, sourceId, targetId, amount, blocked, status, cardInstanceId));
+            StatusKind status = default, int cardInstanceId = 0, IntentDef intent = null) =>
+            _pending.Add(new CombatEvent(kind, sourceId, targetId, amount, blocked, status, cardInstanceId, intent));
 
         string Over()
         {
