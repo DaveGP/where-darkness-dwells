@@ -217,7 +217,7 @@ David split the old Milestone 6 in two (2026-10-17). This one comes first.
 - **Acceptance criteria:** quit in the middle of a run, start the game again, choose Continue and carry on from
   the same map with the same party, deck, Keepsakes and clues.
 
-Status: built, waiting on an Editor check and a playtest.
+Status: built and checked in the Editor (it compiles, all EditMode tests pass, and a quit and Continue in the middle of a fight worked). Waiting on David's playtest.
 
 - **Core:** `RunState.TrySnapshot` and `RunState.TryRestore` with a plain `RunSnapshot`, and tests that a restored
   run plays on exactly as the original did.
@@ -236,6 +236,8 @@ Status: built, waiting on an Editor check and a playtest.
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store
   page.
+- Set the company and product name in Player Settings. They are still Unity's defaults, and the save file's
+  folder is named after them.
 - **Done means** a new player can start the game, learn it, finish a run and reach an ending without help.
 
 ## Creating the Unity project
