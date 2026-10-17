@@ -172,6 +172,69 @@ says otherwise.
   boss, show a hidden room, remove the boss's allies, grant a once-per-fight cancel, and unlock an ending.
   Nothing checks the villain's name.
 
+## Events, Keepsakes and the party (proposed, Milestone 5)
+
+These fill in what the tables above leave open. Each one is a default until David agrees or a playtest says
+otherwise.
+
+### Choosing the party
+
+- The party screen shows four heroes. You pick three before entering the Keep.
+- Every pair of heroes has one dual card, which makes six. The starting deck is the chosen heroes' four
+  cards each plus the three dual cards for their pairs, so it is still 15 cards.
+- Rewards only offer cards that someone in the party can play.
+
+### Keepsakes
+
+A Keepsake is a passive item the party keeps for the rest of the run. Each one has a single effect that
+Core understands, so a new Keepsake is data. An Elite gives a Keepsake the party doesn't have yet, plus its
+card choice, and some event choices give one. These are the first eight:
+
+| Keepsake | Effect |
+| --- | --- |
+| Gaoler's Keyring | The first card each fight costs 1 less. |
+| Siege Lantern | Every hero starts each fight with 4 Block. |
+| Chapel Candle | After each won fight, every standing hero heals 3. |
+| Rusted Caltrops | At the start of each fight, every enemy gets Bleed 2. |
+| Widow's Veil | At the start of each fight, every enemy gets Weak 1. |
+| Steward's Seal-ring | The first activation each fight gets 1 more Resolve. |
+| Marked Deck | Draw 2 more cards on the first turn of each fight. |
+| Bone Charm | Each hero's maximum health goes up by 4, and they heal 4. |
+
+### Events
+
+An Event room shows a short scene (under 60 words) with 2 or 3 choices. A choice's results are data from a
+small set Core understands:
+- heal or hurt the party, or the hero you choose
+- gain a card (chosen from three) or remove one
+- gain a Keepsake or a clue
+- start a fight
+
+Some choices only appear once a clue has been found, and some cost a hero health, so who pays is your call.
+Each event is used at most once per run, picked from the "rewards" stream. These are the first eight:
+
+| Event | The choice |
+| --- | --- |
+| The Chained Thrall | Loosen his chains for the Thrall's Confession (one hero loses 3), or leave. With the Ledger, you can name his master instead, and he confesses for free. |
+| The Chapel Register | Read the torn page for His True Name (one hero loses 4), or burn it to remove a card. |
+| The Bell-founder's Widow | Trade her a card from the deck for the Silvered Bells, or take her Widow's Veil. |
+| The Drowned Well | Drink (the party heals 6), or draw up the bucket for a Keepsake and a fight with the Drowned Watch. |
+| The Quartermaster's Store | Take a card from three rare ones, or a Keepsake that costs one hero 6 health. |
+| The Siege Graves | Dig for a Keepsake (every hero loses 3), or pray to remove a card. With the Broken Seal, a third choice heals everyone 8. |
+| The Survivor | She begs you to follow her. If you do, it is an ambush: a fight. With the Ledger, you recognise the steward's servant and take her Keepsake. |
+| The Mirror Hall | One hero you choose gains 4 maximum health, or removes a card at the cost of 5 health. |
+
+With events in place, the clues return to the sources in the table above: the Thrall's Confession only comes
+from its event, and His True Name from an Elite or its event. The Silvered Bells come from an Investigation
+or the Widow.
+
+### The fourth hero
+
+Open question 4. Proposed: **Corvin, the Penitent** (colour Bone, health 32), a healer who pays in his own
+blood. His cards heal allies and cleanse Bleed, and some get stronger when he is hurt. That fills a gap,
+because the party has no healing in combat, and it fits a Keep run by a man who bargained in blood. He
+brings a new mechanic, **heal an ally**, and uses the existing statuses.
+
 ## Narrative style
 
 - Short, concrete writing, no more than about 60 words per event screen.
@@ -199,7 +262,8 @@ says otherwise.
 3. ~~**Downed heroes.**~~ **Decided (Milestone 3): stand back up with a quarter of max health.** Over 300 runs in the
    balance tool, a hero brought back with 1 health fell again in the next fight 45% of the time, against 35% with a
    quarter. David chose the quarter so a fall still costs something without making that hero useless.
-4. **Fourth hero.** Who is it? This is needed so choosing a party is a real decision.
+4. **Fourth hero.** Who is it? This is needed so choosing a party is a real decision. Proposed in Milestone 5:
+   Corvin, the Penitent (see above).
 5. **Platform.** Steam, itch.io or both? This changes Milestone 7, not the earlier ones.
 6. **Meta-progression.** Should anything unlock between runs, such as new heroes or villains? Currently a
    non-goal.

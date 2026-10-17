@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 4, the mystery (in review).** Milestones 1 to 3 were merged on 2026-10-17.
+**Current milestone: 5, events and replayability (in progress).** Milestones 1 to 4 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -136,7 +136,8 @@ can enter stand out more (Milestone 6 at the latest).
   boss fight and map, and the two endings.
 - **Acceptance criteria:** clues give useful information and measurably change the boss fight or the ending.
 
-Status: in review. Core tests pass in .NET; the Unity screens still need checking in David's Editor.
+Status: done, merged on 2026-10-17 (PR #7). All 318 EditMode tests pass in David's Editor. He played through
+two Investigations without errors. The boss fight with clues and the endings still need a playthrough.
 
 **4a. The mystery in Core**
 - `Mystery/MysteryDefinitions.cs` describes a villain as data: its boss, its clues, each clue's effects, its
@@ -172,6 +173,13 @@ Status: in review. Core tests pass in .NET; the Unity screens still need checkin
 
 - About 8 events (some changed by clues), Keepsakes, a 4th hero and party choice, more cards and enemies.
 - **Acceptance criteria:** two runs with different parties and routes feel noticeably different.
+
+Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes and the party".
+
+- **5a.** Keepsakes and events in Core, with tests, and the clue sources moved back to their events.
+- **5b.** The fourth hero, party choice, six dual cards, more reward cards and two or three enemies. Then tune
+  each party of three with the balance tool.
+- **5c.** Event and Keepsake screens, and the party screen with a choice of three from four.
 
 ## Milestone 6: presentation and polish
 
