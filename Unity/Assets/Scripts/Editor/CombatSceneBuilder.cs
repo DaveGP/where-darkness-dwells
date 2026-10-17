@@ -29,10 +29,12 @@ namespace WhereDarknessDwells.Editor
                 return;
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
+            // Create the scene first: NewScene unloads unused assets, so anything loaded before it would be saved as a
+            // missing reference.
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
             var database = Load<ContentDatabase>(DatabasePath);
             PanelSettings panel = PanelSettingsAsset();
-
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             var camera = new GameObject("Main Camera").AddComponent<Camera>();
             camera.tag = "MainCamera";
