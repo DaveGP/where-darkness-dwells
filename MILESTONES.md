@@ -81,8 +81,11 @@ Status (2026-10-17):
   careless one (random choices) wins 2 in 3, takes about 12 rounds and ends with 19%. Choices matter, so the
   "too easy" reading from Milestone 1's simpler bot was wrong. David chose to keep this difficulty for the first
   fight; harder fights come with Milestone 3's encounters.
-- Open questions 1 and 2 are answered in `GAME_DESIGN.md` from the same tool.
-- Feedback, written and waiting for the Editor check:
+- Open questions 1 and 2 are answered in `GAME_DESIGN.md` from the same tool. Question 3 (how downed heroes
+  return) only matters across a run, so it moves to Milestone 3.
+- Card use is even: in careful play every card is played about once a fight (Stand Guard least, at 0.5) and
+  each hero gets 30 to 38% of activations, so no card or hero needed retuning yet.
+- Feedback, checked in David's Editor (284 EditMode tests pass):
   - enemy intents show what they would really do after Block, Weak, Exposed and Guard
     (`CombatState.PreviewEnemyPhase`);
   - heroes show their incoming damage and warn when it would bring them down;
