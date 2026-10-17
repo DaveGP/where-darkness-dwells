@@ -27,6 +27,8 @@ namespace WhereDarknessDwells.Core
     public sealed class RunState
     {
         public const int RewardChoices = 3;
+        /// <summary>A hero who fell in a won fight stands back up with this share of their maximum health, rounded down (at least 1).</summary>
+        public const int StandUpPercent = 25;
         /// <summary>Resting heals each hero this share of their maximum health, rounded down.</summary>
         public const int RestHealPercent = 30;
 
@@ -117,7 +119,7 @@ namespace WhereDarknessDwells.Core
 
         /// <summary>
         /// After the fight is won or lost: carries the party's health back into the run, then offers a reward, wins
-        /// the expedition after the boss, or ends it if the party fell. Downed heroes stand back up with 1 health.
+        /// the expedition after the boss, or ends it if the party fell. Downed heroes stand back up with a quarter of their health.
         /// </summary>
         public RunResult TryFinishCombat()
         {
@@ -131,7 +133,7 @@ namespace WhereDarknessDwells.Core
                 return RunResult.Success;
             }
 
-            foreach (Combatant hero in Combat.Heroes) _health[hero.Id] = Math.Max(1, hero.Health);
+            foreach (Combatant hero in Combat.Heroes) _health[hero.Id] = hero.IsDown ? StandUpHealth(hero.Id) : hero.Health;
             FightsWon++;
             if (CurrentRoom.Kind == RoomKind.Boss)
             {
@@ -165,6 +167,8 @@ namespace WhereDarknessDwells.Core
             Phase = RunPhase.ChooseRoom;
             return RunResult.Success;
         }
+
+        public int StandUpHealth(string heroId) => Math.Max(1, MaxHealth(heroId) * StandUpPercent / 100);
 
         public int RestHealAmount(string heroId) => MaxHealth(heroId) * RestHealPercent / 100;
 

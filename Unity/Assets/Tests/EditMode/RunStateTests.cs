@@ -101,7 +101,7 @@ namespace WhereDarknessDwells.Tests
         }
 
         [Test]
-        public void HealthCarriesOverAndDownedHeroesStandWithOneHealth()
+        public void HealthCarriesOverAndDownedHeroesStandWithAQuarter()
         {
             foreach (ulong seed in Enumerable.Range(1, 30).Select(s => (ulong)s))
             {
@@ -112,7 +112,7 @@ namespace WhereDarknessDwells.Tests
                 if (run.Phase == RunPhase.Lost) continue;
 
                 foreach (Combatant hero in run.Combat.Heroes)
-                    Assert.That(run.Health(hero.Id), Is.EqualTo(hero.IsDown ? 1 : hero.Health), $"Seed {seed}, {hero}");
+                    Assert.That(run.Health(hero.Id), Is.EqualTo(hero.IsDown ? hero.MaxHealth / 4 : hero.Health), $"Seed {seed}, {hero}");
 
                 Ok(run.TryTakeReward(null));
                 MapRoom next = run.ReachableRooms.FirstOrDefault(r => r.EncounterId != null);

@@ -72,9 +72,9 @@ namespace WhereDarknessDwells.Balance
             Console.WriteLine("          by encounter (won, health lost): " + string.Join(", ", runs.SelectMany(r => r.Encounters).GroupBy(e => e.encounter)
                 .Select(g => $"{g.Key} {100.0 * g.Count(e => e.won) / g.Count():0}% {g.Average(e => e.lostPercent):0}% ({g.Count()})")));
 
-            // Open question 3: what happens to a hero who stood back up with 1 health.
+            // Open question 3: what happens to a hero who stood back up after falling.
             int stoodUp = runs.Sum(r => r.StoodUp), downedAgain = runs.Sum(r => r.DownedAgainNextFight);
-            Console.WriteLine($"          heroes stood up with 1 health {stoodUp / (double)seeds:0.0} a run; down again in the next fight {(stoodUp == 0 ? 0 : 100.0 * downedAgain / stoodUp):0}% of the time");
+            Console.WriteLine($"          heroes stood up after falling {stoodUp / (double)seeds:0.0} a run; down again in the next fight {(stoodUp == 0 ? 0 : 100.0 * downedAgain / stoodUp):0}% of the time");
 
             var taken = runs.SelectMany(r => r.CardsTaken).GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
             Console.WriteLine("          reward cards taken: " + string.Join(", ", StarterContent.RewardCards().Select(c => $"{c.Id} {(taken.TryGetValue(c.Id, out int n) ? n : 0)}")));
