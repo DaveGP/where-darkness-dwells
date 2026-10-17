@@ -26,6 +26,7 @@
                 <ui:Label name="resolve" text="-" class="resolve" />
                 <ui:Label text="Resolve" class="resolve-caption" />
                 <ui:Button name="end-activation" text="End activation" class="end-button" />
+                <ui:Button name="discard" text="Discard a card" class="discard-button" />
                 <ui:Label name="piles" class="piles" />
             </ui:VisualElement>
         </ui:VisualElement>

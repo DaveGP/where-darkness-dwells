@@ -28,6 +28,12 @@ namespace WhereDarknessDwells.Core
                         : $"{source} plays {name} on {target}.";
                 }
 
+                case CombatEventKind.CardDiscarded:
+                {
+                    CardInstance card = combat.FindCard(e.CardInstanceId);
+                    return $"{source} discards {(card == null ? "a card" : combat.CardOf(card).Name)}.";
+                }
+
                 case CombatEventKind.Damaged:
                 {
                     string blocked = e.Blocked > 0 ? $" ({e.Blocked} blocked)" : "";

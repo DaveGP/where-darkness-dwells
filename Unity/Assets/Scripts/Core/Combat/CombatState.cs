@@ -90,6 +90,7 @@ namespace WhereDarknessDwells.Core
             CancelsLeft = other.CancelsLeft;
             CardsPlayed = other.CardsPlayed;
             Activations = other.Activations;
+            HasDiscarded = other.HasDiscarded;
             _rng = other._rng.Copy();
             _heroes = other._heroes.Select(c => c.Copy()).ToList();
             _enemies = other._enemies.Select(c => c.Copy()).ToList();
@@ -132,6 +133,8 @@ namespace WhereDarknessDwells.Core
         /// <summary>Cards played and heroes activated so far this fight. Some Keepsakes only help the first.</summary>
         public int CardsPlayed { get; private set; }
         public int Activations { get; private set; }
+        /// <summary>True once the active hero has used this activation's one discard.</summary>
+        public bool HasDiscarded { get; private set; }
 
         /// <summary>The Resolve a card in the hand costs right now, after Keepsakes.</summary>
         public int CostOf(CardInstance card)
@@ -187,6 +190,7 @@ namespace WhereDarknessDwells.Core
             {
                 Phase = CombatPhase.Activation;
                 ActiveHeroId = hero.Id;
+                HasDiscarded = false;
                 Emit(CombatEventKind.HeroActivated, hero.Id);
                 SetResolve(ResolvePerActivation + (Activations == 0 ? _modifiers.Keepsake(KeepsakeEffectKind.FirstActivationResolve) : 0));
                 Activations++;
@@ -230,6 +234,35 @@ namespace WhereDarknessDwells.Core
                 if (OwnersAllDown(def)) _setAside.Add(card);
                 else _discard.Add(card);
             });
+        }
+
+        /// <summary>
+        /// Moves a card from the hand to the discard pile without playing it, so the next draw replaces it. Any card
+        /// can be discarded, once per activation, for free.
+        /// </summary>
+        public CombatResult TryDiscard(int cardInstanceId)
+        {
+            string reason = WhyCantDiscard(cardInstanceId);
+            if (reason != null) return CombatResult.Refused(reason);
+            CardInstance card = _hand.First(c => c.Id == cardInstanceId);
+            return Run(() =>
+            {
+                _hand.Remove(card);
+                _discard.Add(card);
+                HasDiscarded = true;
+                Emit(CombatEventKind.CardDiscarded, ActiveHeroId, cardInstanceId: card.Id);
+            });
+        }
+
+        /// <summary>Why a card in the hand can't be discarded right now, written for the player, or null if it can.</summary>
+        public string WhyCantDiscard(int cardInstanceId)
+        {
+            string over = Over();
+            if (over != null) return over;
+            if (Phase != CombatPhase.Activation) return "Activate a hero to discard a card.";
+            if (_hand.All(c => c.Id != cardInstanceId)) return "That card isn't in your hand.";
+            if (HasDiscarded) return $"{Name(ActiveHeroId)} has already discarded a card this activation.";
+            return null;
         }
 
         /// <summary>Ends the active hero's turn: the enemies act, statuses tick, and the next turn is dealt.</summary>

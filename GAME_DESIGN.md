@@ -67,6 +67,9 @@ owns a card.
 1. **Draw.** Draw until the hand holds 6 cards. Shuffle the discard pile in when the draw pile runs out.
 2. **Activate.** Choose one standing hero to activate. That hero gets **3 Resolve**. It is the only resource.
 3. **Play.** Play any number of eligible cards. Each card shows its Resolve cost and its target.
+   **Discard (proposed by David, 2026-10-17):** once per activation, the active hero may discard any one card
+   from the hand for free. It goes to the discard pile and the next draw replaces it, so a card nobody can use
+   soon doesn't clog the hand.
 4. **End activation.** Unspent Resolve is lost. **Cards you didn't play stay in your hand.** The next draw
    only tops the hand back up to 6, so planning a turn ahead is rewarded.
 5. **Enemies act.** Each enemy carries out its shown intent, then shows its next one.
