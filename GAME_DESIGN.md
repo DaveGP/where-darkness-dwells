@@ -62,7 +62,7 @@ owns a card.
 - The **starting deck** has 15 cards: 4 for each hero and 3 dual cards, one for each pair of heroes.
 - All cards share one draw pile, one hand and one discard pile.
 
-### Turn structure **(proposed, to be tested in Milestone 1)**
+### Turn structure
 
 1. **Draw.** Draw until the hand holds 6 cards. Shuffle the discard pile in when the draw pile runs out.
 2. **Activate.** Choose one standing hero to activate. That hero gets **3 Resolve**. It is the only resource.
@@ -158,10 +158,11 @@ noticeably easier or changes the ending. The journal shows found clues and blank
 
 ## Open questions
 
-1. **Hand rules.** Is keeping unplayed cards the right call, or should the hand be discarded each turn with
-   a larger draw? This needs a playtest in Milestone 1.
-2. **Benched heroes.** Should heroes who weren't activated get a small benefit, such as 1 Block, so
-   activating only one hero per turn never feels like a waste?
+1. ~~**Hand rules.**~~ **Decided (Milestone 2): keep unplayed cards.** In the balance tool, discarding the hand
+   each turn made Bram nearly useless (activated on 15% of turns instead of 30%), because his cards wait for
+   the right moment.
+2. ~~**Benched heroes.**~~ **Decided (Milestone 2): no bonus.** Giving waiting heroes 1 Block changed results by
+   about 2 percentage points, so it isn't worth the extra rule.
 3. **Downed heroes.** Is "stand back up with 1 health" too forgiving or too harsh?
 4. **Fourth hero.** Who is it? This is needed so choosing a party is a real decision.
 5. **Platform.** Steam, itch.io or both? This changes Milestone 7, not the earlier ones.

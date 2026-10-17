@@ -29,6 +29,7 @@
                 <ui:Label name="piles" class="piles" />
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="floaters" picking-mode="Ignore" class="floaters" />
         <ui:VisualElement name="end-panel" class="end-panel hidden">
             <ui:VisualElement class="end-box">
                 <ui:Label name="end-title" text="Victory" class="end-title" />

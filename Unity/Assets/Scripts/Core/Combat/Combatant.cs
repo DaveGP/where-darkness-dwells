@@ -41,6 +41,20 @@ namespace WhereDarknessDwells.Core
         internal static Combatant ForEnemy(EnemyDef enemy, int index) =>
             new Combatant($"{enemy.Id}#{index}", enemy.Name, null, enemy, enemy.MaxHealth, enemy.MaxHealth);
 
+        internal Combatant Copy()
+        {
+            var copy = new Combatant(Id, Name, Hero, Enemy, MaxHealth, Health)
+            {
+                Block = Block,
+                GuardedBy = GuardedBy,
+                Intent = Intent,
+                IntentTargetId = IntentTargetId,
+                IntentStep = IntentStep,
+            };
+            foreach (KeyValuePair<StatusKind, int> s in _statuses) copy._statuses[s.Key] = s.Value;
+            return copy;
+        }
+
         public bool IsHero => Hero != null;
 
         /// <summary>A hero at 0 health is down; an enemy at 0 health is defeated. Either way they take no further part.</summary>

@@ -70,6 +70,27 @@ namespace WhereDarknessDwells.Core
             if (_draw.Select(c => c.Id).Distinct().Count() != _draw.Count) throw new ArgumentException("Two cards share an instance id.", nameof(deck));
         }
 
+        /// <summary>A copy of everything in the fight, so a choice can be tried without changing this one.</summary>
+        CombatState(CombatState other)
+        {
+            _content = other._content;
+            _rng = other._rng.Copy();
+            _heroes = other._heroes.Select(c => c.Copy()).ToList();
+            _enemies = other._enemies.Select(c => c.Copy()).ToList();
+            _draw.AddRange(other._draw);
+            _hand.AddRange(other._hand);
+            _discard.AddRange(other._discard);
+            _setAside.AddRange(other._setAside);
+            _log.AddRange(other._log);
+            Phase = other.Phase;
+            Round = other.Round;
+            ActiveHeroId = other.ActiveHeroId;
+            Resolve = other.Resolve;
+        }
+
+        /// <summary>An independent copy of the fight. Commands on the copy don't change this one.</summary>
+        public CombatState Clone() => new CombatState(this);
+
         public CombatPhase Phase { get; private set; } = CombatPhase.NotStarted;
         public int Round { get; private set; }
         /// <summary>The active hero's id during an activation, otherwise null.</summary>
@@ -212,6 +233,25 @@ namespace WhereDarknessDwells.Core
         }
 
         public bool CanPlay(int cardInstanceId) => WhyCantPlay(cardInstanceId) == null;
+
+        /// <summary>
+        /// What the enemies' shown intents would do if they acted now, in order: the same events the enemy phase
+        /// produces, with Block, Weak, Exposed, Guard and retargeting already applied. Nothing in this fight
+        /// changes. Statuses ticking at the end of the round aren't included.
+        /// </summary>
+        public IReadOnlyList<CombatEvent> PreviewEnemyPhase()
+        {
+            if (Phase != CombatPhase.ChooseHero && Phase != CombatPhase.Activation) return new CombatEvent[0];
+            CombatState copy = Clone();
+            return copy.Run(() =>
+            {
+                foreach (Combatant enemy in copy._enemies.Where(e => !e.IsDown).ToList())
+                {
+                    copy.Act(enemy);
+                    if (copy.IsOver) return;
+                }
+            }).Events;
+        }
 
         // ---------- card effects ----------
 
