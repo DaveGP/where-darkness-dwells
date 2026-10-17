@@ -98,5 +98,9 @@ Builds/*
 # But track the Builds folder itself (keep empty folder tracked)
 !Builds/.gitkeep
 
-# Third-party Synty assets
+# Third-party Synty assets: never commit (public repo, licence forbids redistribution).
+# Packs import to Assets/Synty/ or Assets/Polygon<Name>/. Check git status after every import.
 Unity/[Aa]ssets/[Ss]ynty/
+Unity/[Aa]ssets/[Ss]ynty.meta
+Unity/[Aa]ssets/[Pp]olygon*/
+Unity/[Aa]ssets/[Pp]olygon*.meta
