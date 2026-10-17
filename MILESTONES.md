@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 5, events and replayability (in progress).** Milestones 1 to 4 were merged on 2026-10-17.
+**Current milestone: 6, menus, saving and the map (in progress).** Milestones 1 to 5 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -174,13 +174,13 @@ two Investigations without errors. The boss fight with clues and the endings sti
 - About 8 events (some changed by clues), Keepsakes, a 4th hero and party choice, more cards and enemies.
 - **Acceptance criteria:** two runs with different parties and routes feel noticeably different.
 
-Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes and the party".
+Status: done, merged as PR #8 (with the card cost contrast in PR #9). The plan is in `GAME_DESIGN.md` under
+"Events, Keepsakes and the party".
 
 - **5a.** Keepsakes and events in Core, with tests, and the clue sources moved back to their events. Done.
 - **5b.** Three new heroes (David chose all three) and party choice of 3 from 6, 12 dual cards, 12 reward
   cards and two enemies. Then tune each party of three with the balance tool. Done; David chose Bloodrage.
-- **5c.** Event and Keepsake screens, and the party screen with a choice of three from six. Built, waiting on an
-  Editor check and a playtest.
+- **5c.** Event and Keepsake screens, and the party screen with a choice of three from six. Done.
 
 **5c. Screens in Unity**
 - Party: all six heroes in two rows, each with their four starting cards. Click to choose three; Enter the Keep
@@ -206,16 +206,38 @@ Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes an
 - One stalemate remains in 2,000 runs, and it is the scripted player's fault: it kept blocking instead of
   finishing two enemies on 1 health.
 
-## Milestone 6: presentation and polish
+## Milestone 6: menus, saving and the map
+
+David split the old Milestone 6 in two (2026-10-17). This one comes first.
+
+- Title, pause and settings menus, and saving between rooms. How saving works is in `GAME_DESIGN.md` under
+  "Saving".
+- The map marks the starting point and makes the rooms you can enter stand out, with an entrance marker and a
+  glow (David's feedback from the Milestone 3 playtest).
+- **Acceptance criteria:** quit in the middle of a run, start the game again, choose Continue and carry on from
+  the same map with the same party, deck, Keepsakes and clues.
+
+Status: built and checked in the Editor (it compiles, all EditMode tests pass, and a quit and Continue in the middle of a fight worked). Waiting on David's playtest.
+
+- **Core:** `RunState.TrySnapshot` and `RunState.TryRestore` with a plain `RunSnapshot`, and tests that a restored
+  run plays on exactly as the original did.
+- **Game:** `SaveFile` (JSON in the player's data folder), `GameSettings` (PlayerPrefs), and `GameMenus` with
+  `Menus.uxml`, a third UI document drawn over the run and combat screens. Build Run Scene adds it, so the Run
+  scene has to be rebuilt once.
+- **Map:** an Entrance marker left of the first layer, and a pulsing glow behind every room the party can enter.
+
+## Milestone 6.5: presentation
 
 - Check which Synty packs are imported, then pick one cohesive set.
-- Room backdrops, a combat stage, lighting, music and sound, animation and feedback.
-- Title, pause and settings menus, and saving between rooms. A short tutorial encounter.
+- Room backdrops, a combat stage, lighting, music and sound (with a volume setting), animation and feedback.
+- A short tutorial encounter.
 
 ## Milestone 7: release preparation
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store
   page.
+- Set the company and product name in Player Settings. They are still Unity's defaults, and the save file's
+  folder is named after them.
 - **Done means** a new player can start the game, learn it, finish a run and reach an ending without help.
 
 ## Creating the Unity project
@@ -230,6 +252,6 @@ Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes an
 
 ## Known limitations and technical debt
 
-- A run can't be saved yet. Saving between rooms is Milestone 6.
+- A run is saved only between rooms. Quitting during a fight or an event starts that room again on Continue.
 - Cloud sessions have no Unity Editor. Unity-side code is checked by David in the Editor, and Core is checked
   by tests.

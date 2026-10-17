@@ -9,12 +9,19 @@ namespace WhereDarknessDwells.Game
 {
     /// <summary>
     /// Draws the floor map from the run's state: layers left to right with the boss at the far right, one button per
-    /// room, and the links between them. Rooms the party can enter now are lit; rooms it can no longer reach are dimmed.
-    /// Once a clue reveals the villain's secret room, it is drawn along the bottom edge under its layer.
+    /// room, and the links between them. The Entrance sits left of the first layer, where every route starts. Rooms the
+    /// party can enter now glow and pulse; rooms it can no longer reach are dimmed. Once a clue reveals the villain's
+    /// secret room, it is drawn along the bottom edge under its layer.
     /// </summary>
     static class MapView
     {
-        const float Margin = 90;
+        /// <summary>Room on the left for the Entrance, and on the right for the boss.</summary>
+        const float Margin = 190;
+        const float EntranceX = 64;
+        const float EntranceWidth = 104, EntranceHeight = 48;
+        /// <summary>How far a reachable room's glow reaches past its edges, and how often it pulses.</summary>
+        const float GlowSpread = 10;
+        const long PulseMs = 800;
         const float MaxRoomGap = 190;
 
         static readonly Color TravelledLine = new Color32(201, 162, 74, 255);
@@ -75,13 +82,16 @@ namespace WhereDarknessDwells.Game
             float roomGap = Math.Min(MaxRoomGap, (height - 80) / (MapGenerator.MaxRoomsPerLayer - 1));
             Vector2 Centre(MapRoom r)
             {
-                float x = Margin + r.Layer * (width - 2 * Margin) / map.LayerCount;
+                float x = Margin + r.Layer * (width - Margin - 90) / map.LayerCount;
                 if (r.Kind == RoomKind.Secret) return new Vector2(x, fullHeight - SecretRow / 2);
                 int count = r.Kind == RoomKind.Boss ? 1 : map.Layer(r.Layer).Count();
                 float y = height / 2 + (r.Column - (count - 1) / 2f) * roomGap;
                 return new Vector2(x, y);
             }
             var shown = secret == null ? map.Rooms.ToList() : map.Rooms.Append(secret).ToList();
+            var entrance = new Vector2(EntranceX, height / 2);
+            bool atStart = run.CurrentRoom == null;
+            MapRoom firstRoom = run.Route.Count > 0 ? map.Room(run.Route[0]) : null;
 
             var lines = new VisualElement { pickingMode = PickingMode.Ignore };
             lines.AddToClassList("map-lines");
@@ -89,6 +99,15 @@ namespace WhereDarknessDwells.Game
             {
                 Painter2D painter = context.painter2D;
                 painter.lineWidth = 3;
+                // From the Entrance to the first layer: open at the start, then only the way the party went in.
+                foreach (MapRoom to in map.Layer(0))
+                {
+                    painter.strokeColor = to == firstRoom ? TravelledLine : atStart ? OpenLine : ClosedLine;
+                    painter.BeginPath();
+                    painter.MoveTo(entrance);
+                    painter.LineTo(Centre(to));
+                    painter.Stroke();
+                }
                 foreach (MapRoom from in shown)
                 foreach (MapRoom to in map.NextOf(from, withSecret: secret != null))
                 {
@@ -105,6 +124,32 @@ namespace WhereDarknessDwells.Game
                 }
             };
             canvas.Add(lines);
+
+            var start = new Label("Entrance") { pickingMode = PickingMode.Ignore };
+            start.AddToClassList("map-entrance");
+            start.EnableInClassList("is-start", atStart);
+            start.style.left = entrance.x - EntranceWidth / 2;
+            start.style.top = entrance.y - EntranceHeight / 2;
+            canvas.Add(start);
+
+            // A glow behind each room the party can enter, pulsing so the next step stands out. The pulse is scheduled
+            // on the glow layer, so it stops when the next draw clears the canvas.
+            var glows = new VisualElement { pickingMode = PickingMode.Ignore };
+            glows.AddToClassList("map-lines");
+            foreach (MapRoom r in reachable)
+            {
+                float w = r.Kind == RoomKind.Boss ? 150 : 128, h = r.Kind == RoomKind.Boss ? 72 : 56;
+                Vector2 c = Centre(r);
+                var glow = new VisualElement { pickingMode = PickingMode.Ignore };
+                glow.AddToClassList("room-glow");
+                glow.style.left = c.x - w / 2 - GlowSpread;
+                glow.style.top = c.y - h / 2 - GlowSpread;
+                glow.style.width = w + 2 * GlowSpread;
+                glow.style.height = h + 2 * GlowSpread;
+                glows.Add(glow);
+            }
+            glows.schedule.Execute(() => glows.ToggleInClassList("is-pulse")).Every(PulseMs);
+            canvas.Add(glows);
 
             foreach (MapRoom room in shown)
             {

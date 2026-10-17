@@ -13,7 +13,7 @@ namespace WhereDarknessDwells.Editor
 {
     /// <summary>
     /// Builds the game's scenes and their panel settings from the assets in the project, so they can be created the
-    /// same way on any machine: the Run scene (the whole game) and the Combat scene (one test fight). Run either
+    /// same way on any machine: the Run scene (the whole game, opening on the title menu) and the Combat scene (one test fight). Run either
     /// again to start that scene over; it asks before replacing it.
     /// </summary>
     public static class CombatSceneBuilder
@@ -63,9 +63,18 @@ namespace WhereDarknessDwells.Editor
             combatFields.FindProperty("startTestFight").boolValue = false;
             combatFields.ApplyModifiedPropertiesWithoutUndo();
 
+            // The title, pause and settings menus draw over everything.
+            var menusObject = new GameObject("Menus");
+            var menusDocument = menusObject.AddComponent<UIDocument>();
+            menusDocument.panelSettings = panel;
+            menusDocument.visualTreeAsset = Load<VisualTreeAsset>("Assets/UI/Menus.uxml");
+            menusDocument.sortingOrder = 2;
+            GameMenus menus = menusObject.AddComponent<GameMenus>();
+
             var flow = new SerializedObject(flowObject.AddComponent<RunFlow>());
             flow.FindProperty("content").objectReferenceValue = database;
             flow.FindProperty("combatScreen").objectReferenceValue = combat;
+            flow.FindProperty("menus").objectReferenceValue = menus;
             flow.FindProperty("heroPanel").objectReferenceValue = Load<VisualTreeAsset>("Assets/UI/HeroPanel.uxml");
             flow.FindProperty("cardView").objectReferenceValue = Load<VisualTreeAsset>("Assets/UI/Card.uxml");
             flow.ApplyModifiedPropertiesWithoutUndo();

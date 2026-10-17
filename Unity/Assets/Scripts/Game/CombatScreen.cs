@@ -141,9 +141,30 @@ namespace WhereDarknessDwells.Game
             finished();
         }
 
+        /// <summary>
+        /// Leaves the fight without finishing it, when the player quits to the title. The run is thrown away with it;
+        /// the save from before the room brings the fight back from its start.
+        /// </summary>
+        public void Abandon()
+        {
+            _onFinished = null;
+            _combat = null;
+            _selectedCard = 0;
+            _root.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>True when Esc belongs to this screen this frame (cancelling a card's target), so it doesn't also pause.</summary>
+        public bool UsesEscape => _selectedCard != 0 || _escapeFrame == Time.frameCount;
+
+        int _escapeFrame = -1;
+
         void Update()
         {
-            if (_selectedCard != 0 && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelTarget();
+            if (_selectedCard != 0 && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                _escapeFrame = Time.frameCount;
+                CancelTarget();
+            }
         }
 
         // ---------- starting a fight ----------
@@ -555,9 +576,10 @@ namespace WhereDarknessDwells.Game
                 label.style.left = area.center.x - origin.x - 60;
                 label.style.top = area.y - origin.y + 40 + row * 26;
                 _floaters.Add(label);
+                label.style.transitionDuration = new StyleList<TimeValue>(new List<TimeValue> { new TimeValue(1.2f * GameSettings.AnimationScale) });
                 label.schedule.Execute(() => label.AddToClassList("floater-gone")).StartingIn(30);
-                label.schedule.Execute(label.RemoveFromHierarchy).StartingIn(1400);
-            }).StartingIn(60 + beat * FloaterGapMs);
+                label.schedule.Execute(label.RemoveFromHierarchy).StartingIn(Scaled(1400));
+            }).StartingIn(60 + Scaled(beat * FloaterGapMs));
         }
 
         void Flash(string enemyId, int beat)
@@ -566,9 +588,12 @@ namespace WhereDarknessDwells.Game
             {
                 if (!_views.TryGetValue(enemyId, out VisualElement view)) return;
                 view.AddToClassList("is-acting");
-                view.schedule.Execute(() => view.RemoveFromClassList("is-acting")).StartingIn(380);
-            }).StartingIn(beat * FloaterGapMs);
+                view.schedule.Execute(() => view.RemoveFromClassList("is-acting")).StartingIn(Scaled(380));
+            }).StartingIn(Scaled(beat * FloaterGapMs));
         }
+
+        /// <summary>A delay in milliseconds at the player's animation speed.</summary>
+        static long Scaled(long ms) => (long)(ms * GameSettings.AnimationScale);
 
         void DrawHealth(VisualElement view, Combatant c)
         {

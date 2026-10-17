@@ -246,6 +246,21 @@ never end: 44% of Bram, Corvin and Hollis's boss fights in the balance tool. The
 Vael's pattern, Bloodrage, gives him Fury 3, so each time his pattern comes round his attacks deal 3 more.
 Fury is a general enemy status (data), not a rule about Vael. With it, no boss fight stalled in 2,000 runs.
 
+## Saving and menus (Milestone 6)
+
+- **Saving.** The run is saved each time the party is back on the map, and once more just before they enter a
+  room. One save slot. It is deleted when the run is won or lost.
+- **Continue** puts the party back on the map. If they quit inside a room, Continue enters that same room again
+  from its start, with the same fight, draws or event, so quitting can't dodge a room or reroll it.
+- The save holds the seed, the party and their health, the deck, Keepsakes, clues, events seen and the route.
+  The map isn't saved: the seed builds it again. A save that no longer fits the content (a card that was
+  removed, say) is refused with a reason, and the title screen offers a new expedition instead.
+- **Title:** Continue (only when there is a save), New Expedition, Settings, Quit.
+- **Pause (Esc):** Resume, Settings, Quit to Title. Quitting keeps the save.
+- **Settings:** fullscreen, and animation speed (normal or fast). Volume comes with sound in Milestone 6.5.
+- **Map:** the first layer's rooms carry an entrance marker before the first room, and every room the party can
+  enter next glows and pulses.
+
 ## Narrative style
 
 - Short, concrete writing, no more than about 60 words per event screen.
@@ -260,7 +275,7 @@ Fury is a general enemy status (data), not a rule about Vael. With it, no boss f
 - Stylised dark fantasy: old stone, restrained warm light against cold shadow, and strong silhouettes.
 - Each hero's colour runs through their cards, portrait frame and activation highlight.
 - Milestones 1 to 5 use placeholders: flat UI, coloured shapes and portrait placeholders.
-- Milestone 6 brings in David's Synty packs (dungeon, horror mansion, and possibly dark fantasy or fortress)
+- Milestone 6.5 brings in David's Synty packs (dungeon, horror mansion, and possibly dark fantasy or fortress)
   for room backdrops, combat stage characters and props. First check which packs are actually in the project.
 
 ## Open questions

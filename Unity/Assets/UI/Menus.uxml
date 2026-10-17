@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatScreen.uss" />
+    <Style src="RunScreen.uss" />
+    <Style src="Menus.uss" />
+    <ui:VisualElement name="menus" class="menus">
+        <ui:VisualElement name="title-view" class="title-view">
+            <ui:Label text="Where Darkness Dwells" class="game-title" />
+            <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep." class="view-text" />
+            <ui:Button name="continue" text="Continue" class="big-button menu-button" />
+            <ui:Button name="new-expedition" text="New Expedition" class="big-button menu-button" />
+            <ui:Button name="title-settings" text="Settings" class="big-button menu-button" />
+            <ui:Button name="quit-game" text="Quit" class="big-button menu-button" />
+            <ui:Label name="title-note" class="hint title-note" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="pause-view" class="menu-overlay hidden">
+            <ui:VisualElement class="menu-panel">
+                <ui:Label text="Paused" class="panel-heading menu-heading" />
+                <ui:Button name="resume" text="Resume" class="big-button menu-button" />
+                <ui:Button name="pause-settings" text="Settings" class="big-button menu-button" />
+                <ui:Button name="quit-to-title" text="Quit to Title" class="big-button menu-button" />
+                <ui:Label text="The expedition is saved each time you return to the map." class="menu-note" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="settings-view" class="menu-overlay hidden">
+            <ui:VisualElement class="menu-panel">
+                <ui:Label text="Settings" class="panel-heading menu-heading" />
+                <ui:Toggle name="fullscreen" label="Fullscreen" class="menu-toggle" />
+                <ui:Toggle name="fast-animations" label="Fast animations" class="menu-toggle" />
+                <ui:Label text="Volume arrives with sound and music." class="menu-note" />
+                <ui:Button name="settings-back" text="Back" class="big-button menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

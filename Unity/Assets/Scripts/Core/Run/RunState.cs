@@ -44,7 +44,7 @@ namespace WhereDarknessDwells.Core
 
         readonly ContentLibrary _content;
         readonly Rng _seedRng;
-        readonly Rng _rewardRng;
+        Rng _rewardRng;
         readonly List<CardInstance> _deck;
         readonly Dictionary<string, int> _health;
         readonly List<int> _route = new List<int>();
@@ -112,6 +112,8 @@ namespace WhereDarknessDwells.Core
 
         public bool IsOver => Phase == RunPhase.Won || Phase == RunPhase.Lost;
         public int FightsWon { get; private set; }
+        /// <summary>True when the party is on the map, the only time the run can be saved.</summary>
+        public bool CanSave => Phase == RunPhase.ChooseRoom;
 
         public VillainDef Villain => Expedition.Villain;
         /// <summary>The clues found so far, in the order they were found.</summary>
@@ -153,6 +155,123 @@ namespace WhereDarknessDwells.Core
             Phase != RunPhase.ChooseRoom ? Enumerable.Empty<MapRoom>()
             : CurrentRoom == null ? Map.Layer(0)
             : Map.NextOf(CurrentRoom, SecretRevealed);
+
+        // ---------- saving ----------
+
+        /// <summary>
+        /// Takes a save of the run on the map. With <paramref name="enteringRoomId"/>, the save is of the moment before
+        /// entering that room, and restoring it enters the room again, so quitting can't dodge or reroll a room.
+        /// </summary>
+        public RunResult TrySnapshot(out RunSnapshot snapshot, int enteringRoomId = -1)
+        {
+            snapshot = null;
+            if (!CanSave) return RunResult.Refused(IsOver ? "The expedition is over." : "The run can only be saved on the map.");
+            if (enteringRoomId >= 0 && !ReachableRooms.Any(r => r.Id == enteringRoomId))
+                return RunResult.Refused("That room isn't connected to this one.");
+            snapshot = new RunSnapshot
+            {
+                ExpeditionId = Expedition.Id,
+                Seed = Seed.ToString(),
+                RewardRngState = _rewardRng.State.ToString(),
+                Heroes = Party.Select(h => new HeroSnapshot
+                {
+                    Id = h,
+                    Health = _health[h],
+                    MaxHealthBonus = _maxHealthBonus.TryGetValue(h, out int bonus) ? bonus : 0,
+                }).ToList(),
+                Deck = _deck.Select(c => new CardSnapshot { Id = c.Id, DefId = c.DefId }).ToList(),
+                NextCardId = _nextCardId,
+                Keepsakes = _keepsakes.ToList(),
+                Clues = _clues.ToList(),
+                EventsSeen = _eventsSeen.ToList(),
+                Route = _route.ToList(),
+                FightsWon = FightsWon,
+                SecretUsed = SecretUsed,
+                EnteringRoomId = enteringRoomId,
+            };
+            return RunResult.Success;
+        }
+
+        /// <summary>
+        /// Carries on a saved run. A save that doesn't fit this content (a card or clue that no longer exists, a route
+        /// the map doesn't have) is refused with a reason and gives no run.
+        /// </summary>
+        public static RunResult TryRestore(ContentLibrary content, ExpeditionDef expedition, RunSnapshot save, out RunState run)
+        {
+            run = null;
+            string wrong = WhyCantRestore(content, expedition, save);
+            if (wrong != null) return RunResult.Refused("The saved expedition can't be loaded: " + wrong);
+
+            var restored = new RunState(content, expedition, ulong.Parse(save.Seed), save.Heroes.Select(h => h.Id).ToList());
+            restored._rewardRng = restored._rewardRng.At(ulong.Parse(save.RewardRngState));
+            foreach (HeroSnapshot hero in save.Heroes)
+            {
+                if (hero.MaxHealthBonus != 0) restored._maxHealthBonus[hero.Id] = hero.MaxHealthBonus;
+                restored._health[hero.Id] = hero.Health;
+            }
+            restored._deck.Clear();
+            restored._deck.AddRange(save.Deck.Select(c => new CardInstance(c.Id, c.DefId)));
+            restored._nextCardId = save.NextCardId;
+            restored._keepsakes.AddRange(save.Keepsakes);
+            restored._clues.AddRange(save.Clues);
+            restored._eventsSeen.AddRange(save.EventsSeen);
+            restored._route.AddRange(save.Route);
+            restored.CurrentRoom = save.Route.Count == 0 ? null : restored.Map.Room(save.Route[save.Route.Count - 1]);
+            restored.FightsWon = save.FightsWon;
+            restored.SecretUsed = save.SecretUsed;
+
+            if (save.EnteringRoomId >= 0)
+            {
+                RunResult entered = restored.TryEnterRoom(save.EnteringRoomId);
+                if (!entered.Ok) return RunResult.Refused("The saved expedition can't be loaded: " + entered.Reason);
+            }
+            run = restored;
+            return RunResult.Success;
+        }
+
+        static string WhyCantRestore(ContentLibrary content, ExpeditionDef expedition, RunSnapshot save)
+        {
+            if (save == null) return "there is no save.";
+            if (save.Version != RunSnapshot.CurrentVersion) return "it was made by another version of the game.";
+            if (save.ExpeditionId != expedition.Id) return "it is from another expedition.";
+            if (!ulong.TryParse(save.Seed, out ulong seed) || !ulong.TryParse(save.RewardRngState, out _)) return "its seed is unreadable.";
+            if (save.Heroes == null || save.Deck == null || save.Keepsakes == null || save.Clues == null || save.EventsSeen == null || save.Route == null)
+                return "it is incomplete.";
+
+            List<string> party = save.Heroes.Select(h => h?.Id).ToList();
+            if (party.Any(h => !content.HasHero(h))) return "it names a hero who doesn't exist.";
+            string badParty = WhyCantChoose(expedition, party);
+            if (badParty != null) return badParty;
+            foreach (HeroSnapshot hero in save.Heroes)
+                if (hero.MaxHealthBonus < 0 || hero.Health < 1 || hero.Health > content.Hero(hero.Id).MaxHealth + hero.MaxHealthBonus)
+                    return $"{content.Hero(hero.Id).Name}'s health is out of range.";
+
+            if (save.Deck.Count == 0) return "the deck is empty.";
+            if (save.Deck.Any(c => c == null || !content.HasCard(c.DefId))) return "the deck holds a card that doesn't exist.";
+            if (save.Deck.Any(c => c.Id < 1) || save.Deck.Select(c => c.Id).Distinct().Count() != save.Deck.Count) return "two cards share an id.";
+            if (save.NextCardId <= save.Deck.Max(c => c.Id)) return "its card ids are out of order.";
+
+            if (save.Keepsakes.Distinct().Count() != save.Keepsakes.Count || save.Keepsakes.Any(k => expedition.Keepsake(k) == null))
+                return "it holds a Keepsake that doesn't exist.";
+            if (save.Clues.Distinct().Count() != save.Clues.Count || save.Clues.Any(c => expedition.Villain?.Clue(c) == null))
+                return "it holds a clue that doesn't exist.";
+            if (save.EventsSeen.Distinct().Count() != save.EventsSeen.Count || save.EventsSeen.Any(e => expedition.Events.All(d => d.Id != e)))
+                return "it remembers an event that doesn't exist.";
+            if (save.FightsWon < 0) return "it is incomplete.";
+
+            // The route has to be a walk through the map the seed builds.
+            MapGraph map = MapGenerator.Generate(expedition, new Rng(seed).Stream("map"));
+            MapRoom at = null;
+            foreach (int id in save.Route)
+            {
+                MapRoom room = map.Room(id);
+                IEnumerable<MapRoom> open = at == null ? map.Layer(0) : map.NextOf(at, withSecret: true);
+                if (room == null || !open.Contains(room)) return "its route doesn't fit the map.";
+                at = room;
+            }
+            if (at != null && at.Kind == RoomKind.Boss) return "the expedition is over.";
+            return null;
+        }
 
         // ---------- commands ----------
 

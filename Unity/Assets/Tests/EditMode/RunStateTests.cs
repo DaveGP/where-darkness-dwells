@@ -31,12 +31,16 @@ namespace WhereDarknessDwells.Tests
             }
         }
 
-        /// <summary>Plays a whole run, always taking the leftmost reachable room and the first card offered.</summary>
-        internal static List<string> PlayRun(RunState run)
+        /// <summary>
+        /// Plays a whole run, always taking the leftmost reachable room and the first card offered. With
+        /// <paramref name="stopAfterRooms"/>, stops on the map once the party has entered that many rooms.
+        /// </summary>
+        internal static List<string> PlayRun(RunState run, int stopAfterRooms = int.MaxValue)
         {
             var log = new List<string>();
             for (int step = 0; step < 100 && !run.IsOver; step++)
             {
+                if (run.Phase == RunPhase.ChooseRoom && run.Route.Count >= stopAfterRooms) break;
                 switch (run.Phase)
                 {
                     case RunPhase.ChooseRoom:
