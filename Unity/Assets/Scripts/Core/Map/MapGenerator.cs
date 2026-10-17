@@ -150,7 +150,8 @@ namespace WhereDarknessDwells.Core
             var room = new MapRoom(id, secret.Layer, layer.Count) { Kind = RoomKind.Secret };
             room.NextIds.Add(layers[secret.Layer + 1].Last().Id);
             map.Secret = room;
-            map._secretFrom.Add(layers[secret.Layer - 1].Last().Id);
+            // Every room on the layer before has a way down, so finding the door is always worth something.
+            foreach (MapRoom from in layers[secret.Layer - 1]) map._secretFrom.Add(from.Id);
         }
 
         static string PickEncounter(ExpeditionDef expedition, MapRoom room, Rng rng)

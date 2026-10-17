@@ -180,16 +180,16 @@ namespace WhereDarknessDwells.Core
                 IntentDef.Attack(5, IntentTarget.AllHeroes, "Lament 5 to all")),
 
             // The boss. Until the party finds the Ledger they only see the vague lines.
-            new EnemyDef(VaelId, "Vael, the Bloodbound Steward", 130,
+            new EnemyDef(VaelId, "Vael, the Bloodbound Steward", 140,
                 IntentDef.Attack(10, IntentTarget.RandomHero, "Blood lash 10").Vaguely("Blood gathers in his hand"),
-                IntentDef.Heal(18, "Blood Tithe: heal 18").Vaguely("He drinks"),
+                IntentDef.Heal(24, "Blood Tithe: heal 24").Vaguely("He drinks"),
                 IntentDef.Apply(StatusKind.Bleed, 2, IntentTarget.AllHeroes, "Hemorrhage: Bleed 2 to all").Vaguely("The air turns red"),
                 IntentDef.Block(14, "Sanguine ward 14").Vaguely("He wraps himself in red"),
                 IntentDef.Attack(16, IntentTarget.HealthiestHero, "Execute 16").Vaguely("He chooses one of you")),
-            new EnemyDef("blood_thrall", "Blood Thrall", 16,
-                IntentDef.Attack(5, IntentTarget.RandomHero, "Claw 5"),
-                IntentDef.Attack(5, IntentTarget.RandomHero, "Claw 5"),
-                IntentDef.Attack(8, IntentTarget.HealthiestHero, "Feed 8")),
+            new EnemyDef("blood_thrall", "Blood Thrall", 10,
+                IntentDef.Attack(4, IntentTarget.RandomHero, "Claw 4"),
+                IntentDef.Attack(4, IntentTarget.RandomHero, "Claw 4"),
+                IntentDef.Attack(6, IntentTarget.HealthiestHero, "Feed 6")),
         };
 
         /// <summary>The Milestone 3 floor of the Keep: the fixed party, the starting deck and every encounter.</summary>

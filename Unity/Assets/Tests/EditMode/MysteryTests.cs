@@ -41,6 +41,8 @@ namespace WhereDarknessDwells.Tests
                 }
                 Assert.That(map.Secret, Is.Not.Null);
                 Assert.That(map.Rooms, Has.No.Member(map.Secret), "The secret room isn't on the visible map.");
+                Assert.That(map.SecretFrom, Is.EquivalentTo(map.Rooms.Where(r => r.Layer == map.Secret.Layer - 1).Select(r => r.Id)),
+                    $"Seed {seed}: every room on the layer before leads to the secret room");
             }
         }
 
@@ -84,7 +86,7 @@ namespace WhereDarknessDwells.Tests
         {
             // The test policy plays simply and can lose on the way, so use the first seed where it gets there.
             RunState run = Enumerable.Range(1, 100).Select(seed => NewRun((ulong)seed))
-                .FirstOrDefault(r => RunStateTests.Walk(r, r.Map.Room(r.Map.SecretFrom.Single())) && Clear(r));
+                .FirstOrDefault(r => RunStateTests.Walk(r, r.Map.Room(r.Map.SecretFrom.First())) && Clear(r));
             Assert.That(run, Is.Not.Null, "The test route should get there on some seed.");
             Assert.That(run.ReachableRooms, Has.No.Member(run.Map.Secret));
 

@@ -154,8 +154,9 @@ says otherwise.
   reward, as the table says.
 - **Before the Ledger,** the boss is shown as "The Master of the Keep". His intents read as vague lines such as
   "Blood gathers", with no numbers or previews. The Ledger shows his real name and exact intents.
-- **The Cistern** is a hidden room in the middle of the map. It is always generated, but only shown and
-  connected once the Cistern Door is found, so the door only appears on layers 1 to 4. Entering it, each
+- **The Cistern** is a hidden room on layer 5. It is always generated, but only shown once the Cistern
+  Door is found, so the door only appears on layers 1 to 4. Every room on layer 4 leads down to it, and it
+  leads on to one room on layer 6. Entering it, each
   hero loses 4 health to destroy Vael's heart, and he starts the fight with 30% less health.
 - **Thralls.** The boss fight is Vael plus two Blood Thralls. The Thrall's Confession removes them.
 - **Blood Tithe** is one of Vael's intents: he heals. **Speak his name** is a button in the boss fight,
