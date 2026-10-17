@@ -134,6 +134,13 @@
     -unity-font-style: bold;
 }
 
+/* Only reachable rooms react to the mouse (see .room.is-reachable:hover). */
+.room:hover,
+.room:active {
+    background-color: rgb(34, 28, 36);
+    color: rgb(150, 140, 146);
+}
+
 .room-combat { border-color: rgb(120, 60, 60); }
 .room-elite { border-color: rgb(200, 70, 60); }
 .room-investigation { border-color: rgb(90, 120, 170); }

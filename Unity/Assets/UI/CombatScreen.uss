@@ -12,6 +12,33 @@
     display: none;
 }
 
+/* ---------- buttons ---------- */
+
+/* Every button, so none falls back to the default theme's light grey under the screen's light text.
+   Map rooms are buttons too; RunScreen.uss loads later and restyles them. */
+.unity-button {
+    background-color: rgb(58, 46, 60);
+    border-color: rgb(110, 88, 70);
+    border-width: 1px;
+    border-radius: 4px;
+    color: rgb(240, 232, 214);
+}
+
+.unity-button:hover {
+    background-color: rgb(80, 64, 82);
+    color: rgb(255, 248, 230);
+}
+
+.unity-button:active {
+    background-color: rgb(44, 35, 46);
+}
+
+.unity-button:disabled {
+    background-color: rgb(34, 28, 36);
+    border-color: rgb(50, 42, 52);
+    color: rgb(150, 140, 146);
+}
+
 /* ---------- top bar ---------- */
 
 .top-bar {
