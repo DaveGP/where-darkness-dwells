@@ -173,7 +173,7 @@ namespace WhereDarknessDwells.Tests
 
             Assert.That(combat.Hand, Has.Count.EqualTo(CombatState.HandSize));
             foreach (int id in before.Where(id => id != shot.Id)) Assert.That(combat.Hand.Select(c => c.Id), Does.Contain(id));
-            Assert.That(combat.Hand.Select(c => c.Id), Does.Not.Contain(shot.Id));
+            Assert.That(combat.Hand.Select(c => c.Id), Has.No.Member(shot.Id));
         }
 
         [Test]
