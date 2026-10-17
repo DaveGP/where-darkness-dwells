@@ -173,6 +173,47 @@
     opacity: 0.35;
 }
 
+/* Where every route starts: bright until the party enters the first room. */
+.map-entrance {
+    position: absolute;
+    width: 104px;
+    height: 48px;
+    -unity-text-align: middle-center;
+    font-size: 15px;
+    -unity-font-style: bold;
+    border-width: 2px;
+    border-radius: 24px;
+    border-color: rgb(110, 96, 106);
+    background-color: rgb(34, 28, 36);
+    color: rgb(150, 140, 146);
+}
+
+.map-entrance.is-start {
+    border-color: rgb(232, 212, 138);
+    background-color: rgb(70, 56, 26);
+    color: rgb(255, 240, 200);
+}
+
+/* Behind each room the party can enter. MapView toggles .is-pulse on the glow layer to make it breathe. */
+.room-glow {
+    position: absolute;
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(240, 200, 120, 0.5);
+    background-color: rgba(240, 190, 100, 0.12);
+    opacity: 0.45;
+    transition-property: opacity, scale;
+    transition-duration: 0.8s;
+    transition-timing-function: ease-in-out;
+}
+
+.is-pulse .room-glow {
+    opacity: 1;
+    scale: 1.06 1.06;
+    border-color: rgba(255, 220, 140, 0.9);
+    background-color: rgba(240, 190, 100, 0.28);
+}
+
 .map-side {
     width: 340px;
     flex-shrink: 0;

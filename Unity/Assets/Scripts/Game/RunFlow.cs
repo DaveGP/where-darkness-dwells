@@ -13,12 +13,15 @@ namespace WhereDarknessDwells.Game
     /// rooms, the journal and the run's end. It shows a
     /// <see cref="RunState"/> and turns clicks into its Try* commands, then shows whichever screen the run's phase
     /// calls for. Fights are handed to the <see cref="CombatScreen"/>, which hands them back when they are over.
+    /// The game opens on the <see cref="GameMenus"/> title. The run is saved each time the party is back on the map
+    /// and just before it enters a room, and the save is deleted when the run ends.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class RunFlow : MonoBehaviour
     {
         [SerializeField] ContentDatabase content;
         [SerializeField] CombatScreen combatScreen;
+        [SerializeField] GameMenus menus;
         [SerializeField] VisualTreeAsset heroPanel;
         [SerializeField] VisualTreeAsset cardView;
         [Tooltip("0 picks a new seed for every expedition. Any other number replays the same map, rewards and fights.")]
@@ -33,6 +36,8 @@ namespace WhereDarknessDwells.Game
         readonly List<string> _chosen = new List<string>();
         // The event choice waiting for the player to say which hero it falls on; -1 when none.
         int _pendingChoice = -1;
+        // Set once OnEnable found everything it needs.
+        bool _ready;
 
         VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
@@ -130,6 +135,7 @@ namespace WhereDarknessDwells.Game
             if (content == null) problems.Add("The run screen has no content database.");
             else _library = content.Build(out problems);
             if (combatScreen == null) problems.Add("The run screen has no combat screen.");
+            if (menus == null) problems.Add("The run screen has no menus. Rebuild the Run scene (Where Darkness Dwells > Build Run Scene).");
             if (heroPanel == null || cardView == null) problems.Add("The run screen is missing a layout.");
             if (problems.Count > 0)
             {
@@ -137,14 +143,82 @@ namespace WhereDarknessDwells.Game
                 return;
             }
             _expedition = content.Expedition.ToDef();
-            ShowParty();
+            menus.ContinueChosen += ContinueRun;
+            menus.NewExpeditionChosen += ShowParty;
+            menus.QuitToTitleChosen += QuitToTitle;
+            menus.EscapeTaken = () => combatScreen.UsesEscape;
+            _ready = true;
+        }
+
+        // The title is shown from Start, once the menus have run their own OnEnable.
+        void Start()
+        {
+            if (_ready) ShowTitle();
+        }
+
+        void OnDisable()
+        {
+            if (menus == null) return;
+            menus.ContinueChosen -= ContinueRun;
+            menus.NewExpeditionChosen -= ShowParty;
+            menus.QuitToTitleChosen -= QuitToTitle;
         }
 
         // ---------- starting ----------
 
+        void ShowTitle(string note = null)
+        {
+            _run = null;
+            DrawTopBar();
+            menus.ShowTitle(SaveFile.Exists, note);
+        }
+
+        /// <summary>Carries on the saved run. A save that can't be loaded is deleted, and the title says why.</summary>
+        void ContinueRun()
+        {
+            RunSnapshot save = SaveFile.Read(out string problem);
+            RunResult result = save == null ? null : RunState.TryRestore(_library, _expedition, save, out _run);
+            if (save == null || !result.Ok)
+            {
+                string why = problem ?? result.Reason;
+                Debug.LogWarning($"[Save] {why} The save was deleted.");
+                SaveFile.Delete();
+                ShowTitle($"{why} Start a new expedition instead.");
+                return;
+            }
+            _found = null;
+            _pendingChoice = -1;
+            menus.CanPause = true;
+            Debug.Log($"[Run] Expedition continued: seed {_run.Seed}, {_run.Route.Count} rooms in" +
+                (save.EnteringRoomId >= 0 ? ", entering the room it was left in." : "."));
+            ShowPhase();
+        }
+
+        /// <summary>Leaves the run, even in the middle of a room. The save from the map or the room's door is kept.</summary>
+        void QuitToTitle()
+        {
+            if (_run?.Phase == RunPhase.Combat) combatScreen.Abandon();
+            Debug.Log("[Run] Quit to the title.");
+            _root.style.display = DisplayStyle.Flex;
+            ShowTitle();
+        }
+
+        void Save()
+        {
+            RunResult result = _run.TrySnapshot(out RunSnapshot snapshot);
+            if (!result.Ok)
+            {
+                Debug.LogError($"[Save] Couldn't save: {result.Reason}");
+                return;
+            }
+            SaveFile.Write(snapshot);
+            Debug.Log($"[Save] Saved on the map, {_run.Route.Count} rooms in.");
+        }
+
         void ShowParty()
         {
             _run = null;
+            menus.CanPause = true;
             _chosen.Clear();
             DrawParty();
             DrawTopBar();
@@ -209,6 +283,8 @@ namespace WhereDarknessDwells.Game
             List<string> party = _expedition.Heroes.Where(_chosen.Contains).ToList();
             _run = new RunState(_library, _expedition, runSeed, party);
             Debug.Log($"[Run] Expedition started: seed {runSeed}, party {string.Join(", ", party)}, {_run.Map.Rooms.Count} rooms.");
+            // A new expedition replaces the saved one.
+            Save();
             ShowPhase();
         }
 
@@ -240,11 +316,20 @@ namespace WhereDarknessDwells.Game
                 return;
             }
             Debug.Log($"[Run] {done}");
+            if (_run.CanSave) Save();
+            else if (_run.IsOver) SaveFile.Delete();
             ShowPhase();
         }
 
-        void EnterRoom(MapRoom room) => Apply(() => _run.TryEnterRoom(room.Id), $"Entered {MapView.Label(room.Kind)} on layer {room.Layer + 1}" +
-            (room.EncounterId != null ? $" ({room.EncounterId})." : "."));
+        void EnterRoom(MapRoom room)
+        {
+            // Saved at the door, so quitting inside the room brings the party back to the same room, not around it.
+            if (_run.TrySnapshot(out RunSnapshot atDoor, room.Id).Ok) SaveFile.Write(atDoor);
+            Apply(() => _run.TryEnterRoom(room.Id), $"Entered {MapView.Label(room.Kind)} on layer {room.Layer + 1}" +
+                (room.EncounterId != null ? $" ({room.EncounterId})." : "."));
+            // Refused, so the party is still outside: save them there again.
+            if (_run.CanSave) Save();
+        }
 
         void OnCombatOver()
         {
@@ -331,7 +416,7 @@ namespace WhereDarknessDwells.Game
 
         void ShowMap()
         {
-            _mapHint.text = _run.CurrentRoom == null ? "Pick one of the rooms on the left to begin." : "Pick a lit room.";
+            _mapHint.text = _run.CurrentRoom == null ? "Start at the Entrance: pick one of the glowing rooms beside it." : "Pick a glowing room.";
             MapView.Draw(_map, _run, EnterRoom, room =>
                 _mapHint.text = room == null ? "" : $"{MapView.Label(_run, room)}. {MapView.Help(room.Kind)}");
             _clueCount.text = _run.Villain == null ? "" : $"Clues found: {_run.CluesFound.Count} of {_run.Villain.Clues.Count}. See the Journal.";

@@ -1,0 +1,74 @@
+/* The title, pause and settings menus. They draw over the run and combat screens. */
+
+.menus {
+    flex-grow: 1;
+    color: rgb(222, 214, 200);
+    font-size: 16px;
+}
+
+.title-view {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(16, 13, 18);
+}
+
+.game-title {
+    font-size: 64px;
+    -unity-font-style: bold;
+    color: rgb(201, 162, 74);
+    margin-bottom: 16px;
+}
+
+.menu-button {
+    margin-top: 12px;
+}
+
+.title-note {
+    width: 640px;
+    height: auto;
+    margin-top: 20px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.menu-overlay {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(10, 8, 12, 0.85);
+}
+
+.menu-panel {
+    width: 420px;
+    padding: 28px 36px;
+    align-items: center;
+    border-width: 2px;
+    border-radius: 8px;
+    border-color: rgb(120, 100, 70);
+    background-color: rgb(30, 25, 30);
+}
+
+.menu-heading {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.menu-toggle {
+    width: 260px;
+    margin-top: 14px;
+    font-size: 18px;
+}
+
+.menu-toggle > .unity-label {
+    color: rgb(222, 214, 200);
+    min-width: 200px;
+}
+
+.menu-note {
+    margin-top: 16px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    color: rgb(150, 140, 146);
+}

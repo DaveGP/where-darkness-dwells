@@ -217,7 +217,14 @@ David split the old Milestone 6 in two (2026-10-17). This one comes first.
 - **Acceptance criteria:** quit in the middle of a run, start the game again, choose Continue and carry on from
   the same map with the same party, deck, Keepsakes and clues.
 
-Status: in progress.
+Status: built, waiting on an Editor check and a playtest.
+
+- **Core:** `RunState.TrySnapshot` and `RunState.TryRestore` with a plain `RunSnapshot`, and tests that a restored
+  run plays on exactly as the original did.
+- **Game:** `SaveFile` (JSON in the player's data folder), `GameSettings` (PlayerPrefs), and `GameMenus` with
+  `Menus.uxml`, a third UI document drawn over the run and combat screens. Build Run Scene adds it, so the Run
+  scene has to be rebuilt once.
+- **Map:** an Entrance marker left of the first layer, and a pulsing glow behind every room the party can enter.
 
 ## Milestone 6.5: presentation
 
