@@ -33,9 +33,11 @@ Assets/Scripts/Core      Rules. No UnityEngine (asmdef: noEngineReferences).
 Assets/Scripts/Content   ScriptableObject authoring types (CardAsset, HeroAsset ...) and ContentDatabase,
                          which converts them to Core definitions and validates ids and references.
 Assets/Scripts/Game      Unity layer: game flow (title > party > map > room > end), screens, input, audio, save.
+Assets/Scripts/Editor    Editor-only tools, such as the menu item that builds the combat scene.
 Assets/UI                UXML and USS.
 Assets/Content           The ScriptableObject assets: cards, heroes, enemies, clues, villains, events.
 Assets/Tests/EditMode    NUnit tests for Core. tests/WhereDarknessDwells.Tests runs the same files in .NET.
+Assets/Tests/Content     Editor-only tests of the content assets. Unity's Test Runner only.
 ```
 
 ### Rules every change follows
