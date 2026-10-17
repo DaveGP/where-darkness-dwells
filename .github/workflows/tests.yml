@@ -1,0 +1,18 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  rules:
+    name: Game rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Run tests
+        run: dotnet test tests/WhereDarknessDwells.Tests/WhereDarknessDwells.Tests.csproj --logger "console;verbosity=normal"

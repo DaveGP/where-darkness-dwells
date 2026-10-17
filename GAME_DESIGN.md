@@ -80,11 +80,11 @@ the enemy that is about to hit hardest.
 
 | Status | Effect | How it ticks |
 | --- | --- | --- |
-| Block | Absorbs damage before health | Removed at the start of the next player turn |
-| Guarded | Attacks aimed at this hero hit Bram instead | Lasts until the next player turn |
+| Block | Absorbs attack damage before health | A hero's Block is removed at the start of the next player turn. An enemy's Block is removed when it next acts. |
+| Guarded | Attacks (not statuses) aimed at this hero hit their guardian instead. A hero can't guard themselves. | Lasts until the next player turn |
 | Exposed | Takes 50% more attack damage | Loses 1 stack at the end of each round |
 | Weak | Deals 25% less attack damage | Loses 1 stack at the end of each round |
-| Bleed | Takes damage equal to its stacks at the end of the round | Then loses 1 stack |
+| Bleed | Takes damage equal to its stacks at the end of the round, ignoring Block | Then loses 1 stack |
 | Hex | Does nothing by itself; Ashe's cards consume stacks for effects | Never ticks down |
 
 **Damage is calculated in a fixed order:** base damage, plus flat bonuses, then multiplied by Weak and then
@@ -97,6 +97,7 @@ Combat rules use no randomness apart from shuffling.
   playable through the other owner.
 - After a won combat, downed heroes stand back up with 1 health.
 - If all three heroes are down, the run is lost.
+- An enemy whose shown target goes down before it acts turns on the healthiest standing hero instead.
 
 ## The map
 

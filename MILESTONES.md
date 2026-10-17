@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 0, project audit and plan (waiting on David's review).**
+**Current milestone: 1a, combat rules (in review).** David agreed the Milestone 0 design on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -19,7 +19,7 @@ Done:
 - [x] `.gitignore` for Unity, with Synty folders excluded.
 
 Waiting on David:
-- [ ] Review the proposed decisions in `GAME_DESIGN.md` (heroes, turn structure, villain).
+- [x] Review the proposed decisions in `GAME_DESIGN.md` (heroes, turn structure, villain). Agreed 2026-10-17.
 - [x] Create the Unity project in this repository. It's in `Unity/` (6000.6.5f1, Universal 3D template).
 - [x] Check the Editor can be driven from a Claude session on David's Mac: it recompiles with 0 errors and
   lists tests.
@@ -35,6 +35,13 @@ The work is split so the rules can be built and tested before the Unity project 
 - Starter content written in code: 3 heroes, 12 hero cards, 3 dual cards, 2 enemy types (a melee brute and
   a caster that applies Weak).
 - A .NET test project and a CI workflow.
+
+Status: written and tested. The code is in `Assets/Scripts/Core` and the tests are in `Assets/Tests/EditMode`.
+.NET runs 235 tests, including 200 seeded fights that an autoplay bot plays to the end. Still to check: the
+same tests in David's Editor.
+
+Known from the bot: it wins all 500 seeds it plays, in about 7 rounds. The first fight is too easy, which is a
+Milestone 2 tuning job.
 
 **1b. Combat screen in Unity**
 - `ScriptableObject` assets for that content, plus `ContentDatabase` with validation.
