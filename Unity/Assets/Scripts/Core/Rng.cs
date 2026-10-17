@@ -26,6 +26,9 @@ namespace WhereDarknessDwells.Core
 
         public static Rng Restore(ulong seed, ulong state) => new Rng(seed, state);
 
+        /// <summary>This generator's stream moved to a saved <see cref="State"/>.</summary>
+        public Rng At(ulong state) => new Rng(_seed, state);
+
         /// <summary>An independent generator at the same position, for trying something out without using up numbers.</summary>
         public Rng Copy() => new Rng(_seed, _state);
 
