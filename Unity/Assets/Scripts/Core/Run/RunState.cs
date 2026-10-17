@@ -18,7 +18,7 @@ namespace WhereDarknessDwells.Core
         Investigation,
         /// <summary>The villain's secret room: act there at a cost, or leave.</summary>
         Secret,
-        /// <summary>An Event room: choose one of <see cref="RunState.EventChoices"/>.</summary>
+        /// <summary>An Event room: choose one of <see cref="RunState.CurrentEvent"/>'s choices with <see cref="RunState.TryChooseEvent"/>.</summary>
         Event,
         /// <summary>An event asked the party to remove a card from the deck: choose it with <see cref="RunState.TryReflect"/>.</summary>
         RemoveCard,

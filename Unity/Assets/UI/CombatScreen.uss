@@ -528,6 +528,21 @@
     background-color: rgb(150, 112, 190);
 }
 
+.owner-bone .combatant-accent,
+.swatch.owner-bone {
+    background-color: rgb(214, 204, 180);
+}
+
+.owner-steel .combatant-accent,
+.swatch.owner-steel {
+    background-color: rgb(120, 156, 196);
+}
+
+.owner-bronze .combatant-accent,
+.swatch.owner-bronze {
+    background-color: rgb(176, 110, 62);
+}
+
 .card.owner-iron {
     background-color: rgb(52, 40, 30);
 }
@@ -538,6 +553,22 @@
 
 .card.owner-ash {
     background-color: rgb(42, 34, 52);
+}
+
+.card.owner-bone {
+    background-color: rgb(50, 47, 40);
+}
+
+.card.owner-steel {
+    background-color: rgb(30, 38, 50);
+}
+
+.card.owner-bronze {
+    background-color: rgb(50, 34, 26);
+}
+
+.card.is-discounted .card-cost {
+    color: rgb(140, 220, 140);
 }
 
 /* ---------- end of fight ---------- */

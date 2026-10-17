@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb0ac7c13ee47b6a6bf7b8f61a1f7e4, type: 3}
+  m_Name: TheChapelRegister
+  m_EditorClassIdentifier: 
+  id: chapel_register
+  title: 'The Chapel Register'
+  scene: 'The chapel''s register lies open on the lectern, every birth and burial of the Keep. The last page is torn, and the ink there is still wet.'
+  choices:
+  - label: 'Read the torn page'
+    result: 'The words cut whoever reads them. One is a name the steward hasn''t used in years.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 11400000, guid: 328f5311776e4ff28c2455ee4220c85b, type: 2}
+    outcomes:
+    - kind: 3
+      amount: 4
+      id: ''
+    - kind: 5
+      amount: 0
+      id: 'true_name'
+  - label: 'Burn the register'
+    result: 'Whatever it held, no one will use it now. You leave something of your own in the flames.'
+    requiresClue: {fileID: 0}
+    hiddenByClue: {fileID: 0}
+    outcomes:
+    - kind: 8
+      amount: 0
+      id: ''

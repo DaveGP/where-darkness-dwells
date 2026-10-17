@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: thrall_confession
   displayName: 'The Thrall''s Confession'
-  sources: 5
+  sources: 4
   minLayer: 1
   maxLayer: 6
   searchCost: 2

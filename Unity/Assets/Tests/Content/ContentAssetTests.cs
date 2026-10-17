@@ -35,15 +35,18 @@ namespace WhereDarknessDwells.Tests
         public void EveryContentAssetIsInTheDatabase()
         {
             ContentLibrary library = Build(out _);
-            foreach (string guid in AssetDatabase.FindAssets("t:HeroAsset t:CardAsset t:EnemyAsset t:ClueAsset", new[] { "Assets/Content" }))
+            ExpeditionDef expedition = Database().Expedition.ToDef();
+            foreach (string guid in AssetDatabase.FindAssets("t:HeroAsset t:CardAsset t:EnemyAsset t:ClueAsset t:KeepsakeAsset t:EventAsset", new[] { "Assets/Content" }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 var asset = AssetDatabase.LoadMainAssetAtPath(path);
                 bool listed = asset is HeroAsset h ? library.HasHero(h.Id)
                     : asset is CardAsset c ? library.HasCard(c.Id)
                     : asset is EnemyAsset e ? library.HasEnemy(e.Id)
-                    : asset is ClueAsset clue && Database().Expedition.ToDef().Villain?.Clue(clue.Id) != null;
-                Assert.That(listed, Is.True, $"{path} isn't listed in the content database (clues: in the expedition's villain).");
+                    : asset is ClueAsset clue ? expedition.Villain?.Clue(clue.Id) != null
+                    : asset is KeepsakeAsset k ? expedition.Keepsake(k.Id) != null
+                    : asset is EventAsset ev && expedition.Events.Any(x => x.Id == ev.Id);
+                Assert.That(listed, Is.True, $"{path} isn't listed in the content database (clues: in the expedition's villain; Keepsakes and events: in the expedition).");
             }
         }
 
@@ -75,6 +78,8 @@ namespace WhereDarknessDwells.Tests
             Assert.That(asset.Villain, Is.Not.Null, "The expedition has no villain.");
             Assert.That(Describe(asset.Villain), Is.EqualTo(Describe(tested.Villain)));
             Assert.That(asset.Villain.Clues.Select(Describe), Is.EqualTo(tested.Villain.Clues.Select(Describe)));
+            Assert.That(asset.Keepsakes.Select(Describe), Is.EqualTo(tested.Keepsakes.Select(Describe)));
+            Assert.That(asset.Events.Select(Describe), Is.EqualTo(tested.Events.Select(Describe)));
         }
 
         static string Describe(HeroDef h) => $"{h.Id}|{h.Name}|{h.Title}|{h.Colour}|{h.MaxHealth}";
@@ -95,6 +100,12 @@ namespace WhereDarknessDwells.Tests
             return $"{v.Id}|{v.BossEnemyId}|{v.HiddenName}|{v.Ending}|{v.TrueEnding}|" +
                 (r == null ? "no secret room" : $"{r.Name},{r.Layer},{r.Scene},{r.ActionLabel},{r.HealthCostPerHero},{r.BossHealthLossPercent}");
         }
+
+        static string Describe(KeepsakeDef k) => $"{k.Id}|{k.Name}|{k.Text}|{k.Kind}|{k.Amount}|{k.Status}";
+
+        static string Describe(EventDef e) =>
+            $"{e.Id}|{e.Title}|{e.Scene}|" + string.Join(";", e.Choices.Select(c =>
+                $"{c.Label},{c.Result},{c.RequiresClue},{c.HiddenByClue}:" + string.Join("+", c.Outcomes.Select(o => $"{o.Kind} {o.Amount} {o.Id}"))));
 
         static string Describe(ClueDef c) =>
             $"{c.Id}|{c.Name}|{c.Sources}|{c.MinLayer}|{c.MaxLayer}|{c.SearchCost}|{c.Scene}|{c.SearchLabel}|{c.Journal}|" +

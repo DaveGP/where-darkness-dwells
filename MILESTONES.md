@@ -178,9 +178,20 @@ Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes an
 
 - **5a.** Keepsakes and events in Core, with tests, and the clue sources moved back to their events. Done.
 - **5b.** Three new heroes (David chose all three) and party choice of 3 from 6, 12 dual cards, 12 reward
-  cards and two enemies. Then tune each party of three with the balance tool. Done, apart from David's call on
-  Bloodrage.
-- **5c.** Event and Keepsake screens, and the party screen with a choice of three from six.
+  cards and two enemies. Then tune each party of three with the balance tool. Done; David chose Bloodrage.
+- **5c.** Event and Keepsake screens, and the party screen with a choice of three from six. Built, waiting on an
+  Editor check and a playtest.
+
+**5c. Screens in Unity**
+- Party: all six heroes in two rows, each with their four starting cards. Click to choose three; Enter the Keep
+  stays disabled until three are chosen.
+- Event: the scene and one button per choice open to the party. A choice that needs a clue names it. A choice
+  that falls on one hero asks which, with what it costs. The result shows before the map or the fight, or on the
+  reward or card-removal screen that follows.
+- Keepsakes: a count in the top bar, an entry each in the Journal, and an Elite's Keepsake on its reward screen.
+  A card made cheaper by a Keepsake shows its cost in green.
+- Assets: `KeepsakeAsset`, `EventAsset`, and the expedition's `heroes`, `keepsakes` and `events` lists (the
+  `party` field was renamed, keeping its data). The content test compares them with `StarterContent`.
 
 **5b. Tuning**
 - `tools/Balance -- parties` plays every party of three and reports wins per party and per hero, and any
@@ -188,7 +199,7 @@ Status: in progress. The plan is in `GAME_DESIGN.md` under "Events, Keepsakes an
 - Corvin's healing was too strong and Hollis dealt too little damage. After tuning (Mend heals 4, Hollis has
   32 health and more damage on his bells), parties with each hero win 45 to 57% of the time for the careful
   player seeking clues, over 100 runs per party.
-- Vael: 150 health and Bloodrage (Fury 3 every sixth step, proposed). The scripted players now value Events,
+- Vael: 150 health and Bloodrage (Fury 3 every sixth step, chosen by David). The scripted players now value Events,
   and Events are 22 in 100 rooms (Combat 42, Investigation 18, Sanctuary 8), so a run sees about 1.4.
 - Results over 200 runs with the first party: 38% wins ignoring clues and 47.5% seeking them (31% with one
   clue, 56% with two, 64% with three, 86% with four). The Thrall's Confession is found in 15% of runs.

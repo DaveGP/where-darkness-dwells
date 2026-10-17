@@ -68,12 +68,34 @@
 
 .party-heroes {
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
+    max-width: 1140px;
 }
 
+/* Six to choose from, in two rows of three. */
 .party-hero {
-    width: 240px;
-    margin: 0 12px;
+    width: 340px;
+    margin: 6px 12px;
+    opacity: 0.6;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+.party-hero:hover {
+    opacity: 0.85;
+}
+
+.party-hero.is-chosen {
+    opacity: 1;
+    border-color: rgb(201, 162, 74);
+}
+
+.party-hero-cards {
+    font-size: 12px;
+    white-space: normal;
+    color: rgb(190, 180, 165);
+    margin-top: 6px;
 }
 
 /* map */
@@ -179,6 +201,13 @@
 
 .choice-row {
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.choice-button.is-selected {
+    border-color: rgb(201, 162, 74);
+    border-width: 2px;
 }
 
 .choice-button {

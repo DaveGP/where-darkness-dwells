@@ -87,7 +87,7 @@ the enemy that is about to hit hardest.
 | Bleed | Takes damage equal to its stacks at the end of the round, ignoring Block | Then loses 1 stack |
 | Hex | Does nothing by itself; Ashe's cards consume stacks for effects | Never ticks down |
 | Riposte | A hero's: when an enemy's attack hits them and they are still standing, the attacker takes that much damage | Removed at the start of the next player turn, like Block |
-| Fury **(proposed, Milestone 5)** | An enemy's: each of its attacks deals that much more base damage | Never ticks down |
+| Fury | An enemy's: each of its attacks deals that much more base damage | Never ticks down |
 
 **Damage is calculated in a fixed order:** base damage, plus flat bonuses, then multiplied by Weak and then
 by Exposed. The result is rounded down, then Block absorbs what it can and the rest comes off health.
@@ -239,10 +239,10 @@ David chose to add all three proposed heroes, so the party is a choice of 3 from
 - **Hollis, the Bellwright** (Bronze, 32 health): bells that reach every enemy or every hero at once, with
   Weak, Exposed and Block.
 
-### Vael's Bloodrage **(proposed, Milestone 5; waiting on David)**
+### Vael's Bloodrage **(decided: David, 2026-10-17)**
 
 Some new parties heal faster than Vael hurts them and deal less than his Blood Tithe heals, so the fight could
-never end: 44% of Bram, Corvin and Hollis's boss fights in the balance tool. Proposed fix: a sixth step in
+never end: 44% of Bram, Corvin and Hollis's boss fights in the balance tool. The fix: a sixth step in
 Vael's pattern, Bloodrage, gives him Fury 3, so each time his pattern comes round his attacks deal 3 more.
 Fury is a general enemy status (data), not a rule about Vael. With it, no boss fight stalled in 2,000 runs.
 
