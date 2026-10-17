@@ -52,6 +52,7 @@ namespace WhereDarknessDwells.Game
         Action _onFinished; // Set while showing a run's fight: called when the player leaves the end panel.
         VisualElement _root;
         int _selectedCard; // Instance id of the card waiting for a target; 0 when none.
+        bool _discarding; // True while the player is choosing a card to discard.
         IReadOnlyList<CombatEvent> _preview = new CombatEvent[0]; // What the enemies would do if they acted now.
         readonly Dictionary<string, VisualElement> _views = new Dictionary<string, VisualElement>();
         readonly List<KeyValuePair<CardDef, VisualElement>> _cardViews = new List<KeyValuePair<CardDef, VisualElement>>();
@@ -59,7 +60,7 @@ namespace WhereDarknessDwells.Game
         Label _round, _prompt, _seedLabel, _hint, _resolve, _piles, _endTitle, _endText;
         VisualElement _enemyRow, _heroRow, _hand, _endPanel, _floaters;
         ScrollView _log;
-        Button _endActivation, _again;
+        Button _endActivation, _discard, _again;
 
         void OnEnable()
         {
@@ -79,14 +80,17 @@ namespace WhereDarknessDwells.Game
             _floaters = root.Q("floaters");
             _log = root.Q<ScrollView>("log");
             _endActivation = root.Q<Button>("end-activation");
+            _discard = root.Q<Button>("discard");
             _again = root.Q<Button>("again");
 
             _endActivation.clicked += () =>
             {
                 if (_combat == null) return;
                 _selectedCard = 0;
+                _discarding = false;
                 Apply(() => _combat.TryEndActivation());
             };
+            _discard.clicked += OnDiscardClicked;
             _again.clicked += OnEndButton;
             // Right-click anywhere cancels choosing a target.
             root.RegisterCallback<PointerDownEvent>(e => { if (e.button == 1) CancelTarget(); }, TrickleDown.TrickleDown);
@@ -154,13 +158,13 @@ namespace WhereDarknessDwells.Game
         }
 
         /// <summary>True when Esc belongs to this screen this frame (cancelling a card's target), so it doesn't also pause.</summary>
-        public bool UsesEscape => _selectedCard != 0 || _escapeFrame == Time.frameCount;
+        public bool UsesEscape => _selectedCard != 0 || _discarding || _escapeFrame == Time.frameCount;
 
         int _escapeFrame = -1;
 
         void Update()
         {
-            if (_selectedCard != 0 && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            if ((_selectedCard != 0 || _discarding) && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 _escapeFrame = Time.frameCount;
                 CancelTarget();
@@ -242,6 +246,11 @@ namespace WhereDarknessDwells.Game
 
         void OnCardClicked(CardInstance card)
         {
+            if (_discarding)
+            {
+                Discard(card.Id);
+                return;
+            }
             if (_selectedCard == card.Id)
             {
                 CancelTarget();
@@ -280,9 +289,43 @@ namespace WhereDarknessDwells.Game
 
         void CancelTarget()
         {
-            if (_selectedCard == 0) return;
+            if (_selectedCard == 0 && !_discarding) return;
             _selectedCard = 0;
+            _discarding = false;
             Redraw();
+        }
+
+        /// <summary>Discards the card waiting for a target, or else asks which card to discard.</summary>
+        void OnDiscardClicked()
+        {
+            if (_combat == null) return;
+            if (_selectedCard != 0)
+            {
+                Discard(_selectedCard);
+                return;
+            }
+            string reason = _combat.Hand.Count == 0 ? "There's nothing in your hand to discard." : _combat.WhyCantDiscard(_combat.Hand[0].Id);
+            if (reason != null)
+            {
+                Refuse(reason);
+                return;
+            }
+            _discarding = !_discarding;
+            Redraw();
+        }
+
+        void Discard(int cardId)
+        {
+            Apply(() =>
+            {
+                CombatResult result = _combat.TryDiscard(cardId);
+                if (result.Ok)
+                {
+                    _selectedCard = 0;
+                    _discarding = false;
+                }
+                return result;
+            });
         }
 
         // ---------- drawing ----------
@@ -299,6 +342,9 @@ namespace WhereDarknessDwells.Game
             _prompt.text = Prompt(selected);
             _resolve.text = _combat.Phase == CombatPhase.Activation ? _combat.Resolve.ToString() : "-";
             _endActivation.SetEnabled(_combat.Phase == CombatPhase.Activation);
+            _discard.SetEnabled(_combat.Phase == CombatPhase.Activation && !_combat.HasDiscarded && _combat.Hand.Count > 0);
+            _discard.text = selected != null ? $"Discard {selected.Name}" : _discarding ? "Cancel discard" : "Discard a card";
+            _discard.EnableInClassList("is-selected", _discarding);
             _piles.text = $"Draw {_combat.DrawPile.Count}   Discard {_combat.DiscardPile.Count}" +
                 (_combat.SetAside.Count > 0 ? $"   Set aside {_combat.SetAside.Count}" : "");
 
@@ -327,6 +373,7 @@ namespace WhereDarknessDwells.Game
             {
                 case CombatPhase.ChooseHero: return "Choose a hero to activate.";
                 case CombatPhase.Activation:
+                    if (_discarding) return "Choose a card to discard. The next draw replaces it. Right-click or Esc to cancel.";
                     if (selected != null)
                         return $"Choose {(selected.Target == CardTarget.Enemy ? "an enemy" : "an ally")} for {selected.Name}. Right-click or Esc to cancel.";
                     return $"{_combat.Find(_combat.ActiveHeroId).Name} is active. Play their cards, then end the activation.";
@@ -463,13 +510,13 @@ namespace WhereDarknessDwells.Game
             view.EnableInClassList("is-discounted", cost < def.Cost);
 
             string reason = _combat.WhyCantPlay(card.Id);
-            view.EnableInClassList("is-unplayable", reason != null);
+            view.EnableInClassList("is-unplayable", reason != null && !_discarding);
             view.EnableInClassList("is-selected", card.Id == _selectedCard);
             string boost = Boost(def);
             view.EnableInClassList("is-boosted", boost != null);
             _cardViews.Add(new KeyValuePair<CardDef, VisualElement>(def, view));
 
-            string help = reason ?? (def.Target == CardTarget.None ? $"Click to play {def.Name}." : $"Click {def.Name}, then choose {(def.Target == CardTarget.Enemy ? "an enemy" : "an ally")}.");
+            string help = _discarding ? $"Click to discard {def.Name}." : reason ?? (def.Target == CardTarget.None ? $"Click to play {def.Name}." : $"Click {def.Name}, then choose {(def.Target == CardTarget.Enemy ? "an enemy" : "an ally")}.");
             if (boost != null) help += " " + boost;
             // Guard is explained here rather than on the card, so the card's text stays short enough to fit.
             if (def.Effects.Any(e => e.Kind == EffectKind.Guard)) help += " Guard: attacks aimed at that ally hit the guard instead.";

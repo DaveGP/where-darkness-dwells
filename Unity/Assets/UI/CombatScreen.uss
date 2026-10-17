@@ -435,6 +435,20 @@
     font-size: 16px;
 }
 
+/* One free discard per activation. Lit while the player is choosing which card. */
+.discard-button {
+    width: 170px;
+    height: 32px;
+    margin-top: 8px;
+    font-size: 13px;
+    white-space: normal;
+}
+
+.discard-button.is-selected {
+    border-color: rgb(232, 212, 138);
+    background-color: rgb(80, 64, 40);
+}
+
 .piles {
     margin-top: 12px;
     font-size: 12px;
