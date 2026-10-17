@@ -1,0 +1,49 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# IDE and generated project files
+.vs/
+.vscode/
+.idea/
+*.csproj
+!tests/**/*.csproj
+*.sln
+!tests/**/*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# .NET test project output
+tests/**/bin/
+tests/**/obj/
+
+# Builds
+/[Bb]uilds/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Licensed third-party art: never commit (public repository, licence forbids redistribution).
+/Assets/Synty/
+/Assets/Synty.meta
+/Assets/Polygon*/
+/Assets/Polygon*.meta
