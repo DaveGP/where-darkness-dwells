@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 1b, combat screen (in progress).** 1a, the combat rules, is in review. David agreed the
+**Current milestone: 1b, combat screen (in review).** 1a, the combat rules, is in review. David agreed the
 Milestone 0 design on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
@@ -65,7 +65,10 @@ Status: written. The pieces:
   and a seed. A seed of 0 picks a new one each fight; the seed is shown at the top right so a fight can be
   replayed.
 
-Still to check in the Editor: that it compiles, the scene builds, and a fight can be played to the end.
+Checked in David's Editor (2026-10-17): it compiles with no warnings, 241 EditMode tests pass (238 rules tests
+and 3 content asset tests), the scene builds, and a fight starts and plays through activation, a targeted
+card, a refused card and the enemy phase with no Console errors. Still to check by David: playing a fight to
+victory or defeat, and how the screen looks.
 
 **Acceptance criteria**
 - David can press Play, complete one encounter and win or lose it.
