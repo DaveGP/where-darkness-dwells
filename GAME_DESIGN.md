@@ -139,7 +139,7 @@ rumours: a plague, a curse, a missing lord. The clues reveal who is really respo
 A typical route finds 3 or 4 of the 6 clues. You can win without any clues, but each one makes the boss
 noticeably easier or changes the ending. The journal shows found clues and blank spaces for missing ones.
 
-### How the clues work **(proposed, Milestone 4)**
+### How the clues work (Milestone 4)
 
 These fill in details the table above leaves open. Each one is a default until David agrees or a playtest
 says otherwise.

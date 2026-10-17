@@ -1,4 +1,5 @@
-/* Run screens: party, map, reward, Sanctuary, unwritten rooms and the run's end. Card and panel styles come from
+/* Run screens: party, map, reward, Sanctuary, Investigation, the secret room, unwritten rooms, the journal and the
+   run's end. Card and panel styles come from
    CombatScreen.uss. */
 
 .view {
@@ -116,6 +117,7 @@
 .room-investigation { border-color: rgb(90, 120, 170); }
 .room-event { border-color: rgb(130, 110, 160); }
 .room-sanctuary { border-color: rgb(110, 160, 100); }
+.room-secret { border-color: rgb(90, 160, 170); }
 .room-boss { border-color: rgb(201, 162, 74); width: 150px; height: 72px; font-size: 20px; }
 
 .room.is-reachable {
@@ -213,4 +215,97 @@
     color: rgb(190, 182, 172);
     -unity-text-align: middle-center;
     white-space: normal;
+}
+
+/* clues */
+
+.view-subtext {
+    width: 760px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    font-size: 15px;
+    color: rgb(190, 182, 172);
+    margin-bottom: 16px;
+}
+
+.found-clue {
+    width: 760px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    font-size: 17px;
+    color: rgb(150, 190, 240);
+    margin-bottom: 18px;
+}
+
+.clue-count {
+    margin-top: 24px;
+    font-size: 15px;
+    color: rgb(150, 190, 240);
+}
+
+.journal-button {
+    height: 30px;
+    margin-left: 18px;
+    font-size: 14px;
+}
+
+.journal-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(10, 8, 12, 0.85);
+}
+
+.journal-page {
+    width: 820px;
+    max-height: 90%;
+    padding: 28px 36px;
+    align-items: center;
+    border-width: 2px;
+    border-radius: 8px;
+    border-color: rgb(120, 100, 70);
+    background-color: rgb(30, 25, 30);
+}
+
+.journal-scroll {
+    width: 100%;
+    flex-shrink: 1;
+}
+
+.journal-entry {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-left-width: 3px;
+    border-color: rgb(90, 120, 170);
+}
+
+.journal-entry.is-unknown {
+    border-color: rgb(60, 54, 62);
+}
+
+.journal-entry-name {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(232, 212, 138);
+}
+
+.journal-entry.is-unknown .journal-entry-name {
+    color: rgb(110, 100, 108);
+}
+
+.journal-entry-text {
+    white-space: normal;
+    font-size: 15px;
+}
+
+.searcher {
+    width: 260px;
+}
+
+.searcher.is-unavailable {
+    opacity: 0.45;
 }

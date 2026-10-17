@@ -8,6 +8,7 @@
             <ui:VisualElement name="party-health" class="party-health" />
             <ui:Label name="deck-count" class="deck-count" />
             <ui:Label name="seed" class="seed" />
+            <ui:Button name="journal" text="Journal" class="journal-button hidden" />
         </ui:VisualElement>
 
         <ui:VisualElement name="party-view" class="view centred">
@@ -23,12 +24,14 @@
                 <ui:Label text="Choose a room" class="panel-heading" />
                 <ui:Label name="map-hint" class="map-hint" />
                 <ui:Label text="Rooms you can enter next are lit. Your route so far is marked in gold." class="map-legend" />
+                <ui:Label name="clue-count" class="clue-count" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:VisualElement name="reward-view" class="view centred">
             <ui:Label text="Victory" class="view-title" />
             <ui:Label text="Choose a card to add to the deck, or skip." class="view-text" />
+            <ui:Label name="reward-clue" class="found-clue hidden" />
             <ui:VisualElement name="reward-cards" class="card-row" />
             <ui:Label name="reward-hint" class="hint" />
             <ui:Button name="skip-reward" text="Skip" class="big-button" />
@@ -49,6 +52,30 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <ui:VisualElement name="investigation-view" class="view centred">
+            <ui:Label text="Investigation" class="view-title" />
+            <ui:Label name="investigation-text" class="view-text" />
+            <ui:Label name="search-help" class="view-subtext" />
+            <ui:VisualElement name="searchers" class="choice-row" />
+            <ui:Label name="investigation-hint" class="hint" />
+            <ui:Button name="leave-investigation" text="Leave it and return to the map" class="big-button" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="secret-view" class="view centred">
+            <ui:Label name="secret-title" class="view-title" />
+            <ui:Label name="secret-text" class="view-text" />
+            <ui:VisualElement class="choice-row">
+                <ui:Button name="use-secret" class="choice-button" />
+                <ui:Button name="leave-secret" text="Leave it and return to the map" class="choice-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="found-view" class="view centred">
+            <ui:Label name="found-title" class="view-title" />
+            <ui:Label name="found-text" class="view-text" />
+            <ui:Button name="found-continue" text="Return to the map" class="big-button" />
+        </ui:VisualElement>
+
         <ui:VisualElement name="unwritten-view" class="view centred">
             <ui:Label name="unwritten-title" class="view-title" />
             <ui:Label name="unwritten-text" class="view-text" />
@@ -60,6 +87,17 @@
             <ui:Label name="run-end-text" class="view-text" />
             <ui:Label name="run-end-summary" class="run-summary" />
             <ui:Button name="new-expedition" text="New expedition" class="big-button" />
+        </ui:VisualElement>
+
+        <!-- Opens over the map from the Journal button. -->
+        <ui:VisualElement name="journal-panel" class="journal-panel hidden">
+            <ui:VisualElement class="journal-page">
+                <ui:Label text="Journal" class="view-title" />
+                <ui:ScrollView class="journal-scroll">
+                    <ui:VisualElement name="journal-entries" />
+                </ui:ScrollView>
+                <ui:Button name="journal-close" text="Close" class="big-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

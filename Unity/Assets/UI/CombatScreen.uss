@@ -421,6 +421,34 @@
     -unity-font-style: bold;
 }
 
+/* An intent the party only sees vaguely, before a clue explains the enemy. */
+.intent.is-vague .intent-text {
+    -unity-font-style: italic;
+    color: rgb(210, 170, 190);
+}
+
+/* An intent the party cancelled with a clue. */
+.intent.is-cancelled {
+    background-color: rgb(40, 40, 48);
+}
+
+.intent.is-cancelled .intent-text {
+    color: rgb(150, 150, 160);
+}
+
+.cancel-intent {
+    margin: 0 0 8px 0;
+    height: 30px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    border-color: rgb(201, 162, 74);
+    color: rgb(232, 212, 138);
+}
+
+.cancel-intent.is-unavailable {
+    opacity: 0.45;
+}
+
 .intent-outcome {
     font-size: 13px;
     color: rgb(255, 170, 150);
@@ -472,6 +500,10 @@
 
 .floater-block {
     color: rgb(130, 180, 255);
+}
+
+.floater-heal {
+    color: rgb(120, 220, 120);
 }
 
 .floater-status {

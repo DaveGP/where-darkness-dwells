@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 4, the mystery (in progress).** Milestones 1 to 3 were merged on 2026-10-17.
+**Current milestone: 4, the mystery (in review).** Milestones 1 to 3 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -136,6 +136,38 @@ can enter stand out more (Milestone 6 at the latest).
   boss fight and map, and the two endings.
 - **Acceptance criteria:** clues give useful information and measurably change the boss fight or the ending.
 
+Status: in review. Core tests pass in .NET; the Unity screens still need checking in David's Editor.
+
+**4a. The mystery in Core**
+- `Mystery/MysteryDefinitions.cs` describes a villain as data: its boss, its clues, each clue's effects, its
+  secret room and its two endings. `RunState` and `Combat/CombatModifiers.cs` interpret the effect kinds;
+  nothing checks which villain it is. `StarterContent.Vael()` is the first villain, as `GAME_DESIGN.md` lists.
+- Investigation rooms each hold a different clue that fits their layer. `RunState.TrySearch(heroId)` costs the
+  chosen hero health, and `TryUseSecret()` handles the Cistern.
+- The boss fight gets Vael's display name, vague intents, bonus damage, starting health and the "Speak his
+  name" cancel from the clues found (`RunState.BossModifiers`).
+- Changed while building it: every room on layer 4 leads down to the Cistern, not just one. With one entrance,
+  the door was found in 28% of runs but the Cistern only reached in 3%.
+
+**4b. Tuning**
+- `tools/Balance -- run` now plays the careful player twice, ignoring clues and seeking them, and reports boss
+  wins by the number of clues found. `-- boss` measures each clue on its own in the boss fight.
+- The careful player now clears small, dangerous enemies first. Before, it poured damage into Vael and made
+  every clue that weakened him look harmful.
+- Vael: 140 health, Blood Tithe heals 24. Blood Thralls: 10 health, Claw 4, Feed 6.
+- Results over 300 runs: ignoring clues, the careful player beats Vael in 34% of the runs that reach him.
+  Seeking clues, it beats him in 24% with one clue, 49% with two, 66% with three and 75% with four. In the boss
+  fight alone, the Confession and the Silvered Bells matter most, the Cistern next, and His True Name least.
+- The tool can't measure the Ledger: its player sees the exact intents either way.
+
+**4c. Screens in Unity**
+- Investigation: the scene, one button per hero to search and pay, and Leave. The clue's journal text follows.
+- The Cistern appears along the bottom of the map once its door is found, and has its own room screen.
+- A Journal button in the top bar lists every clue, found or not. An Elite's clue shows on its reward screen.
+- In the boss fight, vague intents show only their line, with no numbers, target or outcome, and the heroes'
+  incoming damage leaves them out. "Speak his name" is a button on Vael's panel.
+- The end screen shows the normal or the true ending, and the clues found.
+
 ## Milestone 5: events and replayability
 
 - About 8 events (some changed by clues), Keepsakes, a 4th hero and party choice, more cards and enemies.
@@ -165,7 +197,6 @@ can enter stand out more (Milestone 6 at the latest).
 
 ## Known limitations and technical debt
 
-- Vael is a placeholder enemy with ordinary intents. His own rules and the clue effects come with Milestone 4.
 - A run can't be saved yet. Saving between rooms is Milestone 6.
 - Cloud sessions have no Unity Editor. Unity-side code is checked by David in the Editor, and Core is checked
   by tests.

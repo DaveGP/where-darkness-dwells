@@ -10,6 +10,7 @@ namespace WhereDarknessDwells.Game
     /// <summary>
     /// Draws the floor map from the run's state: layers left to right with the boss at the far right, one button per
     /// room, and the links between them. Rooms the party can enter now are lit; rooms it can no longer reach are dimmed.
+    /// Once a clue reveals the villain's secret room, it is drawn along the bottom edge under its layer.
     /// </summary>
     static class MapView
     {
@@ -20,6 +21,13 @@ namespace WhereDarknessDwells.Game
         static readonly Color OpenLine = new Color32(232, 222, 200, 255);
         static readonly Color AheadLine = new Color32(110, 96, 106, 255);
         static readonly Color ClosedLine = new Color32(48, 40, 50, 255);
+        static readonly Color SecretLine = new Color32(90, 160, 170, 255);
+        /// <summary>Room for the secret room under the others, when it is shown.</summary>
+        const float SecretRow = 110;
+
+        /// <summary>The room's button text: its kind, or the secret room's own name.</summary>
+        public static string Label(RunState run, MapRoom room) =>
+            room.Kind == RoomKind.Secret && run.Villain?.SecretRoom != null ? run.Villain.SecretRoom.Name : Label(room.Kind);
 
         public static string Label(RoomKind kind)
         {
@@ -30,6 +38,7 @@ namespace WhereDarknessDwells.Game
                 case RoomKind.Investigation: return "Investigate";
                 case RoomKind.Event: return "Event";
                 case RoomKind.Sanctuary: return "Sanctuary";
+                case RoomKind.Secret: return "Hidden room";
                 default: return "The Lair";
             }
         }
@@ -40,9 +49,10 @@ namespace WhereDarknessDwells.Game
             {
                 case RoomKind.Combat: return "A fight. Win it to choose 1 of 3 cards for the deck.";
                 case RoomKind.Elite: return "A harder fight. Win it to choose 1 of 3 cards for the deck.";
-                case RoomKind.Investigation: return "Search the room for clues. Clues arrive in Milestone 4; for now the room is empty.";
+                case RoomKind.Investigation: return "Search the room for a clue about who rules the Keep. Searching costs one hero some health.";
                 case RoomKind.Event: return "A short scene with choices. Events arrive in Milestone 5; for now the room is empty.";
                 case RoomKind.Sanctuary: return "Rest to heal everyone 30% of their health, or Reflect to remove a card from the deck.";
+                case RoomKind.Secret: return "A hidden room your clues led you to. Every room on the layer before leads down to it.";
                 default: return "Whatever waits at the heart of the Keep. Win here to end the expedition.";
             }
         }
@@ -52,22 +62,26 @@ namespace WhereDarknessDwells.Game
             canvas.Clear();
             MapGraph map = run.Map;
             var reachable = new HashSet<MapRoom>(run.ReachableRooms);
+            MapRoom secret = run.SecretRevealed ? map.Secret : null;
             var visited = new HashSet<int>(run.Route);
-            HashSet<MapRoom> ahead = Ahead(run);
+            HashSet<MapRoom> ahead = Ahead(run, run.SecretRevealed);
 
             // Spread the rooms over the canvas's measured size. Before its first layout, assume a typical size; the
             // caller draws again when the size is known.
             Rect area = canvas.contentRect;
             float width = float.IsNaN(area.width) || area.width < 1 ? 1500 : area.width;
-            float height = float.IsNaN(area.height) || area.height < 1 ? 900 : area.height;
+            float fullHeight = float.IsNaN(area.height) || area.height < 1 ? 900 : area.height;
+            float height = secret == null ? fullHeight : fullHeight - SecretRow;
             float roomGap = Math.Min(MaxRoomGap, (height - 80) / (MapGenerator.MaxRoomsPerLayer - 1));
             Vector2 Centre(MapRoom r)
             {
-                int count = r.Kind == RoomKind.Boss ? 1 : map.Layer(r.Layer).Count();
                 float x = Margin + r.Layer * (width - 2 * Margin) / map.LayerCount;
+                if (r.Kind == RoomKind.Secret) return new Vector2(x, fullHeight - SecretRow / 2);
+                int count = r.Kind == RoomKind.Boss ? 1 : map.Layer(r.Layer).Count();
                 float y = height / 2 + (r.Column - (count - 1) / 2f) * roomGap;
                 return new Vector2(x, y);
             }
+            var shown = secret == null ? map.Rooms.ToList() : map.Rooms.Append(secret).ToList();
 
             var lines = new VisualElement { pickingMode = PickingMode.Ignore };
             lines.AddToClassList("map-lines");
@@ -75,13 +89,15 @@ namespace WhereDarknessDwells.Game
             {
                 Painter2D painter = context.painter2D;
                 painter.lineWidth = 3;
-                foreach (MapRoom from in map.Rooms)
-                foreach (MapRoom to in map.NextOf(from))
+                foreach (MapRoom from in shown)
+                foreach (MapRoom to in map.NextOf(from, withSecret: secret != null))
                 {
                     bool travelled = visited.Contains(from.Id) && visited.Contains(to.Id);
                     bool open = from == run.CurrentRoom && reachable.Contains(to);
                     bool stillAhead = (from == run.CurrentRoom || ahead.Contains(from)) && ahead.Contains(to);
-                    painter.strokeColor = travelled ? TravelledLine : open ? OpenLine : stillAhead ? AheadLine : ClosedLine;
+                    bool hidden = from == secret || to == secret;
+                    painter.strokeColor = travelled ? TravelledLine : open ? OpenLine
+                        : hidden && (stillAhead || from == secret) ? SecretLine : stillAhead ? AheadLine : ClosedLine;
                     painter.BeginPath();
                     painter.MoveTo(Centre(from));
                     painter.LineTo(Centre(to));
@@ -90,10 +106,10 @@ namespace WhereDarknessDwells.Game
             };
             canvas.Add(lines);
 
-            foreach (MapRoom room in map.Rooms)
+            foreach (MapRoom room in shown)
             {
                 MapRoom r = room;
-                var button = new Button(() => onClick(r)) { text = Label(r.Kind) };
+                var button = new Button(() => onClick(r)) { text = Label(run, r) };
                 button.AddToClassList("room");
                 button.AddToClassList($"room-{r.Kind.ToString().ToLowerInvariant()}");
                 button.EnableInClassList("is-reachable", reachable.Contains(r));
@@ -111,15 +127,15 @@ namespace WhereDarknessDwells.Game
         }
 
         /// <summary>Every room the party could still reach from where it stands.</summary>
-        static HashSet<MapRoom> Ahead(RunState run)
+        static HashSet<MapRoom> Ahead(RunState run, bool withSecret)
         {
             var ahead = new HashSet<MapRoom>();
-            var open = new Stack<MapRoom>(run.CurrentRoom == null ? run.Map.Layer(0) : run.Map.NextOf(run.CurrentRoom));
+            var open = new Stack<MapRoom>(run.CurrentRoom == null ? run.Map.Layer(0) : run.Map.NextOf(run.CurrentRoom, withSecret));
             while (open.Count > 0)
             {
                 MapRoom room = open.Pop();
                 if (!ahead.Add(room)) continue;
-                foreach (MapRoom next in run.Map.NextOf(room)) open.Push(next);
+                foreach (MapRoom next in run.Map.NextOf(room, withSecret)) open.Push(next);
             }
             return ahead;
         }
