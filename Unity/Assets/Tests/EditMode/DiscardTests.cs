@@ -31,7 +31,7 @@ namespace WhereDarknessDwells.Tests
 
             CombatResult result = combat.TryDiscard(card.Id);
             Ok(result);
-            Assert.That(combat.Hand, Does.Not.Contain(card));
+            Assert.That(combat.Hand, Has.No.Member(card));
             Assert.That(combat.DiscardPile, Does.Contain(card));
             Assert.That(combat.Resolve, Is.EqualTo(3));
             Assert.That(combat.CardsPlayed, Is.EqualTo(0));
