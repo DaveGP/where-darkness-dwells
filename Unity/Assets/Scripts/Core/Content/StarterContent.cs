@@ -12,6 +12,9 @@ namespace WhereDarknessDwells.Core
         public const string Bram = "bram";
         public const string Wren = "wren";
         public const string Ashe = "ashe";
+        public const string Corvin = "corvin";
+        public const string Mara = "mara";
+        public const string Hollis = "hollis";
 
         public static readonly string[] Party = { Bram, Wren, Ashe };
 
@@ -25,12 +28,24 @@ namespace WhereDarknessDwells.Core
             new HeroDef(Bram, "Bram", "the Warden", "Iron", 40),
             new HeroDef(Wren, "Wren", "the Hunter", "Thorn", 28),
             new HeroDef(Ashe, "Sister Ashe", "the Occultist", "Ash", 30),
+            new HeroDef(Corvin, "Corvin", "the Penitent", "Bone", 32),
+            new HeroDef(Mara, "Mara", "the Duelist", "Steel", 34),
+            new HeroDef(Hollis, "Hollis", "the Bellwright", "Bronze", 30),
         };
+
+        /// <summary>Every hero the party can be chosen from, in the order the party screen shows them.</summary>
+        public static readonly string[] AllHeroes = { Bram, Wren, Ashe, Corvin, Mara, Hollis };
 
         public static IEnumerable<CardDef> Cards() => StarterCards().Concat(RewardCards());
 
-        /// <summary>The 15 cards of the starting deck.</summary>
-        public static IEnumerable<CardDef> StarterCards() => new[]
+        /// <summary>
+        /// Every starting card: four for each hero and one dual card for each pair. A party of three starts with 15 of
+        /// them (<see cref="RunState.StartingCards"/>).
+        /// </summary>
+        public static IEnumerable<CardDef> StarterCards() => FirstStarters().Concat(NewStarters());
+
+        /// <summary>The first three heroes' 15 starting cards.</summary>
+        static IEnumerable<CardDef> FirstStarters() => new[]
         {
             // Bram: protect the party and set enemies up.
             new CardDef("shield_wall", "Shield Wall", new[] { Bram }, 1, CardTarget.Ally,
@@ -86,7 +101,91 @@ namespace WhereDarknessDwells.Core
                 EffectDef.Block(5), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies)),
         };
 
-        /// <summary>Cards that can be offered after a won fight. They use the same effects as the starting cards.</summary>
+        /// <summary>The Milestone 5 heroes' starting cards, and the dual cards for every pair with one of them in it.</summary>
+        static IEnumerable<CardDef> NewStarters() => new[]
+        {
+            // Corvin: heals the party and pays for it in his own health.
+            new CardDef("mend", "Mend", new[] { Corvin }, 1, CardTarget.Ally,
+                "Heal an ally 6.",
+                EffectDef.Heal(6)),
+            new CardDef("blood_offering", "Blood Offering", new[] { Corvin }, 0, CardTarget.None,
+                "Corvin pays 3 health. Gain 2 Resolve.",
+                EffectDef.LoseHealth(3), EffectDef.GainResolve(2)),
+            new CardDef("penance_strike", "Penance Strike", new[] { Corvin }, 1, CardTarget.Enemy,
+                "Deal 7 damage. Corvin pays 2 health.",
+                EffectDef.Damage(7), EffectDef.LoseHealth(2)),
+            new CardDef("cleansing_rite", "Cleansing Rite", new[] { Corvin }, 1, CardTarget.Ally,
+                "Remove all Bleed and Weak from an ally. Heal them 3.",
+                EffectDef.Cleanse(StatusKind.Bleed), EffectDef.Cleanse(StatusKind.Weak), EffectDef.Heal(3)),
+
+            // Mara: precise strikes, and Riposte to punish whoever attacks her.
+            new CardDef("lunge", "Lunge", new[] { Mara }, 1, CardTarget.Enemy,
+                "Deal 6 damage.",
+                EffectDef.Damage(6)),
+            new CardDef("en_garde", "En Garde", new[] { Mara }, 1, CardTarget.None,
+                "Mara gains 4 Block and 4 Riposte.",
+                EffectDef.Block(4, EffectScope.ActingHero), EffectDef.Apply(StatusKind.Riposte, 4, EffectScope.ActingHero)),
+            new CardDef("feint", "Feint", new[] { Mara }, 1, CardTarget.Enemy,
+                "Deal 2 damage. Apply 1 Exposed. Draw a card.",
+                EffectDef.Damage(2), EffectDef.Apply(StatusKind.Exposed, 1), EffectDef.Draw(1)),
+            new CardDef("flurry", "Flurry", new[] { Mara }, 2, CardTarget.Enemy,
+                "Deal 3 damage three times.",
+                EffectDef.Damage(3), EffectDef.Damage(3), EffectDef.Damage(3)),
+
+            // Hollis: rings Weak and Exposed over every enemy at once.
+            new CardDef("toll", "Toll", new[] { Hollis }, 1, CardTarget.None,
+                "Apply 1 Weak to every enemy. Draw a card.",
+                EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies), EffectDef.Draw(1)),
+            new CardDef("knell", "Knell", new[] { Hollis }, 2, CardTarget.None,
+                "Deal 3 damage to every enemy. Apply 1 Exposed to every enemy.",
+                EffectDef.DamageAll(3), EffectDef.Apply(StatusKind.Exposed, 1, EffectScope.AllEnemies)),
+            new CardDef("sanctuary_peal", "Sanctuary Peal", new[] { Hollis }, 1, CardTarget.None,
+                "Give every hero 3 Block.",
+                EffectDef.Block(3, EffectScope.AllHeroes)),
+            new CardDef("cracked_bell", "Cracked Bell", new[] { Hollis }, 1, CardTarget.Enemy,
+                "Deal 5 damage. Apply 1 Weak.",
+                EffectDef.Damage(5), EffectDef.Apply(StatusKind.Weak, 1)),
+
+            // Dual cards for every new pair.
+            new CardDef("shared_burden", "Shared Burden", new[] { Corvin, Bram }, 1, CardTarget.Ally,
+                "Give an ally 5 Block. Heal them 3.",
+                EffectDef.Block(5), EffectDef.Heal(3)),
+            new CardDef("bloodletting", "Bloodletting", new[] { Corvin, Wren }, 1, CardTarget.Enemy,
+                "Apply 4 Bleed. Heal yourself 2.",
+                EffectDef.Apply(StatusKind.Bleed, 4), EffectDef.Heal(2, EffectScope.ActingHero)),
+            new CardDef("last_rites", "Last Rites", new[] { Corvin, Ashe }, 1, CardTarget.Enemy,
+                "Apply 2 Hex. Heal every hero 2.",
+                EffectDef.Apply(StatusKind.Hex, 2), EffectDef.Heal(2, EffectScope.AllHeroes)),
+            new CardDef("second_wind", "Second Wind", new[] { Corvin, Mara }, 1, CardTarget.Ally,
+                "Heal an ally 4. They gain 3 Riposte.",
+                EffectDef.Heal(4), EffectDef.Apply(StatusKind.Riposte, 3)),
+            new CardDef("vespers", "Vespers", new[] { Corvin, Hollis }, 2, CardTarget.None,
+                "Heal every hero 3. Apply 1 Weak to every enemy.",
+                EffectDef.Heal(3, EffectScope.AllHeroes), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies)),
+            new CardDef("blade_and_shield", "Blade and Shield", new[] { Mara, Bram }, 1, CardTarget.Enemy,
+                "Deal 5 damage. Gain 3 Block.",
+                EffectDef.Damage(5), EffectDef.Block(3, EffectScope.ActingHero)),
+            new CardDef("crossing_strikes", "Crossing Strikes", new[] { Mara, Wren }, 1, CardTarget.Enemy,
+                "Deal 4 damage twice.",
+                EffectDef.Damage(4), EffectDef.Damage(4)),
+            new CardDef("cursed_edge", "Cursed Edge", new[] { Mara, Ashe }, 1, CardTarget.Enemy,
+                "Deal 4 damage. Apply 2 Hex. Gain 2 Riposte.",
+                EffectDef.Damage(4), EffectDef.Apply(StatusKind.Hex, 2), EffectDef.Apply(StatusKind.Riposte, 2, EffectScope.ActingHero)),
+            new CardDef("call_to_arms", "Call to Arms", new[] { Mara, Hollis }, 1, CardTarget.None,
+                "Every hero gains 3 Riposte.",
+                EffectDef.Apply(StatusKind.Riposte, 3, EffectScope.AllHeroes)),
+            new CardDef("alarum", "Alarum", new[] { Hollis, Bram }, 1, CardTarget.Ally,
+                "Guard another ally until your next turn. Apply 1 Weak to every enemy.",
+                EffectDef.Guard(), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies)),
+            new CardDef("ringing_shot", "Ringing Shot", new[] { Hollis, Wren }, 1, CardTarget.Enemy,
+                "Deal 5 damage. Apply 1 Exposed to every enemy.",
+                EffectDef.Damage(5), EffectDef.Apply(StatusKind.Exposed, 1, EffectScope.AllEnemies)),
+            new CardDef("dirge", "Dirge", new[] { Hollis, Ashe }, 1, CardTarget.None,
+                "Apply 2 Hex to every enemy.",
+                EffectDef.Apply(StatusKind.Hex, 2, EffectScope.AllEnemies)),
+        };
+
+        /// <summary>Cards that can be offered after a won fight. A run only offers the ones its party can play.</summary>
         public static IEnumerable<CardDef> RewardCards() => new[]
         {
             // Bram
@@ -141,6 +240,48 @@ namespace WhereDarknessDwells.Core
             new CardDef("consecrate", "Consecrate", new[] { Ashe, Bram }, 2, CardTarget.Ally,
                 "Give an ally 8 Block. Apply 1 Weak to every enemy.",
                 EffectDef.Block(8), EffectDef.Apply(StatusKind.Weak, 1, EffectScope.AllEnemies)),
+
+            // Corvin
+            new CardDef("zeal", "Flagellant's Zeal", new[] { Corvin }, 0, CardTarget.None,
+                "Corvin pays 4 health. Gain 2 Resolve. Draw a card.",
+                EffectDef.LoseHealth(4), EffectDef.GainResolve(2), EffectDef.Draw(1)),
+            new CardDef("sanctify", "Sanctify", new[] { Corvin }, 2, CardTarget.None,
+                "Heal every hero 5.",
+                EffectDef.Heal(5, EffectScope.AllHeroes)),
+            new CardDef("martyrs_ward", "Martyr's Ward", new[] { Corvin }, 1, CardTarget.Ally,
+                "Corvin pays 3 health. Give an ally 10 Block.",
+                EffectDef.LoseHealth(3), EffectDef.Block(10)),
+            new CardDef("absolution", "Absolution", new[] { Corvin }, 2, CardTarget.Enemy,
+                "Deal 12 damage. Corvin pays 4 health.",
+                EffectDef.Damage(12), EffectDef.LoseHealth(4)),
+
+            // Mara
+            new CardDef("riposte_stance", "Riposte Stance", new[] { Mara }, 1, CardTarget.None,
+                "Mara gains 8 Riposte.",
+                EffectDef.Apply(StatusKind.Riposte, 8, EffectScope.ActingHero)),
+            new CardDef("coup_de_grace", "Coup de Grace", new[] { Mara }, 2, CardTarget.Enemy,
+                "Deal 9 damage, or 18 if the target is Exposed.",
+                EffectDef.Damage(9, bonusIfExposed: 9)),
+            new CardDef("disarm", "Disarm", new[] { Mara }, 1, CardTarget.Enemy,
+                "Deal 3 damage. Apply 2 Weak.",
+                EffectDef.Damage(3), EffectDef.Apply(StatusKind.Weak, 2)),
+            new CardDef("whirling_blade", "Whirling Blade", new[] { Mara }, 2, CardTarget.None,
+                "Deal 5 damage to every enemy.",
+                EffectDef.DamageAll(5)),
+
+            // Hollis
+            new CardDef("great_bell", "The Great Bell", new[] { Hollis }, 3, CardTarget.None,
+                "Deal 6 damage to every enemy. Apply 2 Weak to every enemy.",
+                EffectDef.DamageAll(6), EffectDef.Apply(StatusKind.Weak, 2, EffectScope.AllEnemies)),
+            new CardDef("muffle", "Muffle", new[] { Hollis }, 0, CardTarget.Enemy,
+                "Apply 1 Weak.",
+                EffectDef.Apply(StatusKind.Weak, 1)),
+            new CardDef("peal_of_warning", "Peal of Warning", new[] { Hollis }, 1, CardTarget.None,
+                "Give every hero 5 Block.",
+                EffectDef.Block(5, EffectScope.AllHeroes)),
+            new CardDef("shatter_note", "Shatter Note", new[] { Hollis }, 2, CardTarget.None,
+                "Apply 2 Exposed to every enemy.",
+                EffectDef.Apply(StatusKind.Exposed, 2, EffectScope.AllEnemies)),
         };
 
         public static IEnumerable<EnemyDef> Enemies() => new[]
@@ -168,6 +309,16 @@ namespace WhereDarknessDwells.Core
                 IntentDef.Block(10, "Silt armour 10"),
                 IntentDef.Attack(10, IntentTarget.RandomHero, "Drag under 10")),
 
+            // Milestone 5
+            new EnemyDef("cistern_leech", "Cistern Leech", 14,
+                IntentDef.Apply(StatusKind.Bleed, 2, IntentTarget.RandomHero, "Latch: Bleed 2"),
+                IntentDef.Attack(5, IntentTarget.RandomHero, "Bite 5"),
+                IntentDef.Heal(6, "Gorge: heal 6")),
+            new EnemyDef("siege_revenant", "Siege Revenant", 32,
+                IntentDef.Attack(8, IntentTarget.RandomHero, "Old wound 8"),
+                IntentDef.Block(10, "Close ranks 10"),
+                IntentDef.Attack(4, IntentTarget.AllHeroes, "Rally 4 to all")),
+
             // Elites
             new EnemyDef("bloodbound_knight", "Bloodbound Knight", 70,
                 IntentDef.Attack(13, IntentTarget.HealthiestHero, "Cleave 13"),
@@ -192,9 +343,9 @@ namespace WhereDarknessDwells.Core
                 IntentDef.Attack(6, IntentTarget.HealthiestHero, "Feed 6")),
         };
 
-        /// <summary>The Milestone 3 floor of the Keep: the fixed party, the starting deck and every encounter.</summary>
+        /// <summary>The floor of the Keep: the heroes to choose from, every starting and reward card, the encounters, Vael, the Keepsakes and the events.</summary>
         public static ExpeditionDef Expedition() => new ExpeditionDef("black_keep",
-            Party,
+            AllHeroes,
             StarterCards().Select(c => c.Id),
             RewardCards().Select(c => c.Id),
             new[]
@@ -205,6 +356,8 @@ namespace WhereDarknessDwells.Core
                 new EncounterDef("drowned_watch", EncounterKind.Normal, 3, 6, "drowned_retainer", "hollow_sentry"),
                 new EncounterDef("pack_and_bell", EncounterKind.Normal, 3, 6, "gaol_hound", "bell_ringer"),
                 new EncounterDef("retainers", EncounterKind.Normal, 4, 6, "drowned_retainer", "drowned_retainer"),
+                new EncounterDef("leech_swarm", EncounterKind.Normal, 1, 4, "cistern_leech", "cistern_leech", "cistern_leech"),
+                new EncounterDef("revenant_and_leech", EncounterKind.Normal, 3, 6, "siege_revenant", "cistern_leech"),
                 new EncounterDef("bloodbound_knight", EncounterKind.Elite, 2, 6, "bloodbound_knight"),
                 new EncounterDef("matron_and_wretch", EncounterKind.Elite, 2, 6, "chapel_matron", "chapel_wretch"),
                 new EncounterDef("vael", EncounterKind.Boss, 0, 0, "blood_thrall", VaelId, "blood_thrall"),
@@ -331,7 +484,8 @@ namespace WhereDarknessDwells.Core
             "Vael falls. Beneath the chapel the broken seal breathes out, and something that was never Vael turns over in its sleep. The Keep is quiet. It won't stay quiet.");
 
         /// <summary>The 15-card starting deck: one of each starter card, numbered 1 to 15.</summary>
-        public static List<CardInstance> StartingDeck() =>
-            StarterCards().Select((c, i) => new CardInstance(i + 1, c.Id)).ToList();
+        /// <summary>A party's 15-card starting deck; the first three heroes when <paramref name="party"/> is null.</summary>
+        public static List<CardInstance> StartingDeck(IReadOnlyList<string> party = null) =>
+            RunState.StartingCards(Library(), Expedition(), party ?? Party).Select((id, i) => new CardInstance(i + 1, id)).ToList();
     }
 }

@@ -88,10 +88,19 @@ namespace WhereDarknessDwells.Core
             if (expedition == null) { problems.Add("There is no expedition."); return problems; }
             string name = $"Expedition '{expedition.Id}'";
 
-            if (expedition.Party.Count == 0) problems.Add($"{name} has no party.");
-            if (expedition.Party.Distinct().Count() != expedition.Party.Count) problems.Add($"{name} lists a hero twice.");
-            foreach (string hero in expedition.Party)
+            if (expedition.Heroes.Count < RunState.PartySize) problems.Add($"{name} needs at least {RunState.PartySize} heroes to choose from.");
+            if (expedition.Heroes.Distinct().Count() != expedition.Heroes.Count) problems.Add($"{name} lists a hero twice.");
+            foreach (string hero in expedition.Heroes)
                 if (!HasHero(hero)) problems.Add($"{name} has unknown hero '{hero}' in its party.");
+            // Every party must get a deck with each hero's cards and a dual card for each pair.
+            foreach (string hero in expedition.Heroes.Where(HasHero))
+                if (!expedition.StartingDeck.Where(HasCard).Any(c => Card(c).Owners.Count == 1 && Card(c).IsOwnedBy(hero)))
+                    problems.Add($"{name} has no starting card of {hero}'s own.");
+            List<string> known = expedition.Heroes.Where(HasHero).ToList();
+            for (int a = 0; a < known.Count; a++)
+            for (int b = a + 1; b < known.Count; b++)
+                if (!expedition.StartingDeck.Where(HasCard).Any(c => Card(c).Owners.Count == 2 && Card(c).IsOwnedBy(known[a]) && Card(c).IsOwnedBy(known[b])))
+                    problems.Add($"{name} has no starting dual card for {known[a]} and {known[b]}.");
 
             if (expedition.StartingDeck.Count == 0) problems.Add($"{name} has an empty starting deck.");
             foreach (string card in expedition.StartingDeck) CheckCard(card, "starting deck");
@@ -124,7 +133,7 @@ namespace WhereDarknessDwells.Core
             void CheckCard(string id, string list)
             {
                 if (!HasCard(id)) { problems.Add($"{name} has unknown card '{id}' in its {list}."); return; }
-                if (!Card(id).Owners.Any(expedition.Party.Contains)) problems.Add($"{name} has '{id}' in its {list}, but no hero in the party owns it.");
+                if (!Card(id).Owners.All(expedition.Heroes.Contains)) problems.Add($"{name} has '{id}' in its {list}, but not every hero who owns it can be chosen.");
             }
         }
 

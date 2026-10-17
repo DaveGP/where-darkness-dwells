@@ -259,7 +259,7 @@ namespace WhereDarknessDwells.Tests
                         new ClueEffect(ClueEffectKind.CancelBossIntent, cancelKind: IntentKind.Heal)),
                 },
                 new SecretRoomDef("A Cellar", 4, "Dark.", "Look", 1, 10), "The end.", "The true end.");
-            var broken = new ExpeditionDef("broken", good.Party, good.StartingDeck, good.RewardCards, good.Encounters, villain);
+            var broken = new ExpeditionDef("broken", good.Heroes, good.StartingDeck, good.RewardCards, good.Encounters, villain);
 
             IReadOnlyList<string> problems = StarterContent.Library().Validate(broken);
             Assert.That(problems, Has.Member("Villain 'broken' has unknown boss enemy 'nobody'."));
@@ -282,10 +282,14 @@ namespace WhereDarknessDwells.Tests
             return null;
         }
 
-        /// <summary>Finishes whatever room the party is standing in.</summary>
         /// <summary>Finishes the room the run is in, fighting if it has to. False if the party falls.</summary>
         static bool Clear(RunState run)
         {
+            if (run.Phase == RunPhase.Event)
+            {
+                RunStateTests.ChooseFirst(run);
+                return RunStateTests.Finish(run);
+            }
             if (run.Phase == RunPhase.Combat)
             {
                 RunStateTests.PlayFight(run.Combat);

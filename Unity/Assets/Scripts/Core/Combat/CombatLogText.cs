@@ -33,6 +33,7 @@ namespace WhereDarknessDwells.Core
                     string blocked = e.Blocked > 0 ? $" ({e.Blocked} blocked)" : "";
                     return e.SourceId == null
                         ? $"{target} bleeds for {e.Amount}."
+                        : e.SourceId == e.TargetId ? $"{target} pays {e.Amount} health."
                         : $"{source} hits {target} for {e.Amount}{blocked}.";
                 }
 

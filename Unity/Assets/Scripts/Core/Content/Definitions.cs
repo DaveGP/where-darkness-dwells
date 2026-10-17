@@ -8,7 +8,11 @@ namespace WhereDarknessDwells.Core
     // run and combat state refer to them by id. In Unity they are built from ScriptableObject assets.
 
     /// <summary>Conditions that come in stacks. Block and Guarded are tracked separately because they work differently.</summary>
-    public enum StatusKind { Exposed, Weak, Bleed, Hex }
+    /// <summary>
+    /// Riposte is a hero's: when an enemy's attack hits them, the attacker takes that much damage. It is removed
+    /// at the start of the next player turn, like Block.
+    /// </summary>
+    public enum StatusKind { Exposed, Weak, Bleed, Hex, Riposte }
 
     public sealed class HeroDef
     {
@@ -46,6 +50,12 @@ namespace WhereDarknessDwells.Core
         Draw,
         /// <summary>Remove all Hex from the target and deal Amount damage per stack removed.</summary>
         ConsumeHex,
+        /// <summary>Heal Amount, never past maximum health.</summary>
+        Heal,
+        /// <summary>Remove every stack of Status.</summary>
+        Cleanse,
+        /// <summary>The acting hero loses Amount health, ignoring Block. It never drops them below 1.</summary>
+        LoseHealth,
     }
 
     /// <summary>Who an effect lands on.</summary>
@@ -56,6 +66,8 @@ namespace WhereDarknessDwells.Core
         AllEnemies,
         /// <summary>The hero playing the card.</summary>
         ActingHero,
+        /// <summary>Every standing hero, the acting one included.</summary>
+        AllHeroes,
     }
 
     public sealed class EffectDef
@@ -83,6 +95,9 @@ namespace WhereDarknessDwells.Core
         public static EffectDef GainResolve(int amount) => new EffectDef(EffectKind.GainResolve, EffectScope.ActingHero, amount);
         public static EffectDef Draw(int cards) => new EffectDef(EffectKind.Draw, EffectScope.ActingHero, cards);
         public static EffectDef ConsumeHex(int damagePerStack) => new EffectDef(EffectKind.ConsumeHex, EffectScope.Target, damagePerStack);
+        public static EffectDef Heal(int amount, EffectScope scope = EffectScope.Target) => new EffectDef(EffectKind.Heal, scope, amount);
+        public static EffectDef Cleanse(StatusKind status, EffectScope scope = EffectScope.Target) => new EffectDef(EffectKind.Cleanse, scope, 0, status);
+        public static EffectDef LoseHealth(int amount) => new EffectDef(EffectKind.LoseHealth, EffectScope.ActingHero, amount);
     }
 
     public sealed class CardDef
@@ -246,8 +261,12 @@ namespace WhereDarknessDwells.Core
     public sealed class ExpeditionDef
     {
         public readonly string Id;
-        public readonly IReadOnlyList<string> Party;
-        /// <summary>Card ids, one entry per copy.</summary>
+        /// <summary>The heroes the party is chosen from, in the order the party screen shows them.</summary>
+        public readonly IReadOnlyList<string> Heroes;
+        /// <summary>
+        /// Every starting card, one entry per copy. A run's deck takes the chosen heroes' own cards and the dual
+        /// cards whose owners are all in the party (see <see cref="RunState.StartingCards"/>).
+        /// </summary>
         public readonly IReadOnlyList<string> StartingDeck;
         public readonly IReadOnlyList<string> RewardCards;
         public readonly IReadOnlyList<EncounterDef> Encounters;
@@ -258,7 +277,7 @@ namespace WhereDarknessDwells.Core
         /// <summary>The events Event rooms draw from, each at most once a run.</summary>
         public readonly IReadOnlyList<EventDef> Events;
 
-        public ExpeditionDef(string id, IEnumerable<string> party, IEnumerable<string> startingDeck,
+        public ExpeditionDef(string id, IEnumerable<string> heroes, IEnumerable<string> startingDeck,
             IEnumerable<string> rewardCards, IEnumerable<EncounterDef> encounters, VillainDef villain = null,
             IEnumerable<KeepsakeDef> keepsakes = null, IEnumerable<EventDef> events = null)
         {
@@ -266,7 +285,7 @@ namespace WhereDarknessDwells.Core
             Keepsakes = (keepsakes ?? Enumerable.Empty<KeepsakeDef>()).ToArray();
             Events = (events ?? Enumerable.Empty<EventDef>()).ToArray();
             Id = id;
-            Party = (party ?? Enumerable.Empty<string>()).ToArray();
+            Heroes = (heroes ?? Enumerable.Empty<string>()).ToArray();
             StartingDeck = (startingDeck ?? Enumerable.Empty<string>()).ToArray();
             RewardCards = (rewardCards ?? Enumerable.Empty<string>()).ToArray();
             Encounters = (encounters ?? Enumerable.Empty<EncounterDef>()).ToArray();

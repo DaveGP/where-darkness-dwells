@@ -67,7 +67,7 @@ namespace WhereDarknessDwells.Tests
             ExpeditionDef tested = StarterContent.Expedition();
 
             Assert.That(asset.Id, Is.EqualTo(tested.Id));
-            Assert.That(asset.Party, Is.EqualTo(tested.Party));
+            Assert.That(asset.Heroes, Is.EqualTo(tested.Heroes));
             Assert.That(asset.StartingDeck, Is.EquivalentTo(tested.StartingDeck));
             Assert.That(asset.RewardCards, Is.EquivalentTo(tested.RewardCards));
             Assert.That(asset.Encounters.Select(Describe), Is.EquivalentTo(tested.Encounters.Select(Describe)));

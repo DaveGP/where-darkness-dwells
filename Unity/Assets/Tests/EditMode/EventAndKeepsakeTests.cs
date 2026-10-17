@@ -29,7 +29,7 @@ namespace WhereDarknessDwells.Tests
         static RunState AtEvent(string eventId, params string[] clues)
         {
             ExpeditionDef full = StarterContent.Expedition();
-            var expedition = new ExpeditionDef(full.Id, full.Party, full.StartingDeck, full.RewardCards, full.Encounters, full.Villain,
+            var expedition = new ExpeditionDef(full.Id, full.Heroes, full.StartingDeck, full.RewardCards, full.Encounters, full.Villain,
                 full.Keepsakes, full.Events.Where(e => e.Id == eventId));
             foreach (ulong seed in Enumerable.Range(1, 100).Select(s => (ulong)s))
             {
@@ -195,7 +195,7 @@ namespace WhereDarknessDwells.Tests
         public void AnEventRoomWithNoEventLeftIsEmpty()
         {
             ExpeditionDef full = StarterContent.Expedition();
-            var expedition = new ExpeditionDef(full.Id, full.Party, full.StartingDeck, full.RewardCards, full.Encounters, full.Villain, full.Keepsakes);
+            var expedition = new ExpeditionDef(full.Id, full.Heroes, full.StartingDeck, full.RewardCards, full.Encounters, full.Villain, full.Keepsakes);
             foreach (ulong seed in Enumerable.Range(1, 50).Select(s => (ulong)s))
             {
                 var run = new RunState(Library, expedition, seed);
@@ -323,7 +323,7 @@ namespace WhereDarknessDwells.Tests
             var broken = new EventDef("broken", "Broken", "Nothing here.",
                 new EventChoice("Too much", "", outcomes: new[] { new EventOutcome(EventOutcomeKind.GainCard), new EventOutcome(EventOutcomeKind.Fight) }),
                 new EventChoice("Wrong clue", "", requiresClue: "nothing", outcomes: new EventOutcome(EventOutcomeKind.GainClue, id: "ledger")));
-            var expedition = new ExpeditionDef(full.Id, full.Party, full.StartingDeck, full.RewardCards, full.Encounters, full.Villain,
+            var expedition = new ExpeditionDef(full.Id, full.Heroes, full.StartingDeck, full.RewardCards, full.Encounters, full.Villain,
                 full.Keepsakes, full.Events.Append(broken));
             IReadOnlyList<string> problems = Library.Validate(expedition);
             Assert.That(problems, Has.Member("The choice 'Too much' in event 'broken' needs more than one extra step; keep it to one."));

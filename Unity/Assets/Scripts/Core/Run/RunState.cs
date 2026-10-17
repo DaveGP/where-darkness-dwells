@@ -35,6 +35,8 @@ namespace WhereDarknessDwells.Core
     public sealed class RunState
     {
         public const int RewardChoices = 3;
+        /// <summary>How many heroes go into the Keep.</summary>
+        public const int PartySize = 3;
         /// <summary>A hero who fell in a won fight stands back up with this share of their maximum health, rounded down (at least 1).</summary>
         public const int StandUpPercent = 25;
         /// <summary>Resting heals each hero this share of their maximum health, rounded down.</summary>
@@ -53,21 +55,39 @@ namespace WhereDarknessDwells.Core
         List<string> _offer = new List<string>();
         int _nextCardId;
 
-        public RunState(ContentLibrary content, ExpeditionDef expedition, ulong seed)
+        /// <param name="party">The chosen heroes; null for the expedition's first <see cref="PartySize"/>. Check it with <see cref="WhyCantChoose"/>.</param>
+        public RunState(ContentLibrary content, ExpeditionDef expedition, ulong seed, IReadOnlyList<string> party = null)
         {
             _content = content ?? throw new ArgumentNullException(nameof(content));
             Expedition = expedition ?? throw new ArgumentNullException(nameof(expedition));
             IReadOnlyList<string> problems = content.Validate(expedition);
             if (problems.Count > 0) throw new ArgumentException("The expedition can't be used: " + string.Join(" ", problems), nameof(expedition));
+            party = party ?? expedition.Heroes.Take(PartySize).ToList();
+            string wrong = WhyCantChoose(expedition, party);
+            if (wrong != null) throw new ArgumentException(wrong, nameof(party));
+            Party = party.ToArray();
 
             Seed = seed;
             _seedRng = new Rng(seed);
             _rewardRng = _seedRng.Stream("rewards");
             Map = MapGenerator.Generate(expedition, _seedRng.Stream("map"));
-            _deck = expedition.StartingDeck.Select((id, i) => new CardInstance(i + 1, id)).ToList();
+            _deck = StartingCards(content, expedition, Party).Select((id, i) => new CardInstance(i + 1, id)).ToList();
             _nextCardId = _deck.Count + 1;
-            _health = expedition.Party.ToDictionary(id => id, id => content.Hero(id).MaxHealth);
+            _health = Party.ToDictionary(id => id, id => content.Hero(id).MaxHealth);
         }
+
+        /// <summary>Why this party can't go into the Keep, written for the player, or null if it can.</summary>
+        public static string WhyCantChoose(ExpeditionDef expedition, IReadOnlyList<string> party)
+        {
+            if (party == null || party.Count != PartySize) return $"Choose {PartySize} heroes.";
+            if (party.Distinct().Count() != party.Count) return "Choose each hero only once.";
+            if (party.Any(h => !expedition.Heroes.Contains(h))) return "Choose heroes from the list.";
+            return null;
+        }
+
+        /// <summary>The party's starting deck: each hero's own cards and the dual cards whose owners are all in the party.</summary>
+        public static IEnumerable<string> StartingCards(ContentLibrary content, ExpeditionDef expedition, IReadOnlyList<string> party) =>
+            expedition.StartingDeck.Where(id => content.Card(id).Owners.All(party.Contains));
 
         public ExpeditionDef Expedition { get; }
         public ulong Seed { get; }
@@ -83,7 +103,8 @@ namespace WhereDarknessDwells.Core
         /// <summary>The card ids to choose from in the Reward phase.</summary>
         public IReadOnlyList<string> RewardOffer => _offer;
 
-        public IReadOnlyList<string> Party => Expedition.Party;
+        /// <summary>The heroes in this run, in the order they were chosen.</summary>
+        public IReadOnlyList<string> Party { get; }
         public IReadOnlyList<CardInstance> Deck => _deck;
         public int Health(string heroId) => _health.TryGetValue(heroId, out int h) ? h : 0;
         public int MaxHealth(string heroId) => _content.Hero(heroId).MaxHealth + (_maxHealthBonus.TryGetValue(heroId, out int bonus) ? bonus : 0);
@@ -234,7 +255,8 @@ namespace WhereDarknessDwells.Core
 
         void OfferCards()
         {
-            List<string> pool = Expedition.RewardCards.ToList();
+            // Only cards someone in the party can play.
+            List<string> pool = Expedition.RewardCards.Where(id => _content.Card(id).Owners.Any(Party.Contains)).ToList();
             _rewardRng.Shuffle(pool);
             _offer = pool.Take(RewardChoices).ToList();
             Phase = RunPhase.Reward;

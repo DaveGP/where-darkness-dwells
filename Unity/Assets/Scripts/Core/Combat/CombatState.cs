@@ -307,6 +307,18 @@ namespace WhereDarknessDwells.Core
 
         public bool CanPlay(int cardInstanceId) => WhyCantPlay(cardInstanceId) == null;
 
+        /// <summary>For tests: moves a card from any pile into the hand.</summary>
+        internal void PutInHandForTest(int cardInstanceId)
+        {
+            foreach (List<CardInstance> pile in new[] { _draw, _discard, _setAside })
+            {
+                CardInstance card = pile.FirstOrDefault(c => c.Id == cardInstanceId);
+                if (card == null) continue;
+                pile.Remove(card);
+                _hand.Add(card);
+            }
+        }
+
         /// <summary>
         /// What the enemies' shown intents would do if they acted now, in order: the same events the enemy phase
         /// produces, with Block, Weak, Exposed, Guard and retargeting already applied. Nothing in this fight
@@ -374,6 +386,21 @@ namespace WhereDarknessDwells.Core
                 case EffectKind.Draw:
                     Draw(effect.Amount, MaxHandSize);
                     break;
+
+                case EffectKind.Heal:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target)) Heal(t, effect.Amount);
+                    break;
+
+                case EffectKind.Cleanse:
+                    foreach (Combatant t in Targets(effect.Scope, actor, target)) SetStatus(t, effect.Status, 0);
+                    break;
+
+                case EffectKind.LoseHealth:
+                    int lost = Math.Min(effect.Amount, actor.Health - 1);
+                    if (lost <= 0) break;
+                    actor.Health -= lost;
+                    Emit(CombatEventKind.Damaged, actor.Id, actor.Id, lost);
+                    break;
             }
         }
 
@@ -383,6 +410,7 @@ namespace WhereDarknessDwells.Core
             {
                 case EffectScope.AllEnemies: return _enemies.Where(e => !e.IsDown).ToList();
                 case EffectScope.ActingHero: return new[] { actor };
+                case EffectScope.AllHeroes: return _heroes.Where(h => !h.IsDown).ToList();
                 default: return target == null || target.IsDown ? Enumerable.Empty<Combatant>() : new[] { target };
             }
         }
@@ -436,9 +464,7 @@ namespace WhereDarknessDwells.Core
                     break;
 
                 case IntentKind.Heal:
-                    int healed = Math.Min(intent.Amount, enemy.MaxHealth - enemy.Health);
-                    enemy.Health += healed;
-                    Emit(CombatEventKind.Healed, enemy.Id, enemy.Id, healed);
+                    Heal(enemy, intent.Amount);
                     break;
 
                 case IntentKind.Attack:
@@ -486,6 +512,19 @@ namespace WhereDarknessDwells.Core
                 baseDamage += bonus;
             int damage = DamageRules.Attack(baseDamage, attacker.Status(StatusKind.Weak) > 0, defender.Status(StatusKind.Exposed) > 0);
             TakeDamage(attacker.Id, defender, damage, ignoresBlock: false);
+
+            // A hero with Riposte who is still standing strikes back: flat damage, through the attacker's Block.
+            int riposte = defender.Status(StatusKind.Riposte);
+            if (riposte > 0 && defender.IsHero && !attacker.IsHero && !defender.IsDown && !IsOver)
+                TakeDamage(defender.Id, attacker, riposte, ignoresBlock: false);
+        }
+
+        void Heal(Combatant target, int amount)
+        {
+            if (target.IsDown) return;
+            int healed = Math.Min(amount, target.MaxHealth - target.Health);
+            target.Health += healed;
+            Emit(CombatEventKind.Healed, target.Id, target.Id, healed);
         }
 
         void TakeDamage(string sourceId, Combatant target, int damage, bool ignoresBlock)
@@ -561,6 +600,7 @@ namespace WhereDarknessDwells.Core
             {
                 hero.Block = 0;
                 hero.GuardedBy = null;
+                SetStatus(hero, StatusKind.Riposte, 0);
             }
             Draw(HandSize - _hand.Count, HandSize);
         }
