@@ -11,6 +11,7 @@
         <ui:VisualElement class="badges">
             <ui:Label name="block" text="Block 0" class="badge block-badge" />
             <ui:Label name="guard" text="Guarded" class="badge guard-badge" />
+            <ui:Label name="incoming" text="Incoming 0" class="badge incoming-badge" />
         </ui:VisualElement>
         <ui:VisualElement name="statuses" class="statuses" />
         <ui:Button name="activate" text="Activate" class="activate-button" />

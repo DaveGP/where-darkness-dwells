@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Plays the combat rules many times with scripted players and prints how hard the fights are. A tuning tool for
+    Milestone 2, not part of the game. Run it from the repository root with dotnet run, giving it the project folder tools/Balance (see Program.cs).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- Point CoreDir at a modified copy of the rules to measure a rule change before making it. -->
+    <CoreDir Condition="'$(CoreDir)' == ''">../../Unity/Assets/Scripts/Core</CoreDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(CoreDir)/**/*.cs" />
+    <Compile Include="*.cs" />
+  </ItemGroup>
+</Project>

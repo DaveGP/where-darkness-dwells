@@ -335,7 +335,8 @@
 
 .card-header {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
+    flex-shrink: 0;
 }
 
 .card-cost {
@@ -350,7 +351,11 @@
 }
 
 .card-name {
+    /* A zero basis gives a two-line name a fixed width to wrap in, so the header grows to fit it. */
+    flex-grow: 1;
     flex-shrink: 1;
+    flex-basis: 0;
+    margin-top: 4px;
     -unity-font-style: bold;
     white-space: normal;
 }
@@ -403,6 +408,75 @@
     color: rgb(150, 140, 146);
     -unity-text-align: middle-center;
     white-space: normal;
+}
+
+/* ---------- previews and feedback (Milestone 2) ---------- */
+
+.incoming-badge {
+    background-color: rgb(110, 35, 40);
+}
+
+.incoming-badge.is-lethal {
+    background-color: rgb(200, 50, 50);
+    -unity-font-style: bold;
+}
+
+.intent-outcome {
+    font-size: 13px;
+    color: rgb(255, 170, 150);
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.combatant.is-acting {
+    border-color: rgb(220, 70, 60);
+    scale: 1.05 1.05;
+}
+
+.card.is-highlighted {
+    translate: 0 -12px;
+    border-color: rgb(232, 212, 138);
+}
+
+.card.is-boosted {
+    border-color: rgb(120, 200, 110);
+}
+
+.floaters {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.floater {
+    position: absolute;
+    width: 120px;
+    -unity-text-align: middle-center;
+    font-size: 24px;
+    -unity-font-style: bold;
+    transition-property: translate, opacity;
+    transition-duration: 1.2s;
+    transition-timing-function: ease-out;
+}
+
+.floater-gone {
+    translate: 0 -48px;
+    opacity: 0;
+}
+
+.floater-damage {
+    color: rgb(255, 90, 80);
+}
+
+.floater-block {
+    color: rgb(130, 180, 255);
+}
+
+.floater-status {
+    color: rgb(240, 190, 90);
+    font-size: 18px;
 }
 
 /* ---------- hero colours ---------- */

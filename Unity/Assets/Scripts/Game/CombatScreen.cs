@@ -44,9 +44,12 @@ namespace WhereDarknessDwells.Game
         CombatState _combat;
         ulong _seed;
         int _selectedCard; // Instance id of the card waiting for a target; 0 when none.
+        IReadOnlyList<CombatEvent> _preview = new CombatEvent[0]; // What the enemies would do if they acted now.
+        readonly Dictionary<string, VisualElement> _views = new Dictionary<string, VisualElement>();
+        readonly List<KeyValuePair<CardDef, VisualElement>> _cardViews = new List<KeyValuePair<CardDef, VisualElement>>();
 
         Label _round, _prompt, _seedLabel, _hint, _resolve, _piles, _endTitle, _endText;
-        VisualElement _enemyRow, _heroRow, _hand, _endPanel;
+        VisualElement _enemyRow, _heroRow, _hand, _endPanel, _floaters;
         ScrollView _log;
         Button _endActivation, _again;
 
@@ -65,6 +68,7 @@ namespace WhereDarknessDwells.Game
             _heroRow = root.Q("heroes");
             _hand = root.Q("hand");
             _endPanel = root.Q("end-panel");
+            _floaters = root.Q("floaters");
             _log = root.Q<ScrollView>("log");
             _endActivation = root.Q<Button>("end-activation");
             _again = root.Q<Button>("again");
@@ -73,7 +77,7 @@ namespace WhereDarknessDwells.Game
             {
                 if (_combat == null) return;
                 _selectedCard = 0;
-                Apply(_combat.TryEndActivation());
+                Apply(() => _combat.TryEndActivation());
             };
             _again.clicked += NewFight;
             // Right-click anywhere cancels choosing a target.
@@ -121,7 +125,7 @@ namespace WhereDarknessDwells.Game
             }
 
             Debug.Log($"[Combat] Fight started: {string.Join(", ", party.Select(h => h.Id))} against {string.Join(", ", enemies.Select(e => e.Id))}, seed {_seed}.");
-            Apply(_combat.Start());
+            Apply(() => _combat.Start());
         }
 
         void ShowProblems(IEnumerable<string> problems)
@@ -135,9 +139,14 @@ namespace WhereDarknessDwells.Game
 
         // ---------- commands ----------
 
-        /// <summary>Shows a command's result: the reason it was refused, or its events in the log and a fresh redraw.</summary>
-        bool Apply(CombatResult result)
+        /// <summary>
+        /// Runs a command and shows its result: the reason it was refused, or its events in the log, a fresh redraw,
+        /// and floating numbers for what changed.
+        /// </summary>
+        bool Apply(Func<CombatResult> command)
         {
+            Dictionary<string, int> stacksBefore = StatusStacks();
+            CombatResult result = command();
             if (!result.Ok)
             {
                 Refuse(result.Reason);
@@ -153,6 +162,7 @@ namespace WhereDarknessDwells.Game
             }
             SetHint("", false);
             Redraw();
+            ShowFloaters(result.Events, stacksBefore);
             return true;
         }
 
@@ -180,7 +190,7 @@ namespace WhereDarknessDwells.Game
             if (_combat.CardOf(card).Target == CardTarget.None)
             {
                 _selectedCard = 0;
-                Apply(_combat.TryPlay(card.Id));
+                Apply(() => _combat.TryPlay(card.Id));
                 return;
             }
 
@@ -191,9 +201,13 @@ namespace WhereDarknessDwells.Game
         void OnCombatantClicked(Combatant target)
         {
             if (_selectedCard == 0) return;
-            CombatResult result = _combat.TryPlay(_selectedCard, target.Id);
-            if (result.Ok) _selectedCard = 0;
-            Apply(result);
+            int card = _selectedCard;
+            Apply(() =>
+            {
+                CombatResult result = _combat.TryPlay(card, target.Id);
+                if (result.Ok) _selectedCard = 0;
+                return result;
+            });
         }
 
         void CancelTarget()
@@ -208,6 +222,9 @@ namespace WhereDarknessDwells.Game
         void Redraw()
         {
             CardDef selected = _selectedCard == 0 ? null : _combat.CardOf(_combat.FindCard(_selectedCard));
+            _preview = _combat.PreviewEnemyPhase();
+            _views.Clear();
+            _cardViews.Clear();
 
             _round.text = $"Round {_combat.Round}";
             _seedLabel.text = $"Seed {_seed}";
@@ -218,9 +235,9 @@ namespace WhereDarknessDwells.Game
                 (_combat.SetAside.Count > 0 ? $"   Set aside {_combat.SetAside.Count}" : "");
 
             _enemyRow.Clear();
-            foreach (Combatant enemy in _combat.Enemies) _enemyRow.Add(EnemyView(enemy, selected));
+            foreach (Combatant enemy in _combat.Enemies) _enemyRow.Add(_views[enemy.Id] = EnemyView(enemy, selected));
             _heroRow.Clear();
-            foreach (Combatant hero in _combat.Heroes) _heroRow.Add(HeroView(hero, selected));
+            foreach (Combatant hero in _combat.Heroes) _heroRow.Add(_views[hero.Id] = HeroView(hero, selected));
             _hand.Clear();
             foreach (CardInstance card in _combat.Hand) _hand.Add(CardView(card));
 
@@ -262,10 +279,20 @@ namespace WhereDarknessDwells.Game
             guard.text = hero.GuardedBy == null ? "" : $"Guarded by {_combat.Find(hero.GuardedBy).Name}";
             guard.EnableInClassList("hidden", hero.GuardedBy == null);
 
+            // What the enemies' shown intents would take off this hero if the activation ended now.
+            int incoming = _preview.Where(e => e.Kind == CombatEventKind.Damaged && e.TargetId == hero.Id).Sum(e => e.Amount);
+            bool falls = _preview.Any(e => e.Kind == CombatEventKind.HeroDowned && e.SourceId == hero.Id);
+            Label incomingBadge = view.Q<Label>("incoming");
+            incomingBadge.text = falls ? $"Incoming {incoming}: would fall" : $"Incoming {incoming}";
+            incomingBadge.EnableInClassList("hidden", incoming == 0 || hero.IsDown);
+            incomingBadge.EnableInClassList("is-lethal", falls);
+
             bool active = hero.Id == _combat.ActiveHeroId;
             Button activate = view.Q<Button>("activate");
             activate.EnableInClassList("hidden", _combat.Phase != CombatPhase.ChooseHero || hero.IsDown);
-            activate.clicked += () => Apply(_combat.TryActivate(hero.Id));
+            activate.clicked += () => Apply(() => _combat.TryActivate(hero.Id));
+            activate.RegisterCallback<PointerEnterEvent>(_ => HighlightCardsOf(hero));
+            activate.RegisterCallback<PointerLeaveEvent>(_ => HighlightCardsOf(null));
 
             Label state = view.Q<Label>("state");
             state.text = hero.IsDown ? "Down" : active ? "Active" : "";
@@ -294,6 +321,9 @@ namespace WhereDarknessDwells.Game
                 view.Q<Label>("intent").text = enemy.Intent.Description;
                 view.Q<Label>("intent-target").text = IntentTargetText(enemy);
             }
+            Label outcome = view.Q<Label>("intent-outcome");
+            outcome.text = showIntent ? OutcomeText(enemy) : "";
+            outcome.EnableInClassList("hidden", outcome.text.Length == 0);
 
             Label state = view.Q<Label>("state");
             state.text = "Defeated";
@@ -302,6 +332,16 @@ namespace WhereDarknessDwells.Game
             view.EnableInClassList("is-targetable", selected != null && selected.Target == CardTarget.Enemy && !enemy.IsDown);
             view.RegisterCallback<ClickEvent>(_ => OnCombatantClicked(enemy));
             return view;
+        }
+
+        /// <summary>What this enemy's intent would really do now, after Block, Weak, Exposed and Guard.</summary>
+        string OutcomeText(Combatant enemy)
+        {
+            IEnumerable<string> hits = _preview
+                .Where(e => e.Kind == CombatEventKind.Damaged && e.SourceId == enemy.Id)
+                .Select(e => e.Amount == 0 ? $"{_combat.Find(e.TargetId).Name} blocks it all"
+                    : $"{_combat.Find(e.TargetId).Name} loses {e.Amount}" + (e.Blocked > 0 ? $" ({e.Blocked} blocked)" : ""));
+            return string.Join(", ", hits);
         }
 
         string IntentTargetText(Combatant enemy)
@@ -339,8 +379,12 @@ namespace WhereDarknessDwells.Game
             string reason = _combat.WhyCantPlay(card.Id);
             view.EnableInClassList("is-unplayable", reason != null);
             view.EnableInClassList("is-selected", card.Id == _selectedCard);
+            string boost = Boost(def);
+            view.EnableInClassList("is-boosted", boost != null);
+            _cardViews.Add(new KeyValuePair<CardDef, VisualElement>(def, view));
 
             string help = reason ?? (def.Target == CardTarget.None ? $"Click to play {def.Name}." : $"Click {def.Name}, then choose {(def.Target == CardTarget.Enemy ? "an enemy" : "an ally")}.");
+            if (boost != null) help += " " + boost;
             view.RegisterCallback<PointerEnterEvent>(_ => SetHint(help, false));
             view.RegisterCallback<PointerLeaveEvent>(_ => SetHint("", false));
             view.RegisterCallback<ClickEvent>(e =>
@@ -349,6 +393,110 @@ namespace WhereDarknessDwells.Game
                 OnCardClicked(card);
             });
             return view;
+        }
+
+        /// <summary>Why the card is stronger than usual right now, or null. Read from its effects, not its name.</summary>
+        string Boost(CardDef def)
+        {
+            List<Combatant> standing = _combat.Enemies.Where(e => !e.IsDown).ToList();
+            if (def.Effects.Any(e => e.BonusIfExposed > 0) && standing.Any(e => e.Status(StatusKind.Exposed) > 0))
+                return "An enemy is Exposed, so it hits harder.";
+            if (def.Effects.Any(e => e.Kind == EffectKind.ConsumeHex) && standing.Any(e => e.Status(StatusKind.Hex) > 0))
+                return $"{string.Join(" and ", standing.Where(e => e.Status(StatusKind.Hex) > 0).Select(e => $"{e.Name} has {e.Status(StatusKind.Hex)} Hex"))}.";
+            return null;
+        }
+
+        /// <summary>While the pointer is on a hero's Activate button, lifts the cards that hero could play.</summary>
+        void HighlightCardsOf(Combatant hero)
+        {
+            foreach (KeyValuePair<CardDef, VisualElement> card in _cardViews)
+                card.Value.EnableInClassList("is-highlighted", hero != null && card.Key.IsOwnedBy(hero.Id));
+            if (hero == null) { SetHint("", false); return; }
+            int count = _cardViews.Count(c => c.Key.IsOwnedBy(hero.Id));
+            SetHint(count == 0 ? $"{hero.Name} has no cards in hand." : $"{hero.Name} can play {count} of these cards.", false);
+        }
+
+        // ---------- floating numbers ----------
+
+        const long FloaterGapMs = 450;
+
+        Dictionary<string, int> StatusStacks()
+        {
+            var stacks = new Dictionary<string, int>();
+            if (_combat == null) return stacks;
+            foreach (Combatant c in _combat.Heroes.Concat(_combat.Enemies))
+                foreach (KeyValuePair<StatusKind, int> s in c.Statuses) stacks[$"{c.Id}/{s.Key}"] = s.Value;
+            return stacks;
+        }
+
+        /// <summary>
+        /// Floats damage, Block and new statuses up from the panels they hit. Each enemy's action gets its own beat,
+        /// so the enemy phase can be followed. Statuses only float when they grow, not when they tick down.
+        /// </summary>
+        void ShowFloaters(IReadOnlyList<CombatEvent> events, Dictionary<string, int> stacks)
+        {
+            int beat = 0;
+            var perTarget = new Dictionary<string, int>();
+            foreach (CombatEvent e in events)
+            {
+                string text = null, style = null;
+                switch (e.Kind)
+                {
+                    case CombatEventKind.EnemyActed:
+                        beat++;
+                        Flash(e.SourceId, beat);
+                        break;
+                    case CombatEventKind.Damaged:
+                        text = e.Amount > 0 ? $"-{e.Amount}" : "Blocked";
+                        style = e.Amount > 0 ? "floater-damage" : "floater-block";
+                        break;
+                    case CombatEventKind.BlockGained:
+                        text = $"+{e.Amount} Block";
+                        style = "floater-block";
+                        break;
+                    case CombatEventKind.StatusChanged:
+                        string key = $"{e.TargetId}/{e.Status}";
+                        stacks.TryGetValue(key, out int before);
+                        stacks[key] = e.Amount;
+                        if (e.Amount > before) { text = $"{e.Status} {e.Amount}"; style = "floater-status"; }
+                        break;
+                }
+                if (text == null || e.TargetId == null) continue;
+
+                string slot = $"{e.TargetId}/{beat}";
+                perTarget.TryGetValue(slot, out int row);
+                perTarget[slot] = row + 1;
+                Float(e.TargetId, text, style, beat, row);
+            }
+        }
+
+        void Float(string targetId, string text, string style, int beat, int row)
+        {
+            _floaters.schedule.Execute(() =>
+            {
+                // Looked up when it runs, because a redraw replaces the panels.
+                if (!_views.TryGetValue(targetId, out VisualElement view) || view.panel == null) return;
+                Rect area = view.worldBound;
+                Rect origin = _floaters.worldBound;
+                var label = new Label(text) { pickingMode = PickingMode.Ignore };
+                label.AddToClassList("floater");
+                label.AddToClassList(style);
+                label.style.left = area.center.x - origin.x - 60;
+                label.style.top = area.y - origin.y + 40 + row * 26;
+                _floaters.Add(label);
+                label.schedule.Execute(() => label.AddToClassList("floater-gone")).StartingIn(30);
+                label.schedule.Execute(label.RemoveFromHierarchy).StartingIn(1400);
+            }).StartingIn(60 + beat * FloaterGapMs);
+        }
+
+        void Flash(string enemyId, int beat)
+        {
+            _floaters.schedule.Execute(() =>
+            {
+                if (!_views.TryGetValue(enemyId, out VisualElement view)) return;
+                view.AddToClassList("is-acting");
+                view.schedule.Execute(() => view.RemoveFromClassList("is-acting")).StartingIn(380);
+            }).StartingIn(beat * FloaterGapMs);
         }
 
         void DrawHealth(VisualElement view, Combatant c)

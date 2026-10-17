@@ -108,3 +108,7 @@ Unity/[Aa]ssets/[Pp]olygon*.meta
 # .NET test project output
 tests/**/bin/
 tests/**/obj/
+
+# Build output of the .NET tools
+tools/**/bin/
+tools/**/obj/

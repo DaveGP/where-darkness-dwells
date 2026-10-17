@@ -1,7 +1,7 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 1b, combat screen (in review).** 1a, the combat rules, is in review. David agreed the
-Milestone 0 design on 2026-10-17.
+**Current milestone: 2, a combat system worth building on (in progress).** Milestone 1 was merged on
+2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -37,12 +37,7 @@ The work is split so the rules can be built and tested before the Unity project 
   a caster that applies Weak).
 - A .NET test project and a CI workflow.
 
-Status: written and tested. The code is in `Assets/Scripts/Core` and the tests are in `Assets/Tests/EditMode`.
-.NET runs 235 tests, including 200 seeded fights that an autoplay bot plays to the end. Still to check: the
-same tests in David's Editor.
-
-Known from the bot: it wins all 500 seeds it plays, in about 7 rounds. The first fight is too easy, which is a
-Milestone 2 tuning job.
+Status: done. The code is in `Assets/Scripts/Core` and the tests are in `Assets/Tests/EditMode`.
 
 **1b. Combat screen in Unity**
 - `ScriptableObject` assets for that content, plus `ContentDatabase` with validation.
@@ -68,7 +63,7 @@ Status: written. The pieces:
 Checked in David's Editor (2026-10-17): it compiles with no warnings, 241 EditMode tests pass (238 rules tests
 and 3 content asset tests), the scene builds, and a fight starts and plays through activation, a targeted
 card, a refused card and the enemy phase with no Console errors. Still to check by David: playing a fight to
-victory or defeat, and how the screen looks.
+victory or defeat, and how the screen looks. David played it and approved the look on 2026-10-17. Done.
 
 **Acceptance criteria**
 - David can press Play, complete one encounter and win or lose it.
@@ -79,6 +74,24 @@ victory or defeat, and how the screen looks.
   from the same seed and commands.
 
 ## Milestone 2: a combat system worth building on
+
+Status (2026-10-17):
+- `tools/Balance` plays the first fight with two scripted players. Over 200 seeds, a careful player (one that
+  looks ahead at the enemy phase) wins every fight in about 6 rounds with 73% of the party's health left. A
+  careless one (random choices) wins 2 in 3, takes about 12 rounds and ends with 19%. Choices matter, so the
+  "too easy" reading from Milestone 1's simpler bot was wrong. David chose to keep this difficulty for the first
+  fight; harder fights come with Milestone 3's encounters.
+- Open questions 1 and 2 are answered in `GAME_DESIGN.md` from the same tool. Question 3 (how downed heroes
+  return) only matters across a run, so it moves to Milestone 3.
+- Card use is even: in careful play every card is played about once a fight (Stand Guard least, at 0.5) and
+  each hero gets 30 to 38% of activations, so no card or hero needed retuning yet.
+- Feedback, checked in David's Editor (284 EditMode tests pass):
+  - enemy intents show what they would really do after Block, Weak, Exposed and Guard
+    (`CombatState.PreviewEnemyPhase`);
+  - heroes show their incoming damage and warn when it would bring them down;
+  - damage, Block and new statuses float up from the panels, with each enemy's action on its own beat;
+  - hovering a hero's Activate button lifts their cards, and cards that are stronger right now (an Exposed
+    target for Exploit, Hex for Unravel) are outlined in green.
 
 - Tune the hero identities, card effects, cross-hero synergies, costs and enemy intents.
 - Answer open questions 1 to 3 in `GAME_DESIGN.md` through playtests.
