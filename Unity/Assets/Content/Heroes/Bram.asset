@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Bram
   m_EditorClassIdentifier: 
   id: bram
-  displayName: 'Bram'
-  title: 'the Warden'
+  displayName: Bram
+  title: the Warden
   colour: Iron
   maxHealth: 40
+  model: {fileID: 3186528172670679936, guid: 48e71803e3dc7e248a1a532cdef1be17, type: 3}
