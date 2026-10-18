@@ -680,3 +680,27 @@
     height: 44px;
     font-size: 16px;
 }
+
+/* ---------- the 3D stage ---------- */
+
+/* With a stage (CombatScreen adds has-stage when the local art is there), the fight shows through the middle of the
+   screen, and the panels over it turn translucent so the fighters behind them stay visible. */
+.has-stage .screen {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.has-stage .battlefield {
+    justify-content: space-between;
+}
+
+.has-stage .combatant {
+    background-color: rgba(20, 16, 22, 0.78);
+}
+
+.has-stage .enemy-row .combatant {
+    background-color: rgba(30, 18, 22, 0.78);
+}
+
+.has-stage .log-panel {
+    background-color: rgba(16, 13, 18, 0.88);
+}

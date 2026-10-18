@@ -47,6 +47,9 @@ namespace WhereDarknessDwells.Game
         };
 
         ContentLibrary _library;
+        // The 3D set behind the fight, when the local art for one is on this machine (see CombatStage).
+        CombatStage _stage;
+        Camera _hiddenCamera;
         CombatState _combat;
         ulong _seed;
         Action _onFinished; // Set while showing a run's fight: called when the player leaves the end panel.
@@ -128,6 +131,7 @@ namespace WhereDarknessDwells.Game
             _again.text = "Continue";
             _root.style.display = DisplayStyle.Flex;
             SetHint("", false);
+            ShowStage();
             Redraw();
         }
 
@@ -142,6 +146,7 @@ namespace WhereDarknessDwells.Game
             _onFinished = null;
             _combat = null;
             _root.style.display = DisplayStyle.None;
+            HideStage();
             finished();
         }
 
@@ -155,6 +160,33 @@ namespace WhereDarknessDwells.Game
             _combat = null;
             _selectedCard = 0;
             _root.style.display = DisplayStyle.None;
+            HideStage();
+        }
+
+        void OnDisable() => HideStage();
+
+        // ---------- the 3D stage ----------
+
+        void ShowStage()
+        {
+            if (_stage != null) return;
+            var prefab = Resources.Load<CombatStage>("CombatStage");
+            if (prefab == null) return;
+            _hiddenCamera = Camera.main;
+            if (_hiddenCamera != null) _hiddenCamera.enabled = false;
+            _stage = Instantiate(prefab);
+            _root.AddToClassList("has-stage");
+            Debug.Log("[Combat] Showing the fight on the 3D stage.");
+        }
+
+        void HideStage()
+        {
+            if (_stage == null) return;
+            Destroy(_stage.gameObject);
+            _stage = null;
+            if (_hiddenCamera != null) _hiddenCamera.enabled = true;
+            _hiddenCamera = null;
+            _root?.RemoveFromClassList("has-stage");
         }
 
         /// <summary>True when Esc belongs to this screen this frame (cancelling a card's target), so it doesn't also pause.</summary>
@@ -196,6 +228,7 @@ namespace WhereDarknessDwells.Game
             }
 
             Debug.Log($"[Combat] Fight started: {string.Join(", ", party.Select(h => h.Id))} against {string.Join(", ", enemies.Select(e => e.Id))}, seed {_seed}.");
+            ShowStage();
             Apply(() => _combat.Start());
         }
 
@@ -334,6 +367,7 @@ namespace WhereDarknessDwells.Game
         {
             CardDef selected = _selectedCard == 0 ? null : _combat.CardOf(_combat.FindCard(_selectedCard));
             _preview = _combat.PreviewEnemyPhase();
+            if (_stage != null) _stage.Show(_combat, content);
             _views.Clear();
             _cardViews.Clear();
 
