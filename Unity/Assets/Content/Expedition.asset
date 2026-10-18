@@ -96,13 +96,13 @@ MonoBehaviour:
     enemies:
     - {fileID: 11400000, guid: 23a71b5394c1485c91127f24aef4d9b5, type: 2}
     - {fileID: 11400000, guid: d533dd5593aa432e9abe0446021205b8, type: 2}
-  - id: hound_pair
+  - id: demon_pair
     kind: 0
     minLayer: 0
     maxLayer: 2
     enemies:
-    - {fileID: 11400000, guid: d90a75b88e04403c872528de657674e6, type: 2}
-    - {fileID: 11400000, guid: d90a75b88e04403c872528de657674e6, type: 2}
+    - {fileID: 11400000, guid: 30147e9bf1834e9385130857bc1334a6, type: 2}
+    - {fileID: 11400000, guid: 30147e9bf1834e9385130857bc1334a6, type: 2}
   - id: ringer_and_wretch
     kind: 0
     minLayer: 1
@@ -117,12 +117,12 @@ MonoBehaviour:
     enemies:
     - {fileID: 11400000, guid: 8e888a1b49714c8c9e810f46a08d9bbc, type: 2}
     - {fileID: 11400000, guid: 23a71b5394c1485c91127f24aef4d9b5, type: 2}
-  - id: pack_and_bell
+  - id: demon_and_bell
     kind: 0
     minLayer: 3
     maxLayer: 6
     enemies:
-    - {fileID: 11400000, guid: d90a75b88e04403c872528de657674e6, type: 2}
+    - {fileID: 11400000, guid: 30147e9bf1834e9385130857bc1334a6, type: 2}
     - {fileID: 11400000, guid: 313555c0d46045f0aea5b05ecf956cc6, type: 2}
   - id: retainers
     kind: 0
@@ -131,21 +131,21 @@ MonoBehaviour:
     enemies:
     - {fileID: 11400000, guid: 8e888a1b49714c8c9e810f46a08d9bbc, type: 2}
     - {fileID: 11400000, guid: 8e888a1b49714c8c9e810f46a08d9bbc, type: 2}
-  - id: leech_swarm
+  - id: gargoyle_roost
     kind: 0
     minLayer: 1
     maxLayer: 4
     enemies:
-    - {fileID: 11400000, guid: 0235681d0b8c4fb594e42ed564b2135e, type: 2}
-    - {fileID: 11400000, guid: 0235681d0b8c4fb594e42ed564b2135e, type: 2}
-    - {fileID: 11400000, guid: 0235681d0b8c4fb594e42ed564b2135e, type: 2}
-  - id: revenant_and_leech
+    - {fileID: 11400000, guid: ebaec0d6cd0747deb759fe9cf7817288, type: 2}
+    - {fileID: 11400000, guid: ebaec0d6cd0747deb759fe9cf7817288, type: 2}
+    - {fileID: 11400000, guid: ebaec0d6cd0747deb759fe9cf7817288, type: 2}
+  - id: revenant_and_gargoyle
     kind: 0
     minLayer: 3
     maxLayer: 6
     enemies:
     - {fileID: 11400000, guid: eb39006d2a4843568b50d5d5ed78b0dc, type: 2}
-    - {fileID: 11400000, guid: 0235681d0b8c4fb594e42ed564b2135e, type: 2}
+    - {fileID: 11400000, guid: ebaec0d6cd0747deb759fe9cf7817288, type: 2}
   - id: bloodbound_knight
     kind: 1
     minLayer: 2

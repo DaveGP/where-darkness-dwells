@@ -319,6 +319,17 @@ namespace WhereDarknessDwells.Core
                 IntentDef.Block(10, "Close ranks 10"),
                 IntentDef.Attack(4, IntentTarget.AllHeroes, "Rally 4 to all")),
 
+            // Milestone 6.5: these two take the Gaol Hound's and Cistern Leech's fights, with the same numbers, because
+            // the art packs have characters for them. The hound and the leech stay defined for later (David, 2026-10-18).
+            new EnemyDef("crypt_demon", "Crypt Demon", 18,
+                IntentDef.Attack(5, IntentTarget.RandomHero, "Rake 5"),
+                IntentDef.Apply(StatusKind.Bleed, 3, IntentTarget.RandomHero, "Brand: Bleed 3"),
+                IntentDef.Attack(8, IntentTarget.RandomHero, "Pounce 8")),
+            new EnemyDef("gargoyle", "Gargoyle", 14,
+                IntentDef.Apply(StatusKind.Bleed, 2, IntentTarget.RandomHero, "Talons: Bleed 2"),
+                IntentDef.Attack(5, IntentTarget.RandomHero, "Swoop 5"),
+                IntentDef.Heal(6, "Mend stone: heal 6")),
+
             // Elites
             new EnemyDef("bloodbound_knight", "Bloodbound Knight", 70,
                 IntentDef.Attack(13, IntentTarget.HealthiestHero, "Cleave 13"),
@@ -353,13 +364,13 @@ namespace WhereDarknessDwells.Core
             new[]
             {
                 new EncounterDef("sentry_and_wretch", EncounterKind.Normal, 0, 2, FirstEncounter),
-                new EncounterDef("hound_pair", EncounterKind.Normal, 0, 2, "gaol_hound", "gaol_hound"),
+                new EncounterDef("demon_pair", EncounterKind.Normal, 0, 2, "crypt_demon", "crypt_demon"),
                 new EncounterDef("ringer_and_wretch", EncounterKind.Normal, 1, 4, "bell_ringer", "chapel_wretch"),
                 new EncounterDef("drowned_watch", EncounterKind.Normal, 3, 6, "drowned_retainer", "hollow_sentry"),
-                new EncounterDef("pack_and_bell", EncounterKind.Normal, 3, 6, "gaol_hound", "bell_ringer"),
+                new EncounterDef("demon_and_bell", EncounterKind.Normal, 3, 6, "crypt_demon", "bell_ringer"),
                 new EncounterDef("retainers", EncounterKind.Normal, 4, 6, "drowned_retainer", "drowned_retainer"),
-                new EncounterDef("leech_swarm", EncounterKind.Normal, 1, 4, "cistern_leech", "cistern_leech", "cistern_leech"),
-                new EncounterDef("revenant_and_leech", EncounterKind.Normal, 3, 6, "siege_revenant", "cistern_leech"),
+                new EncounterDef("gargoyle_roost", EncounterKind.Normal, 1, 4, "gargoyle", "gargoyle", "gargoyle"),
+                new EncounterDef("revenant_and_gargoyle", EncounterKind.Normal, 3, 6, "siege_revenant", "gargoyle"),
                 new EncounterDef("bloodbound_knight", EncounterKind.Elite, 2, 6, "bloodbound_knight"),
                 new EncounterDef("matron_and_wretch", EncounterKind.Elite, 2, 6, "chapel_matron", "chapel_wretch"),
                 new EncounterDef("vael", EncounterKind.Boss, 0, 0, "blood_thrall", VaelId, "blood_thrall"),

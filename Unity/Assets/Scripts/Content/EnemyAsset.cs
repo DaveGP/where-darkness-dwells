@@ -14,8 +14,12 @@ namespace WhereDarknessDwells.Content
         [SerializeField, Min(1)] int maxHealth = 20;
         [Tooltip("The enemy's actions, used in order and then repeated.")]
         [SerializeField] IntentData[] intents = new IntentData[0];
+        [Tooltip("The character shown for this enemy. Optional: the Synty prefabs aren't in the repository, so a fresh clone has none and shows a placeholder.")]
+        [SerializeField] GameObject model;
 
         public string Id => id;
+        /// <summary>The enemy's character prefab, or null when it has none or the art isn't on this machine.</summary>
+        public GameObject Model => model;
 
         public EnemyDef ToDef() => new EnemyDef(id, displayName, maxHealth,
             (intents ?? new IntentData[0]).Select(i => i.ToDef()).ToArray());

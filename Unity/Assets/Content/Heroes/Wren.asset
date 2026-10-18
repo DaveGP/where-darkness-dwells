@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Wren
   m_EditorClassIdentifier: 
   id: wren
-  displayName: 'Wren'
-  title: 'the Hunter'
+  displayName: Wren
+  title: the Hunter
   colour: Thorn
   maxHealth: 28
+  model: {fileID: 2438390183911661607, guid: 5c93c808e1c8a6445924e912ddf5e34c, type: 3}

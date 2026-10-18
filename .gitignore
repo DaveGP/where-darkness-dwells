@@ -117,3 +117,6 @@ tools/**/obj/
 # from licensed assets, so it stays on David's machine like the packs themselves.
 Unity/[Aa]ssets/LocalArt/
 Unity/[Aa]ssets/LocalArt.meta
+
+# Rider project files
+Unity/.idea/

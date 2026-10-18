@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ChapelWretch
   m_EditorClassIdentifier: 
   id: chapel_wretch
-  displayName: 'Chapel Wretch'
+  displayName: Chapel Wretch
   maxHealth: 22
   intents:
   - description: 'Curse: Weak 2'
@@ -21,16 +21,17 @@ MonoBehaviour:
     target: 1
     amount: 2
     status: 1
-    vague: ''
-  - description: 'Wail 4 to all'
+    vague: 
+  - description: Wail 4 to all
     kind: 0
     target: 2
     amount: 4
     status: 0
-    vague: ''
-  - description: 'Claw 6'
+    vague: 
+  - description: Claw 6
     kind: 0
     target: 0
     amount: 6
     status: 0
-    vague: ''
+    vague: 
+  model: {fileID: 1679424419653922518, guid: 20d542776ec1c654e9ac1fa0b28352fc, type: 3}

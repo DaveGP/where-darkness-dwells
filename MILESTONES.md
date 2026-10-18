@@ -1,6 +1,6 @@
 # Where Darkness Dwells: milestones
 
-**Current milestone: 6.5, presentation (not started).** Milestones 1 to 6 were merged on 2026-10-17.
+**Current milestone: 6.5, presentation (started).** Milestones 1 to 6 were merged on 2026-10-17.
 
 Each milestone is one branch and one PR. A milestone is done only when its acceptance criteria have been
 checked, not just when the code is written.
@@ -236,6 +236,16 @@ Status: started. The title screen shows a lair backdrop rendered on David's Mac 
 image (`Assets/LocalArt/Resources/TitleBackdrop.jpg`) and the scene it is rendered from (`Assets/LocalArt/LairBackdrop.unity`)
 are licensed art, so they are gitignored. Without them the title keeps its plain background. The Dark Fantasy and Fantasy
 Characters materials were converted to URP on David's Mac; re-importing those packs undoes that.
+
+Enemy models: each enemy asset has an optional `model` prefab, so a later scene can show the enemy as a character.
+They are from the Dark Fantasy pack: Hollow Sentry (Skeleton_HeavyArmor), Siege Revenant (Skeleton_LightArmor),
+Drowned Retainer (Skeleton_Flesh), Vael (DarkLord), Chapel Matron (Priest_Female), Chapel Wretch (Witch_Female),
+Bell Ringer (Gravedigger), Blood Thrall (Demon). The Bloodbound Knight is a red, unmasked DarkLord variant in
+`Assets/LocalArt/Enemies/`. The new Crypt Demon is Demon_Male and the Gargoyle is Gargoyle_01. They replace the Gaol Hound and
+Cistern Leech in fights, which have no models because the pack has no animal rigs. In a fresh
+clone the references are missing, so the field reads as empty and a placeholder is used.
+Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
+the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard.
 
 ## Milestone 7: release preparation
 

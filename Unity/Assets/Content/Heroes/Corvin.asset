@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Corvin
   m_EditorClassIdentifier: 
   id: corvin
-  displayName: 'Corvin'
-  title: 'the Penitent'
+  displayName: Corvin
+  title: the Penitent
   colour: Bone
   maxHealth: 32
+  model: {fileID: 6711451649947656021, guid: 6f84430900ee9f246aa877a58c0085a0, type: 3}

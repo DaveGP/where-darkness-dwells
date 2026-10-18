@@ -13,30 +13,31 @@ MonoBehaviour:
   m_Name: BloodboundKnight
   m_EditorClassIdentifier: 
   id: bloodbound_knight
-  displayName: 'Bloodbound Knight'
+  displayName: Bloodbound Knight
   maxHealth: 70
   intents:
-  - description: 'Cleave 13'
+  - description: Cleave 13
     kind: 0
     target: 1
     amount: 13
     status: 0
-    vague: ''
+    vague: 
   - description: 'Blood oath: Bleed 4'
     kind: 2
     target: 0
     amount: 4
     status: 2
-    vague: ''
-  - description: 'Sweep 7 to all'
+    vague: 
+  - description: Sweep 7 to all
     kind: 0
     target: 2
     amount: 7
     status: 0
-    vague: ''
-  - description: 'Crimson guard 14'
+    vague: 
+  - description: Crimson guard 14
     kind: 1
     target: 3
     amount: 14
     status: 0
-    vague: ''
+    vague: 
+  model: {fileID: 8257804376889450244, guid: 18826821704324786945c5763377d82e, type: 3}

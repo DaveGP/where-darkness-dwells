@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Mara
   m_EditorClassIdentifier: 
   id: mara
-  displayName: 'Mara'
-  title: 'the Duelist'
+  displayName: Mara
+  title: the Duelist
   colour: Steel
   maxHealth: 34
+  model: {fileID: 136616, guid: f7e586317327fe240bef5a82944f49c2, type: 3}
