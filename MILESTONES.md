@@ -247,6 +247,12 @@ clone the references are missing, so the field reads as empty and a placeholder 
 Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
 the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard.
 
+Fight stage: when `Assets/LocalArt/Resources/CombatStage.prefab` is there, each fight is shown on a 3D set behind the
+combat screen (`Game/CombatStage.cs`). It is the Background-Layout crypt with three hero places on the left of the aisle
+and three enemy places on the right, its own camera, and the crypt's ambient light and fog. Every fighter plays one
+idle loop (`LocalArt/Combat/CombatIdle.controller`), and fighters who are down are hidden. A fighter without a model
+gets a capsule. Without the prefab the fight keeps its flat background. Attack animations come later.
+
 ## Milestone 7: release preparation
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store
