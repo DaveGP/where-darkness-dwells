@@ -84,7 +84,7 @@ Assets/Tests/Content     Editor-only tests of the content assets. Unity's Test R
 ## Third-party assets
 
 - **Synty assets are licensed to David and must not be committed.** The repo is public and the licence
-  doesn't allow redistribution. `.gitignore` excludes `Unity/Assets/Synty/` and `Unity/Assets/Polygon*/` (with their `.meta` files). Run `git status` after every import. If a pack
+  doesn't allow redistribution. `.gitignore` excludes `Unity/Assets/Synty/` and `Unity/Assets/Polygon*/` (with their `.meta` files), and `Unity/Assets/LocalArt/` for art rendered from them, such as the title backdrop. Run `git status` after every import. If a pack
   imports somewhere else, add that folder to `.gitignore` before committing.
 - Because of that, cloud sessions and fresh clones won't have the Synty art. Scenes and prefabs must still
   load without it, falling back to placeholders, so the game always runs from a clean clone.

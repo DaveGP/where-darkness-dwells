@@ -232,6 +232,11 @@ Status: done, merged as PR #10. Discarding a card (once per activation, chosen b
 - Room backdrops, a combat stage, lighting, music and sound (with a volume setting), animation and feedback.
 - A short tutorial encounter.
 
+Status: started. The title screen shows a lair backdrop rendered on David's Mac from the Dark Fantasy crypt. The
+image (`Assets/LocalArt/Resources/TitleBackdrop.jpg`) and the scene it is rendered from (`Assets/LocalArt/LairBackdrop.unity`)
+are licensed art, so they are gitignored. Without them the title keeps its plain background. The Dark Fantasy and Fantasy
+Characters materials were converted to URP on David's Mac; re-importing those packs undoes that.
+
 ## Milestone 7: release preparation
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store
