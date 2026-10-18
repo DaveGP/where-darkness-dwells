@@ -27,6 +27,10 @@ The first release is one complete, polished run. It is not a large game.
 | Save | Resume a run between rooms | Save mid-combat |
 | Platform **(proposed)** | Windows and macOS, landscape 16:9, mouse | Web build (itch.io), controller |
 
+**Enemy roster (decided: David, 2026-10-18).** The Crypt Demon and the Gargoyle take the Gaol Hound's and the Cistern
+Leech's fights, with the same numbers, because the art packs have characters for them. The hound and the leech stay
+defined but out of the encounter tables, kept for later.
+
 **Non-goals for the first release:** multiplayer, explorable 3D rooms, procedural 3D dungeons, complex
 physics, elaborate animation systems, meta-progression unlocks, a shop or currency, and localisation.
 

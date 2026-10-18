@@ -241,7 +241,8 @@ Enemy models: each enemy asset has an optional `model` prefab, so a later scene 
 They are from the Dark Fantasy pack: Hollow Sentry (Skeleton_HeavyArmor), Siege Revenant (Skeleton_LightArmor),
 Drowned Retainer (Skeleton_Flesh), Vael (DarkLord), Chapel Matron (Priest_Female), Chapel Wretch (Witch_Female),
 Bell Ringer (Gravedigger), Blood Thrall (Demon). The Bloodbound Knight is a red, unmasked DarkLord variant in
-`Assets/LocalArt/Enemies/`. The Gaol Hound and Cistern Leech have none, because the pack has no animal rigs. In a fresh
+`Assets/LocalArt/Enemies/`. The new Crypt Demon is Demon_Male and the Gargoyle is Gargoyle_01. They replace the Gaol Hound and
+Cistern Leech in fights, which have no models because the pack has no animal rigs. In a fresh
 clone the references are missing, so the field reads as empty and a placeholder is used.
 Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
 the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard.
