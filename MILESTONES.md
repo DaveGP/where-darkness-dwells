@@ -263,6 +263,9 @@ flat background and its usual rows. Attack animations come later.
   folder is named after them.
 - **Done means** a new player can start the game, learn it, finish a run and reach an ending without help.
 
+Started early (2026-10-18): a web build (**Where Darkness Dwells > Build for Web**) and a workflow that publishes a
+release's zip to GitHub Pages. See README. The Quit button is hidden on the web.
+
 ## Creating the Unity project
 
 1. In Unity Hub choose **New project**, editor **6000.6.x**, template **Universal 3D**. Create it in any

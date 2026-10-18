@@ -51,7 +51,10 @@ namespace WhereDarknessDwells.Game
             _continue.clicked += () => Choose(ContinueChosen);
             _root.Q<Button>("new-expedition").clicked += () => Choose(NewExpeditionChosen);
             _root.Q<Button>("title-settings").clicked += () => ShowSettings(_titleView);
-            _root.Q<Button>("quit-game").clicked += Quit;
+            var quit = _root.Q<Button>("quit-game");
+            quit.clicked += Quit;
+            // A browser tab can't be closed by the game, so the web build has no Quit.
+            if (Application.platform == RuntimePlatform.WebGLPlayer) quit.style.display = DisplayStyle.None;
             _root.Q<Button>("resume").clicked += Close;
             _root.Q<Button>("pause-settings").clicked += () => ShowSettings(_pauseView);
             _root.Q<Button>("quit-to-title").clicked += () => Choose(QuitToTitleChosen);

@@ -10,7 +10,7 @@ milestone are in `MILESTONES.md`. Read both before changing anything.
   written without the Editor, and edited by David in UI Builder. Use uGUI or world-space UI only for
   something UI Toolkit can't do, and record the reason in `MILESTONES.md`.
 - **Input:** the Input System package.
-- **Platforms:** Windows and macOS, landscape 16:9, mouse first.
+- **Platforms:** Windows and macOS, landscape 16:9, mouse first. Also a web build published to GitHub Pages (see README).
 - **No new packages without a reason** written in the PR description.
 
 ## Architecture
