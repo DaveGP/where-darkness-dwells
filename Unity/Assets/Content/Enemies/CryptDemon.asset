@@ -13,25 +13,25 @@ MonoBehaviour:
   m_Name: CryptDemon
   m_EditorClassIdentifier: 
   id: crypt_demon
-  displayName: 'Crypt Demon'
+  displayName: Crypt Demon
   maxHealth: 18
   intents:
-  - description: 'Rake 5'
+  - description: Rake 5
     kind: 0
     target: 0
     amount: 5
     status: 0
-    vague: ''
+    vague: 
   - description: 'Brand: Bleed 3'
     kind: 2
     target: 0
     amount: 3
     status: 2
-    vague: ''
-  - description: 'Pounce 8'
+    vague: 
+  - description: Pounce 8
     kind: 0
     target: 0
     amount: 8
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 4022236762757211066, guid: b6de10cf9adbb5f4bb72a98a89b1c12e, type: 3}

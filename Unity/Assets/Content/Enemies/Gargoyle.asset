@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Gargoyle
   m_EditorClassIdentifier: 
   id: gargoyle
-  displayName: 'Gargoyle'
+  displayName: Gargoyle
   maxHealth: 14
   intents:
   - description: 'Talons: Bleed 2'
@@ -21,17 +21,17 @@ MonoBehaviour:
     target: 0
     amount: 2
     status: 2
-    vague: ''
-  - description: 'Swoop 5'
+    vague: 
+  - description: Swoop 5
     kind: 0
     target: 0
     amount: 5
     status: 0
-    vague: ''
+    vague: 
   - description: 'Mend stone: heal 6'
     kind: 3
     target: 3
     amount: 6
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 9020730524547166879, guid: 2e019375636fea1468f45103b4ad73b4, type: 3}
