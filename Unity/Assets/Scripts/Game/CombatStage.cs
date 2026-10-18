@@ -31,7 +31,29 @@ namespace WhereDarknessDwells.Game
         [SerializeField] float fogEnd = 150f;
 
         readonly Dictionary<string, GameObject> _fighters = new Dictionary<string, GameObject>();
+        readonly Dictionary<string, Transform> _places = new Dictionary<string, Transform>();
         Action _restoreLighting;
+        Camera _camera;
+
+        void Awake() => _camera = GetComponentInChildren<Camera>();
+
+        /// <summary>Draws the stage only into this part of the screen (0 to 1, from the bottom left).</summary>
+        public void SetViewport(Rect normalized)
+        {
+            if (_camera != null) _camera.rect = normalized;
+        }
+
+        /// <summary>
+        /// Where the point just above a fighter's head is in the stage's view, from (0, 0) at its bottom left to (1, 1)
+        /// at its top right, or null when the fighter has no place on the stage. It uses the place, not the model, so a
+        /// fallen fighter's panel stays put.
+        /// </summary>
+        public Vector2? HeadInView(string fighterId)
+        {
+            if (_camera == null || !_places.TryGetValue(fighterId, out Transform place)) return null;
+            Vector3 point = _camera.WorldToViewportPoint(place.position + Vector3.up * 2.1f);
+            return point.z > 0f ? new Vector2(point.x, point.y) : (Vector2?)null;
+        }
 
         void OnEnable()
         {
@@ -88,6 +110,7 @@ namespace WhereDarknessDwells.Game
             {
                 if (index >= slots.Length || slots[index] == null) return;
                 Transform slot = slots[index];
+                _places[fighter.Id] = slot;
                 placed = model != null ? Instantiate(model, slot.position, slot.rotation, transform) : Placeholder(slot);
                 placed.name = fighter.Id;
                 if (placed.GetComponentInChildren<Animator>() is Animator animator && idle != null)
