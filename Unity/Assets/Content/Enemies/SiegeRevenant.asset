@@ -34,3 +34,4 @@ MonoBehaviour:
     amount: 4
     status: 0
     vague: ''
+  model: {fileID: 0}

@@ -52,3 +52,4 @@ MonoBehaviour:
     amount: 3
     status: 5
     vague: 'His veins darken'
+  model: {fileID: 0}
