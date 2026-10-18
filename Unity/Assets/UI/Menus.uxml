@@ -4,13 +4,21 @@
     <Style src="Menus.uss" />
     <ui:VisualElement name="menus" class="menus">
         <ui:VisualElement name="title-view" class="title-view">
-            <ui:Label text="Where Darkness Dwells" class="game-title" />
-            <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep." class="view-text" />
-            <ui:Button name="continue" text="Continue" class="big-button menu-button" />
-            <ui:Button name="new-expedition" text="New Expedition" class="big-button menu-button" />
-            <ui:Button name="title-settings" text="Settings" class="big-button menu-button" />
-            <ui:Button name="quit-game" text="Quit" class="big-button menu-button" />
-            <ui:Label name="title-note" class="hint title-note" />
+            <ui:VisualElement class="title-shade title-shade-1" picking-mode="Ignore" />
+            <ui:VisualElement class="title-shade title-shade-2" picking-mode="Ignore" />
+            <ui:VisualElement class="title-shade title-shade-3" picking-mode="Ignore" />
+            <ui:VisualElement class="title-shade title-shade-4" picking-mode="Ignore" />
+            <ui:VisualElement class="title-shade title-shade-5" picking-mode="Ignore" />
+            <ui:VisualElement class="title-shade title-shade-6" picking-mode="Ignore" />
+            <ui:VisualElement name="title-column" class="title-column">
+                <ui:Label text="Where Darkness Dwells" class="game-title" />
+                <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep." class="view-text" />
+                <ui:Button name="continue" text="Continue" class="big-button menu-button" />
+                <ui:Button name="new-expedition" text="New Expedition" class="big-button menu-button" />
+                <ui:Button name="title-settings" text="Settings" class="big-button menu-button" />
+                <ui:Button name="quit-game" text="Quit" class="big-button menu-button" />
+                <ui:Label name="title-note" class="hint title-note" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:VisualElement name="pause-view" class="menu-overlay hidden">

@@ -112,3 +112,8 @@ tests/**/obj/
 # Build output of the .NET tools
 tools/**/bin/
 tools/**/obj/
+
+# Art rendered locally from the Synty packs (the title backdrop and the scene it is rendered from). It is derived
+# from licensed assets, so it stays on David's machine like the packs themselves.
+Unity/[Aa]ssets/LocalArt/
+Unity/[Aa]ssets/LocalArt.meta

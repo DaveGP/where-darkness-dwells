@@ -39,6 +39,15 @@ namespace WhereDarknessDwells.Game
             _fullscreen = _root.Q<Toggle>("fullscreen");
             _fastAnimations = _root.Q<Toggle>("fast-animations");
 
+            // The backdrop is rendered from licensed art that is never committed, so a fresh clone won't have it
+            // and the title keeps its plain background.
+            var backdrop = Resources.Load<Texture2D>("TitleBackdrop");
+            if (backdrop != null)
+            {
+                _titleView.style.backgroundImage = new StyleBackground(backdrop);
+                _titleView.AddToClassList("has-backdrop");
+            }
+
             _continue.clicked += () => Choose(ContinueChosen);
             _root.Q<Button>("new-expedition").clicked += () => Choose(NewExpeditionChosen);
             _root.Q<Button>("title-settings").clicked += () => ShowSettings(_titleView);
