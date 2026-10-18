@@ -251,7 +251,9 @@ Fight stage: when `Assets/LocalArt/Resources/CombatStage.prefab` is there, each 
 combat screen (`Game/CombatStage.cs`). It is the Background-Layout crypt with three hero places on the left of the aisle
 and three enemy places on the right, its own camera, and the crypt's ambient light and fog. Every fighter plays one
 idle loop (`LocalArt/Combat/CombatIdle.controller`), and fighters who are down are hidden. A fighter without a model
-gets a capsule. Without the prefab the fight keeps its flat background. Attack animations come later.
+gets a capsule. On the stage, each fighter's panel sits just above its head (projected from the stage camera), or beside
+it when there's no room above, and panels are pushed apart so they never overlap. Without the prefab the fight keeps its
+flat background and its usual rows. Attack animations come later.
 
 ## Milestone 7: release preparation
 
