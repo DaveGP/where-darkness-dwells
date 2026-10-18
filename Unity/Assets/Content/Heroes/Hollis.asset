@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Hollis
   m_EditorClassIdentifier: 
   id: hollis
-  displayName: 'Hollis'
-  title: 'the Bellwright'
+  displayName: Hollis
+  title: the Bellwright
   colour: Bronze
   maxHealth: 32
+  model: {fileID: 110800, guid: 97c46f85ed671244b83b2409f56039d1, type: 3}
