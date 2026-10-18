@@ -66,6 +66,8 @@
       productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
       productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
       showBanner: unityShowBanner,
+      // The expedition is saved to persistentDataPath; this keeps it in the browser's storage after every write.
+      autoSyncPersistentDataPath: true,
       // Sharp on high-density screens without rendering at 3x, which costs a lot for no visible gain.
       devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
     };
