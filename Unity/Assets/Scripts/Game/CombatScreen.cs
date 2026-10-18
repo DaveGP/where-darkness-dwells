@@ -47,6 +47,9 @@ namespace WhereDarknessDwells.Game
         };
 
         ContentLibrary _library;
+        // The 3D set behind the fight, when the local art for one is on this machine (see CombatStage).
+        CombatStage _stage;
+        Camera _hiddenCamera;
         CombatState _combat;
         ulong _seed;
         Action _onFinished; // Set while showing a run's fight: called when the player leaves the end panel.
@@ -78,6 +81,7 @@ namespace WhereDarknessDwells.Game
             _hand = root.Q("hand");
             _endPanel = root.Q("end-panel");
             _floaters = root.Q("floaters");
+            root.Q(className: "battlefield").RegisterCallback<GeometryChangedEvent>(_ => PlacePanelsOnStage());
             _log = root.Q<ScrollView>("log");
             _endActivation = root.Q<Button>("end-activation");
             _discard = root.Q<Button>("discard");
@@ -128,6 +132,7 @@ namespace WhereDarknessDwells.Game
             _again.text = "Continue";
             _root.style.display = DisplayStyle.Flex;
             SetHint("", false);
+            ShowStage();
             Redraw();
         }
 
@@ -142,6 +147,7 @@ namespace WhereDarknessDwells.Game
             _onFinished = null;
             _combat = null;
             _root.style.display = DisplayStyle.None;
+            HideStage();
             finished();
         }
 
@@ -155,6 +161,98 @@ namespace WhereDarknessDwells.Game
             _combat = null;
             _selectedCard = 0;
             _root.style.display = DisplayStyle.None;
+            HideStage();
+        }
+
+        void OnDisable() => HideStage();
+
+        // ---------- the 3D stage ----------
+
+        void ShowStage()
+        {
+            if (_stage != null) return;
+            var prefab = Resources.Load<CombatStage>("CombatStage");
+            if (prefab == null) return;
+            _hiddenCamera = Camera.main;
+            if (_hiddenCamera != null) _hiddenCamera.enabled = false;
+            _stage = Instantiate(prefab);
+            _root.AddToClassList("has-stage");
+            // The rows cover the whole battlefield on a stage, so let clicks through to the panels in both of them.
+            _heroRow.pickingMode = PickingMode.Ignore;
+            _enemyRow.pickingMode = PickingMode.Ignore;
+            Debug.Log("[Combat] Showing the fight on the 3D stage.");
+        }
+
+        // Puts each fighter's panel just above its head on the stage, or beside it when there's no room above, and keeps
+        // the panels from overlapping. Runs after each redraw and when the screen changes size.
+        void OnPanelLaidOut(GeometryChangedEvent e) => PlacePanelsOnStage();
+
+        void PlacePanelsOnStage()
+        {
+            if (_stage == null || _combat == null) return;
+            // Both rows cover the battlefield on a stage, so their panels share one set of coordinates.
+            Rect area = _heroRow.worldBound;
+            if (_heroRow.panel == null || float.IsNaN(area.width) || area.width <= 0f) return;
+
+            // Draw the stage into the battlefield, whatever the window's shape, so the fighters stand where the panels expect.
+            Rect screen = _root.worldBound;
+            _stage.SetViewport(new Rect(area.xMin / screen.width, 1f - area.yMax / screen.height, area.width / screen.width, area.height / screen.height));
+            const float gap = 8f, clearance = 44f;
+
+            var panels = new List<(VisualElement view, float left, float top, float width, float height)>();
+            foreach (Combatant fighter in _combat.Heroes.Concat(_combat.Enemies))
+            {
+                if (!_views.TryGetValue(fighter.Id, out VisualElement view)) continue;
+                Vector2? head = _stage.HeadInView(fighter.Id);
+                if (head == null) continue;
+                // The stage draws into the battlefield, so its view maps straight onto the rows (whose y runs downwards).
+                Vector2 point = new Vector2(head.Value.x * area.width, (1f - head.Value.y) * area.height);
+                float width = view.resolvedStyle.width, height = view.resolvedStyle.height;
+                if (float.IsNaN(width) || float.IsNaN(height)) return;
+                float left = point.x - width / 2f, top = point.y - height - gap;
+                if (top >= -height / 4f) top = Mathf.Max(top, 0f);
+                else
+                {
+                    // No room above the head: stand the panel beside the fighter instead, on the side facing the middle.
+                    left = fighter.IsHero ? point.x + clearance : point.x - clearance - width;
+                    top = Mathf.Clamp(point.y, gap, area.height - height - gap);
+                }
+                panels.Add((view, left, top, width, height));
+            }
+
+            panels.Sort((a, b) => a.left.CompareTo(b.left));
+            for (int i = 1; i < panels.Count; i++)
+            {
+                var previous = panels[i - 1];
+                float minLeft = previous.left + previous.width + gap;
+                bool sameBand = panels[i].top < previous.top + previous.height && previous.top < panels[i].top + panels[i].height;
+                if (sameBand && panels[i].left < minLeft) panels[i] = (panels[i].view, minLeft, panels[i].top, panels[i].width, panels[i].height);
+            }
+            // If the last panels were pushed off the right edge, slide the whole run back to the left.
+            if (panels.Count > 0)
+            {
+                var last = panels[panels.Count - 1];
+                float overflow = last.left + last.width + gap - area.width;
+                if (overflow > 0f) for (int i = 0; i < panels.Count; i++) panels[i] = (panels[i].view, panels[i].left - overflow, panels[i].top, panels[i].width, panels[i].height);
+            }
+            foreach (var (view, left, top, width, _) in panels)
+            {
+                view.style.position = Position.Absolute;
+                view.style.left = Mathf.Max(left, gap);
+                view.style.top = top;
+            }
+        }
+
+        void HideStage()
+        {
+            if (_stage == null) return;
+            Destroy(_stage.gameObject);
+            _stage = null;
+            if (_hiddenCamera != null) _hiddenCamera.enabled = true;
+            _hiddenCamera = null;
+            _root?.RemoveFromClassList("has-stage");
+            if (_heroRow != null) _heroRow.pickingMode = PickingMode.Position;
+            if (_enemyRow != null) _enemyRow.pickingMode = PickingMode.Position;
         }
 
         /// <summary>True when Esc belongs to this screen this frame (cancelling a card's target), so it doesn't also pause.</summary>
@@ -196,6 +294,7 @@ namespace WhereDarknessDwells.Game
             }
 
             Debug.Log($"[Combat] Fight started: {string.Join(", ", party.Select(h => h.Id))} against {string.Join(", ", enemies.Select(e => e.Id))}, seed {_seed}.");
+            ShowStage();
             Apply(() => _combat.Start());
         }
 
@@ -334,6 +433,7 @@ namespace WhereDarknessDwells.Game
         {
             CardDef selected = _selectedCard == 0 ? null : _combat.CardOf(_combat.FindCard(_selectedCard));
             _preview = _combat.PreviewEnemyPhase();
+            if (_stage != null) _stage.Show(_combat, content);
             _views.Clear();
             _cardViews.Clear();
 
@@ -352,6 +452,8 @@ namespace WhereDarknessDwells.Game
             foreach (Combatant enemy in _combat.Enemies) _enemyRow.Add(_views[enemy.Id] = EnemyView(enemy, selected));
             _heroRow.Clear();
             foreach (Combatant hero in _combat.Heroes) _heroRow.Add(_views[hero.Id] = HeroView(hero, selected));
+            // On a stage the panels are placed once they have been laid out and their sizes are known.
+            if (_stage != null) foreach (VisualElement view in _views.Values) view.RegisterCallback<GeometryChangedEvent>(OnPanelLaidOut);
             _hand.Clear();
             foreach (CardInstance card in _combat.Hand) _hand.Add(CardView(card));
 
