@@ -243,7 +243,8 @@ Drowned Retainer (Skeleton_Flesh), Vael (DarkLord), Chapel Matron (Priest_Female
 Bell Ringer (Gravedigger), Blood Thrall (Demon). The Bloodbound Knight is a red, unmasked DarkLord variant in
 `Assets/LocalArt/Enemies/`. The Gaol Hound and Cistern Leech have none, because the pack has no animal rigs. In a fresh
 clone the references are missing, so the field reads as empty and a placeholder is used.
-Heroes have the same optional `model`. So far only Hollis has one: the Fantasy Characters bard (Character_Male_Baird_01, David's choice).
+Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
+the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard.
 
 ## Milestone 7: release preparation
 
