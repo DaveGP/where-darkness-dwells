@@ -72,3 +72,50 @@
     font-size: 14px;
     color: rgb(150, 140, 146);
 }
+
+.title-column {
+    align-items: center;
+}
+
+/* With a backdrop image (GameMenus loads it when the local art is there), the menu moves to the left third
+   over a dark fade, so the lair stays visible on the right. Without one, the title looks as it always has. */
+.title-view.has-backdrop {
+    align-items: flex-start;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.title-view.has-backdrop .title-column {
+    width: 760px;
+    padding-left: 90px;
+    align-items: flex-start;
+}
+
+.title-view.has-backdrop .view-text {
+    -unity-text-align: middle-left;
+    width: 560px;
+    white-space: normal;
+}
+
+.title-view.has-backdrop .title-note {
+    -unity-text-align: middle-left;
+    width: 520px;
+}
+
+.title-shade {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.title-view.has-backdrop .title-shade {
+    display: flex;
+}
+
+/* Overlapping bands stand in for a gradient: darkest behind the menu, fading out towards the lair. */
+.title-shade-1 { left: 0; width: 34%; background-color: rgba(10, 8, 12, 0.4); }
+.title-shade-2 { left: 0; width: 39%; background-color: rgba(10, 8, 12, 0.18); }
+.title-shade-3 { left: 0; width: 44%; background-color: rgba(10, 8, 12, 0.14); }
+.title-shade-4 { left: 0; width: 49%; background-color: rgba(10, 8, 12, 0.1); }
+.title-shade-5 { left: 0; width: 54%; background-color: rgba(10, 8, 12, 0.07); }
+.title-shade-6 { left: 0; width: 59%; background-color: rgba(10, 8, 12, 0.05); }
