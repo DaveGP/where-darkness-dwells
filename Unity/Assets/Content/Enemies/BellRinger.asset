@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BellRinger
   m_EditorClassIdentifier: 
   id: bell_ringer
-  displayName: 'Bell Ringer'
+  displayName: Bell Ringer
   maxHealth: 26
   intents:
   - description: 'Toll: Exposed 1 to all'
@@ -21,17 +21,17 @@ MonoBehaviour:
     target: 2
     amount: 1
     status: 0
-    vague: ''
-  - description: 'Hammer 9'
+    vague: 
+  - description: Hammer 9
     kind: 0
     target: 1
     amount: 9
     status: 0
-    vague: ''
-  - description: 'Brace 6'
+    vague: 
+  - description: Brace 6
     kind: 1
     target: 3
     amount: 6
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 5671466155733360654, guid: c75009d75a4e3b44cbb3790162d25d8b, type: 3}

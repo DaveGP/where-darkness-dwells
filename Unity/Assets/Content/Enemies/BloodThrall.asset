@@ -13,25 +13,25 @@ MonoBehaviour:
   m_Name: BloodThrall
   m_EditorClassIdentifier: 
   id: blood_thrall
-  displayName: 'Blood Thrall'
+  displayName: Blood Thrall
   maxHealth: 10
   intents:
-  - description: 'Claw 4'
+  - description: Claw 4
     kind: 0
     target: 0
     amount: 4
     status: 0
-    vague: ''
-  - description: 'Claw 4'
+    vague: 
+  - description: Claw 4
     kind: 0
     target: 0
     amount: 4
     status: 0
-    vague: ''
-  - description: 'Feed 6'
+    vague: 
+  - description: Feed 6
     kind: 0
     target: 1
     amount: 6
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 8441074245178239377, guid: 052a4d6f692dfd04cafe4b85b10af89a, type: 3}

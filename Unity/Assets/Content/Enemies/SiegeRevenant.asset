@@ -13,25 +13,25 @@ MonoBehaviour:
   m_Name: SiegeRevenant
   m_EditorClassIdentifier: 
   id: siege_revenant
-  displayName: 'Siege Revenant'
+  displayName: Siege Revenant
   maxHealth: 32
   intents:
-  - description: 'Old wound 8'
+  - description: Old wound 8
     kind: 0
     target: 0
     amount: 8
     status: 0
-    vague: ''
-  - description: 'Close ranks 10'
+    vague: 
+  - description: Close ranks 10
     kind: 1
     target: 3
     amount: 10
     status: 0
-    vague: ''
-  - description: 'Rally 4 to all'
+    vague: 
+  - description: Rally 4 to all
     kind: 0
     target: 2
     amount: 4
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 4151270308924995188, guid: 607007fb0ae97c840881977fdf820cd5, type: 3}

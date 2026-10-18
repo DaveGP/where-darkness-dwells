@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ChapelMatron
   m_EditorClassIdentifier: 
   id: chapel_matron
-  displayName: 'Chapel Matron'
+  displayName: Chapel Matron
   maxHealth: 52
   intents:
   - description: 'Hymn: Weak 2 to all'
@@ -21,17 +21,17 @@ MonoBehaviour:
     target: 2
     amount: 2
     status: 1
-    vague: ''
-  - description: 'Smite 12'
+    vague: 
+  - description: Smite 12
     kind: 0
     target: 0
     amount: 12
     status: 0
-    vague: ''
-  - description: 'Lament 5 to all'
+    vague: 
+  - description: Lament 5 to all
     kind: 0
     target: 2
     amount: 5
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 4348002319776719767, guid: 986e018360fad2141a3487eee6ecd1c1, type: 3}

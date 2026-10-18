@@ -13,25 +13,25 @@ MonoBehaviour:
   m_Name: HollowSentry
   m_EditorClassIdentifier: 
   id: hollow_sentry
-  displayName: 'Hollow Sentry'
+  displayName: Hollow Sentry
   maxHealth: 34
   intents:
-  - description: 'Strike 6'
+  - description: Strike 6
     kind: 0
     target: 0
     amount: 6
     status: 0
-    vague: ''
-  - description: 'Raise shield 8'
+    vague: 
+  - description: Raise shield 8
     kind: 1
     target: 3
     amount: 8
     status: 0
-    vague: ''
-  - description: 'Cleave 12'
+    vague: 
+  - description: Cleave 12
     kind: 0
     target: 1
     amount: 12
     status: 0
-    vague: ''
-  model: {fileID: 0}
+    vague: 
+  model: {fileID: 4376708952660885327, guid: 7472f1051c156254781f50ed411e09f1, type: 3}
