@@ -35,7 +35,13 @@ namespace WhereDarknessDwells.Game
         Action _restoreLighting;
         Camera _camera;
 
-        void Awake() => _camera = GetComponentInChildren<Camera>();
+        void Awake()
+        {
+            _camera = GetComponentInChildren<Camera>();
+            // In a browser, a dozen shadow-casting lights cost too much, so the stage keeps its lights and drops their shadows.
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+                foreach (Light stageLight in GetComponentsInChildren<Light>(true)) stageLight.shadows = LightShadows.None;
+        }
 
         /// <summary>Draws the stage only into this part of the screen (0 to 1, from the bottom left).</summary>
         public void SetViewport(Rect normalized)

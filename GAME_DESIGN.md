@@ -25,7 +25,7 @@ The first release is one complete, polished run. It is not a large game.
 | Events | About 8 short narrative events, some changed by clues | More events |
 | Keepsakes (equipment) | About 8 passive items from elites and events | More |
 | Save | Resume a run between rooms | Save mid-combat |
-| Platform **(proposed)** | Windows and macOS, landscape 16:9, mouse | Web build (itch.io), controller |
+| Platform | Windows and macOS, landscape 16:9, mouse. A web build on GitHub Pages (decided: David, 2026-10-18) | Controller |
 
 **Enemy roster (decided: David, 2026-10-18).** The Crypt Demon and the Gargoyle take the Gaol Hound's and the Cistern
 Leech's fights, with the same numbers, because the art packs have characters for them. The hound and the leech stay
