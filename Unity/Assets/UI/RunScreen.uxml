@@ -28,6 +28,7 @@
                 <ui:Label name="map-hint" class="map-hint" />
                 <ui:Label name="map-legend" class="map-legend" />
                 <ui:Label name="clue-count" class="clue-count" />
+                <ui:Button name="map-style" class="map-style-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 

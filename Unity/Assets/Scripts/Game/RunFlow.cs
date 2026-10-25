@@ -46,7 +46,7 @@ namespace WhereDarknessDwells.Game
         Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _mapLegend, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
         Label _partyHint, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
-        Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue;
+        Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue, _mapStyle;
 
         void OnEnable()
         {
@@ -88,6 +88,7 @@ namespace WhereDarknessDwells.Game
             _seedLabel = _root.Q<Label>("seed");
             _mapHint = _root.Q<Label>("map-hint");
             _mapLegend = _root.Q<Label>("map-legend");
+            _mapStyle = _root.Q<Button>("map-style");
             _rewardHint = _root.Q<Label>("reward-hint");
             _rewardClue = _root.Q<Label>("reward-clue");
             _clueCount = _root.Q<Label>("clue-count");
@@ -125,6 +126,7 @@ namespace WhereDarknessDwells.Game
                 ShowPhase();
             };
             _journal.clicked += () => ShowJournal(true);
+            _mapStyle.clicked += SwitchMapStyle;
             _root.Q<Button>("journal-close").clicked += () => ShowJournal(false);
             _newExpedition.clicked += ShowParty;
             // The map spreads its rooms over its measured size, so draw it again whenever that changes.
@@ -173,6 +175,11 @@ namespace WhereDarknessDwells.Game
         {
             if (Keyboard.current == null || !Keyboard.current.f2Key.wasPressedThisFrame) return;
             if (_run?.Phase != RunPhase.ChooseRoom || menus.IsOpen) return;
+            SwitchMapStyle();
+        }
+
+        void SwitchMapStyle()
+        {
             GameSettings.ChartMap = !GameSettings.ChartMap;
             Debug.Log($"[Run] Map drawn as {(GameSettings.ChartMap ? "the chart" : "the floor plan")}.");
         }
@@ -438,14 +445,16 @@ namespace WhereDarknessDwells.Game
             if (GameSettings.ChartMap)
             {
                 _mapHint.text = _run.CurrentRoom == null ? "Start at the Entrance: pick one of the glowing rooms beside it." : "Pick a glowing room.";
-                _mapLegend.text = "Rooms you can enter next glow. Your route so far is marked in gold. F2 shows the floor plan.";
+                _mapLegend.text = "Rooms you can enter next glow. Your route so far is marked in gold.";
                 MapView.Draw(_map, _run, EnterRoom, hover);
+                _mapStyle.text = "Show the floor plan (F2)";
             }
             else
             {
                 _mapHint.text = FloorPlanView.Hint(_run);
                 _mapLegend.text = FloorPlanView.Legend;
                 FloorPlanView.Draw(_map, _run, EnterRoom, hover);
+                _mapStyle.text = "Show the chart (F2)";
             }
             _clueCount.text = _run.Villain == null ? "" : $"Clues found: {_run.CluesFound.Count} of {_run.Villain.Clues.Count}. See the Journal.";
             Show(_mapView);

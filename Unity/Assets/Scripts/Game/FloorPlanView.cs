@@ -27,7 +27,7 @@ namespace WhereDarknessDwells.Game
             ? "You stand in the Entrance. Pick one of its glowing doors."
             : run.CurrentRoom.Kind == RoomKind.Secret ? "Take the stairs back up." : "Pick a glowing door.";
 
-        public const string Legend = "Doors you can open glow, with the room behind them written beyond. Your route is lit and its doors are gold. F2 shows the chart.";
+        public const string Legend = "Doors you can open glow, with the room behind them written beyond. Your route is lit and its doors are gold.";
 
         public static void Draw(VisualElement canvas, RunState run, Action<MapRoom> onClick, Action<MapRoom> onHover)
         {

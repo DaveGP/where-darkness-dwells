@@ -138,8 +138,8 @@ stays as a debug view. Both are drawings of the same map and run, so switching c
 - **The secret room** isn't on the plan, because every room on the layer before leads to it. Once its clue is found,
   those rooms show "Stairs down", and the room appears as a cellar under the plan, "Beneath the Keep". From the
   cellar, stairs lead back up to the room it leads to.
-- **Switching:** Settings > "Map as a chart (debug, F2)", kept in PlayerPrefs, or F2 on the map. The floor plan is
-  the default.
+- **Switching:** a button under the map's side panel ("Show the chart" or "Show the floor plan"), F2 on the map, or
+  Settings > "Map as a chart (debug, F2)". The choice is kept in PlayerPrefs, and the floor plan is the default.
 
 | Room | What happens |
 | --- | --- |

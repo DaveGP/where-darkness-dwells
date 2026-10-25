@@ -226,6 +226,12 @@
     font-size: 16px;
 }
 
+.map-style-button {
+    margin: 24px 0 0 0;
+    align-self: flex-start;
+    font-size: 14px;
+}
+
 .map-legend {
     white-space: normal;
     font-size: 13px;
