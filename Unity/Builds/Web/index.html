@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b090d">
+  <meta name="description" content="A dark-fantasy roguelite deckbuilder. Lead three heroes into the Black Keep, gather clues and face what dwells there.">
+  <title>Where Darkness Dwells</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b090d; }
+    body { position: fixed; inset: 0; touch-action: none; -webkit-user-select: none; user-select: none; }
+    #unity-canvas { display: block; width: 100%; height: 100%; background: #0b090d; outline: none; }
+    #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: Georgia, "Times New Roman", serif; color: #d8cfc4; text-align: center; padding: 0 24px; }
+    #loading h1 { margin: 0 0 8px; font-size: clamp(36px, 9vw, 64px); color: #c9a35a; text-shadow: 0 0 18px #5a0f14; }
+    #loading p { margin: 0 0 28px; font-style: italic; font-size: clamp(16px, 4vw, 22px); }
+    #bar { width: min(70vw, 360px); height: 18px; border-radius: 9px; background: #1c1418; border: 2px solid #3a2a2e; overflow: hidden; }
+    #fill { width: 0; height: 100%; background: #8c1c22; transition: width 0.2s; }
+    #error { display: none; max-width: 480px; margin-top: 24px; color: #f0a59a; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="loading">
+    <h1>Where Darkness Dwells</h1>
+    <p>The candles gutter...</p>
+    <div id="bar"><div id="fill"></div></div>
+    <div id="error"></div>
+  </div>
+  <script>
+    var canvas = document.getElementById("unity-canvas");
+    var loading = document.getElementById("loading");
+    var fill = document.getElementById("fill");
+    var errorBox = document.getElementById("error");
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+    }
+
+    // Warnings go to the console; only errors are shown to players.
+    function unityShowBanner(message, type) {
+      if (type === "error") showError(message);
+      else console.warn(message);
+    }
+
+    var buildUrl = "Build";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/Web.data.unityweb",
+      frameworkUrl: buildUrl + "/Web.framework.js.unityweb",
+      codeUrl: buildUrl + "/Web.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "Unity",
+      productVersion: "0.1.0",
+      showBanner: unityShowBanner,
+      // The expedition is saved to persistentDataPath; this keeps it in the browser's storage after every write.
+      autoSyncPersistentDataPath: true,
+      // Sharp on high-density screens without rendering at 3x, which costs a lot for no visible gain.
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+    };
+
+    var script = document.createElement("script");
+    script.src = buildUrl + "/Web.loader.js";
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (progress) {
+        fill.style.width = Math.round(progress * 100) + "%";
+      }).then(function () {
+        loading.style.display = "none";
+      }).catch(function (message) {
+        showError("The game couldn't start: " + message);
+      });
+    };
+    script.onerror = function () { showError("The game files couldn't be loaded. Try refreshing the page."); };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
