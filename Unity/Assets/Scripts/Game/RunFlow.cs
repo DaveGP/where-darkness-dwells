@@ -46,7 +46,9 @@ namespace WhereDarknessDwells.Game
         Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _mapLegend, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
         Label _partyHint, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
-        Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue, _mapStyle;
+        Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue, _mapStyle, _wholePlan;
+        // Debug: draw the whole floor plan as if explored. Only for this session; it changes nothing in the run.
+        bool _showWholePlan;
 
         void OnEnable()
         {
@@ -89,6 +91,7 @@ namespace WhereDarknessDwells.Game
             _mapHint = _root.Q<Label>("map-hint");
             _mapLegend = _root.Q<Label>("map-legend");
             _mapStyle = _root.Q<Button>("map-style");
+            _wholePlan = _root.Q<Button>("whole-plan");
             _rewardHint = _root.Q<Label>("reward-hint");
             _rewardClue = _root.Q<Label>("reward-clue");
             _clueCount = _root.Q<Label>("clue-count");
@@ -127,6 +130,7 @@ namespace WhereDarknessDwells.Game
             };
             _journal.clicked += () => ShowJournal(true);
             _mapStyle.clicked += SwitchMapStyle;
+            _wholePlan.clicked += SwitchWholePlan;
             _root.Q<Button>("journal-close").clicked += () => ShowJournal(false);
             _newExpedition.clicked += ShowParty;
             // The map spreads its rooms over its measured size, so draw it again whenever that changes.
@@ -170,12 +174,20 @@ namespace WhereDarknessDwells.Game
             GameSettings.MapStyleChanged -= RedrawMap;
         }
 
-        // F2 swaps the map between the floor plan and the chart, for debugging. Both draw the same run.
+        // F2 swaps the map between the floor plan and the chart, and F3 shows the whole floor plan, for debugging. Both
+        // only change how the run is drawn.
         void Update()
         {
-            if (Keyboard.current == null || !Keyboard.current.f2Key.wasPressedThisFrame) return;
-            if (_run?.Phase != RunPhase.ChooseRoom || menus.IsOpen) return;
-            SwitchMapStyle();
+            if (Keyboard.current == null || _run?.Phase != RunPhase.ChooseRoom || menus.IsOpen) return;
+            if (Keyboard.current.f2Key.wasPressedThisFrame) SwitchMapStyle();
+            else if (Keyboard.current.f3Key.wasPressedThisFrame && !GameSettings.ChartMap) SwitchWholePlan();
+        }
+
+        void SwitchWholePlan()
+        {
+            _showWholePlan = !_showWholePlan;
+            Debug.Log($"[Run] Whole floor plan {(_showWholePlan ? "shown" : "hidden")}.");
+            RedrawMap();
         }
 
         void SwitchMapStyle()
@@ -448,13 +460,16 @@ namespace WhereDarknessDwells.Game
                 _mapLegend.text = "Rooms you can enter next glow. Your route so far is marked in gold.";
                 MapView.Draw(_map, _run, EnterRoom, hover);
                 _mapStyle.text = "Show the floor plan (F2)";
+                _wholePlan.AddToClassList("hidden");
             }
             else
             {
                 _mapHint.text = FloorPlanView.Hint(_run);
                 _mapLegend.text = FloorPlanView.Legend;
-                FloorPlanView.Draw(_map, _run, EnterRoom, hover);
+                FloorPlanView.Draw(_map, _run, EnterRoom, hover, _showWholePlan);
                 _mapStyle.text = "Show the chart (F2)";
+                _wholePlan.RemoveFromClassList("hidden");
+                _wholePlan.text = _showWholePlan ? "Hide unexplored rooms (F3)" : "Show the whole plan (F3)";
             }
             _clueCount.text = _run.Villain == null ? "" : $"Clues found: {_run.CluesFound.Count} of {_run.Villain.Clues.Count}. See the Journal.";
             Show(_mapView);

@@ -140,6 +140,8 @@ stays as a debug view. Both are drawings of the same map and run, so switching c
   cellar, stairs lead back up to the room it leads to.
 - **Switching:** a button under the map's side panel ("Show the chart" or "Show the floor plan"), F2 on the map, or
   Settings > "Map as a chart (debug, F2)". The choice is kept in PlayerPrefs, and the floor plan is the default.
+- **Whole plan (debug):** on the floor plan, "Show the whole plan" (or F3) draws every room and door as if the Keep
+  were explored, dimming the rooms not entered. It lasts until the game is closed and changes nothing in the run.
 
 | Room | What happens |
 | --- | --- |

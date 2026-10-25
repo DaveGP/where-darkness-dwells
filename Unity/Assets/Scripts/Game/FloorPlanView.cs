@@ -29,7 +29,8 @@ namespace WhereDarknessDwells.Game
 
         public const string Legend = "Doors you can open glow, with the room behind them written beyond. Your route is lit and its doors are gold.";
 
-        public static void Draw(VisualElement canvas, RunState run, Action<MapRoom> onClick, Action<MapRoom> onHover)
+        /// <param name="whole">Draw every room and door as if the Keep were explored, dimming the rooms not entered. A debug view.</param>
+        public static void Draw(VisualElement canvas, RunState run, Action<MapRoom> onClick, Action<MapRoom> onHover, bool whole = false)
         {
             canvas.Clear();
             FloorPlan plan = run.FloorPlan;
@@ -38,7 +39,8 @@ namespace WhereDarknessDwells.Game
             var reachable = new HashSet<int>(run.ReachableRooms.Select(r => r.Id));
             int here = run.CurrentRoom?.Id ?? FloorPlan.EntranceId;
             bool IsLit(int id) => id == FloorPlan.EntranceId || visited.Contains(id);
-            MapRoom secret = run.SecretRevealed ? map.Secret : null;
+            bool IsShown(int id) => whole || IsLit(id);
+            MapRoom secret = run.SecretRevealed || whole ? map.Secret : null;
             // Fit the plan to the canvas. Before its first layout, assume a typical size; the caller draws again.
             Rect area = canvas.contentRect;
             bool sized = !float.IsNaN(area.width) && area.width >= 1;
@@ -56,21 +58,24 @@ namespace WhereDarknessDwells.Game
             Place(board, new Rect(origin.x - 4, origin.y - 4, tile * plan.Width + 8, tile * plan.Height + 8));
             canvas.Add(board);
 
-            foreach (FloorRoom room in plan.Rooms.Where(r => IsLit(r.RoomId)))
+            foreach (FloorRoom room in plan.Rooms.Where(r => IsShown(r.RoomId)))
             {
                 MapRoom mapRoom = room.RoomId == FloorPlan.EntranceId ? null : map.Room(room.RoomId);
                 string kind = mapRoom == null ? "entrance" : mapRoom.Kind.ToString().ToLowerInvariant();
                 bool isHere = room.RoomId == here;
                 bool isNew = fresh && isHere && mapRoom != null;
+                bool unexplored = !IsLit(room.RoomId);
                 foreach (Cell passage in room.Passages)
                 {
                     var hall = Tile($"tile-{kind}", isHere, isNew);
                     hall.AddToClassList("tile-passage");
+                    hall.EnableInClassList("is-unexplored", unexplored);
                     Rect r = Square(passage);
                     Place(hall, new Rect(r.x, r.y + tile * 0.22f, r.width, r.height * 0.56f));
                     canvas.Add(hall);
                 }
                 var body = Tile($"tile-{kind}", isHere, isNew);
+                body.EnableInClassList("is-unexplored", unexplored);
                 Place(body, new Rect(origin.x + room.X * tile, origin.y + room.Y * tile, room.Width * tile, room.Height * tile));
                 var name = new Label(mapRoom == null ? "Entrance" : MapView.Label(run, mapRoom)) { pickingMode = PickingMode.Ignore };
                 name.AddToClassList("tile-name");
@@ -97,7 +102,7 @@ namespace WhereDarknessDwells.Game
             // Doors on lit rooms: gold on the route, glowing where the party can go now, shut everywhere else.
             var open = new VisualElement { pickingMode = PickingMode.Ignore };
             open.AddToClassList("map-lines");
-            foreach (FloorDoor door in plan.Doors.Where(d => IsLit(d.FromId) || IsLit(d.ToId)))
+            foreach (FloorDoor door in plan.Doors.Where(d => IsShown(d.FromId) || IsShown(d.ToId)))
             {
                 bool travelled = IsLit(door.FromId) && visited.Contains(door.ToId);
                 bool canOpen = door.FromId == here && reachable.Contains(door.ToId);

@@ -232,6 +232,10 @@
     font-size: 14px;
 }
 
+.whole-plan-button {
+    margin-top: 8px;
+}
+
 .map-legend {
     white-space: normal;
     font-size: 13px;
@@ -266,6 +270,12 @@
 .tile.is-current {
     border-color: rgb(232, 212, 138);
     background-color: rgb(70, 56, 26);
+}
+
+/* Debug: a room the party hasn't entered, shown by "Show the whole plan". */
+.tile.is-unexplored {
+    opacity: 0.45;
+    background-color: rgb(30, 26, 32);
 }
 
 .tile.is-dark {
