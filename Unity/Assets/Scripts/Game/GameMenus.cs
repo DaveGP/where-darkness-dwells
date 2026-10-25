@@ -24,7 +24,7 @@ namespace WhereDarknessDwells.Game
         VisualElement _root, _titleView, _pauseView, _settingsView;
         Button _continue;
         Label _titleNote;
-        Toggle _fullscreen, _fastAnimations;
+        Toggle _fullscreen, _fastAnimations, _chartMap;
         // Where Back on the settings menu returns to.
         VisualElement _settingsFrom;
 
@@ -38,6 +38,7 @@ namespace WhereDarknessDwells.Game
             _titleNote = _root.Q<Label>("title-note");
             _fullscreen = _root.Q<Toggle>("fullscreen");
             _fastAnimations = _root.Q<Toggle>("fast-animations");
+            _chartMap = _root.Q<Toggle>("chart-map");
 
             // The backdrop is rendered from licensed art that is never committed, so a fresh clone won't have it
             // and the title keeps its plain background.
@@ -69,6 +70,11 @@ namespace WhereDarknessDwells.Game
                 GameSettings.FastAnimations = e.newValue;
                 Debug.Log($"[Settings] Fast animations {(e.newValue ? "on" : "off")}.");
             });
+            _chartMap.RegisterValueChangedCallback(e =>
+            {
+                GameSettings.ChartMap = e.newValue;
+                Debug.Log($"[Settings] Map drawn as {(e.newValue ? "the chart" : "the floor plan")}.");
+            });
 
             GameSettings.Apply();
             Close();
@@ -98,6 +104,7 @@ namespace WhereDarknessDwells.Game
             _settingsFrom = from;
             _fullscreen.SetValueWithoutNotify(GameSettings.Fullscreen);
             _fastAnimations.SetValueWithoutNotify(GameSettings.FastAnimations);
+            _chartMap.SetValueWithoutNotify(GameSettings.ChartMap);
             Show(_settingsView);
         }
 

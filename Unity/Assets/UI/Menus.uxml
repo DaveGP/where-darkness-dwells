@@ -36,6 +36,7 @@
                 <ui:Label text="Settings" class="panel-heading menu-heading" />
                 <ui:Toggle name="fullscreen" label="Fullscreen" class="menu-toggle" />
                 <ui:Toggle name="fast-animations" label="Fast animations" class="menu-toggle" />
+                <ui:Toggle name="chart-map" label="Map as a chart (debug, F2)" class="menu-toggle" />
                 <ui:Label text="Volume arrives with sound and music." class="menu-note" />
                 <ui:Button name="settings-back" text="Back" class="big-button menu-button" />
             </ui:VisualElement>

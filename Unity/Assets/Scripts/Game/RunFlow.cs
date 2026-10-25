@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using WhereDarknessDwells.Content;
 using WhereDarknessDwells.Core;
@@ -42,7 +43,7 @@ namespace WhereDarknessDwells.Game
         VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
         VisualElement _eventChoices, _eventHeroes, _removeGrid;
-        Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
+        Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _mapLegend, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
         Label _partyHint, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
         Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue;
@@ -86,6 +87,7 @@ namespace WhereDarknessDwells.Game
             _deckCount = _root.Q<Label>("deck-count");
             _seedLabel = _root.Q<Label>("seed");
             _mapHint = _root.Q<Label>("map-hint");
+            _mapLegend = _root.Q<Label>("map-legend");
             _rewardHint = _root.Q<Label>("reward-hint");
             _rewardClue = _root.Q<Label>("reward-clue");
             _clueCount = _root.Q<Label>("clue-count");
@@ -147,6 +149,7 @@ namespace WhereDarknessDwells.Game
             menus.NewExpeditionChosen += ShowParty;
             menus.QuitToTitleChosen += QuitToTitle;
             menus.EscapeTaken = () => combatScreen.UsesEscape;
+            GameSettings.MapStyleChanged += RedrawMap;
             _ready = true;
         }
 
@@ -162,6 +165,21 @@ namespace WhereDarknessDwells.Game
             menus.ContinueChosen -= ContinueRun;
             menus.NewExpeditionChosen -= ShowParty;
             menus.QuitToTitleChosen -= QuitToTitle;
+            GameSettings.MapStyleChanged -= RedrawMap;
+        }
+
+        // F2 swaps the map between the floor plan and the chart, for debugging. Both draw the same run.
+        void Update()
+        {
+            if (Keyboard.current == null || !Keyboard.current.f2Key.wasPressedThisFrame) return;
+            if (_run?.Phase != RunPhase.ChooseRoom || menus.IsOpen) return;
+            GameSettings.ChartMap = !GameSettings.ChartMap;
+            Debug.Log($"[Run] Map drawn as {(GameSettings.ChartMap ? "the chart" : "the floor plan")}.");
+        }
+
+        void RedrawMap()
+        {
+            if (_run?.Phase == RunPhase.ChooseRoom) ShowMap();
         }
 
         // ---------- starting ----------
@@ -416,9 +434,19 @@ namespace WhereDarknessDwells.Game
 
         void ShowMap()
         {
-            _mapHint.text = _run.CurrentRoom == null ? "Start at the Entrance: pick one of the glowing rooms beside it." : "Pick a glowing room.";
-            MapView.Draw(_map, _run, EnterRoom, room =>
-                _mapHint.text = room == null ? "" : $"{MapView.Label(_run, room)}. {MapView.Help(room.Kind)}");
+            Action<MapRoom> hover = room => _mapHint.text = room == null ? "" : $"{MapView.Label(_run, room)}. {MapView.Help(room.Kind)}";
+            if (GameSettings.ChartMap)
+            {
+                _mapHint.text = _run.CurrentRoom == null ? "Start at the Entrance: pick one of the glowing rooms beside it." : "Pick a glowing room.";
+                _mapLegend.text = "Rooms you can enter next glow. Your route so far is marked in gold. F2 shows the floor plan.";
+                MapView.Draw(_map, _run, EnterRoom, hover);
+            }
+            else
+            {
+                _mapHint.text = FloorPlanView.Hint(_run);
+                _mapLegend.text = FloorPlanView.Legend;
+                FloorPlanView.Draw(_map, _run, EnterRoom, hover);
+            }
             _clueCount.text = _run.Villain == null ? "" : $"Clues found: {_run.CluesFound.Count} of {_run.Villain.Clues.Count}. See the Journal.";
             Show(_mapView);
         }

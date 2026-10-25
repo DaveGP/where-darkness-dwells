@@ -255,6 +255,12 @@ gets a capsule. On the stage, each fighter's panel sits just above its head (pro
 it when there's no room above, and panels are pushed apart so they never overlap. Without the prefab the fight keeps its
 flat background and its usual rows. Attack animations come later.
 
+Floor-plan map (David's request, 2026-10-25): the map is now drawn as a floor plan of the Keep, in the style of Betrayal
+at House on the Hill, with the chart kept as a debug view (Settings, or F2). How it works is in `GAME_DESIGN.md` under
+"The floor plan". The layout is `Core/Map/FloorPlan.cs` and `RunState.FloorPlan`, tested over 1,000 seeds in `FloorPlanTests`.
+The view is `Game/FloorPlanView.cs`. The tiles are placeholders: flat stone colours with each room type's border.
+Synty room art can come later.
+
 ## Milestone 7: release preparation
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store
