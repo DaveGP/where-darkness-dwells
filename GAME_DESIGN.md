@@ -116,6 +116,33 @@ Combat rules use no randomness apart from shuffling.
   2 Investigation rooms and 1 Sanctuary, and they never put an Elite on the first two layers.
 - Rooms show their type icon but not their contents. Rumours from events and clues can reveal more.
 
+### The floor plan (decided: David, 2026-10-25)
+
+The map is shown as a floor plan of the Keep, in the style of Betrayal at House on the Hill. The branching chart
+stays as a debug view. Both are drawings of the same map and run, so switching changes nothing in the run.
+
+- **Layout.** The Entrance is on the west edge and the Lair on the east. Each layer has its own band of columns, two
+  squares wide. Every link in the map is one door through the wall between two bands, so rooms that aren't linked
+  never share a door. A room can have up to 7 links, more than a square has sides, so a room is a rectangle one or
+  two squares wide and as tall as its doors need. A room narrower than its band reaches the far wall through
+  one-square passages, which are part of the room.
+- **Rows** come from the doors' order. The doors in a wall run top to bottom in the order of the links, a room covers
+  all its doors, and rooms in a band don't overlap. The generator's links never cross, so a plan always exists. The
+  smallest one is used, so there are no retries and the generator doesn't change. The plan is laid from the run's
+  "floor plan" stream: the same seed gives the same plan, and no other stream changes. It isn't saved; the seed
+  builds it again, like the map.
+- **What the player sees.** The run starts in the Entrance, and the rest of the Keep is dark. The doors the party
+  can open now glow, with the room type written in the dark beyond, so the type is known before choosing, as on the
+  chart. Clicking one enters that room, and its tile is laid against the door. Entered rooms stay lit and the
+  route's doors are gold. Doors the party didn't take stay shut.
+- **The secret room** isn't on the plan, because every room on the layer before leads to it. Once its clue is found,
+  those rooms show "Stairs down", and the room appears as a cellar under the plan, "Beneath the Keep". From the
+  cellar, stairs lead back up to the room it leads to.
+- **Switching:** a button under the map's side panel ("Show the chart" or "Show the floor plan"), F2 on the map, or
+  Settings > "Map as a chart (debug, F2)". The choice is kept in PlayerPrefs, and the floor plan is the default.
+- **Whole plan (debug):** on the floor plan, "Show the whole plan" (or F3) draws every room and door as if the Keep
+  were explored, dimming the rooms not entered. It lasts until the game is closed and changes nothing in the run.
+
 | Room | What happens |
 | --- | --- |
 | Combat | A fight. Reward: choose 1 of 3 cards or skip. |
@@ -264,7 +291,8 @@ Fury is a general enemy status (data), not a rule about Vael. With it, no boss f
   removed, say) is refused with a reason, and the title screen offers a new expedition instead.
 - **Title:** Continue (only when there is a save), New Expedition, Settings, Quit.
 - **Pause (Esc):** Resume, Settings, Quit to Title. Quitting keeps the save.
-- **Settings:** fullscreen, and animation speed (normal or fast). Volume comes with sound in Milestone 6.5.
+- **Settings:** fullscreen, animation speed (normal or fast), and the map as a chart (a debug view). Volume comes with
+  sound in Milestone 6.5.
 - **Map:** the first layer's rooms carry an entrance marker before the first room, and every room the party can
   enter next glows and pulses.
 

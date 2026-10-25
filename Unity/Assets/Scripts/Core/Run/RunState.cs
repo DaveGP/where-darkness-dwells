@@ -92,6 +92,9 @@ namespace WhereDarknessDwells.Core
         public ExpeditionDef Expedition { get; }
         public ulong Seed { get; }
         public MapGraph Map { get; }
+        /// <summary>The map drawn as a floor plan of the Keep. It is laid from its own stream, so building it changes nothing else.</summary>
+        public FloorPlan FloorPlan => _floorPlan ?? (_floorPlan = FloorPlan.Lay(Map, _seedRng.Stream("floor plan")));
+        FloorPlan _floorPlan;
         public RunPhase Phase { get; private set; } = RunPhase.ChooseRoom;
 
         /// <summary>The room the party is in or last left; null before the first room.</summary>

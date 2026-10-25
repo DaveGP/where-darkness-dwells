@@ -26,8 +26,10 @@
             <ui:VisualElement class="map-side">
                 <ui:Label text="Choose a room" class="panel-heading" />
                 <ui:Label name="map-hint" class="map-hint" />
-                <ui:Label text="Rooms you can enter next glow. Your route so far is marked in gold." class="map-legend" />
+                <ui:Label name="map-legend" class="map-legend" />
                 <ui:Label name="clue-count" class="clue-count" />
+                <ui:Button name="map-style" class="map-style-button" />
+                <ui:Button name="whole-plan" class="map-style-button whole-plan-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 

@@ -81,7 +81,7 @@ namespace WhereDarknessDwells.Game
             _hand = root.Q("hand");
             _endPanel = root.Q("end-panel");
             _floaters = root.Q("floaters");
-            root.Q(className: "battlefield").RegisterCallback<GeometryChangedEvent>(_ => PlacePanelsOnStage());
+            root.Q(className: "battlefield").RegisterCallback<GeometryChangedEvent>(OnPanelLaidOut);
             _log = root.Q<ScrollView>("log");
             _endActivation = root.Q<Button>("end-activation");
             _discard = root.Q<Button>("discard");
@@ -184,8 +184,15 @@ namespace WhereDarknessDwells.Game
         }
 
         // Puts each fighter's panel just above its head on the stage, or beside it when there's no room above, and keeps
-        // the panels from overlapping. Runs after each redraw and when the screen changes size.
-        void OnPanelLaidOut(GeometryChangedEvent e) => PlacePanelsOnStage();
+        // the panels from overlapping. Runs after each redraw and when the screen changes size. Placing a panel moves it
+        // but doesn't resize it, so only a change of size places them again; reacting to the moves would loop.
+        void OnPanelLaidOut(GeometryChangedEvent e)
+        {
+            if (e.oldRect.size == e.newRect.size) return;
+            PlacePanelsOnStage();
+            // Once more on the next frame, outside this layout pass, in case the stage hadn't drawn its fighters yet.
+            _heroRow.schedule.Execute(PlacePanelsOnStage);
+        }
 
         void PlacePanelsOnStage()
         {

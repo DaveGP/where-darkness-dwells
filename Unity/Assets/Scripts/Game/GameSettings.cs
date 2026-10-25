@@ -7,6 +7,10 @@ namespace WhereDarknessDwells.Game
     {
         const string FullscreenKey = "settings.fullscreen";
         const string FastAnimationsKey = "settings.fastAnimations";
+        const string ChartMapKey = "settings.chartMap";
+
+        /// <summary>Raised when <see cref="ChartMap"/> changes, so a map on screen can be drawn the other way.</summary>
+        public static event System.Action MapStyleChanged;
 
         public static bool Fullscreen
         {
@@ -26,6 +30,22 @@ namespace WhereDarknessDwells.Game
             {
                 PlayerPrefs.SetInt(FastAnimationsKey, value ? 1 : 0);
                 PlayerPrefs.Save();
+            }
+        }
+
+        /// <summary>
+        /// Draws the map as the branching chart instead of the floor plan. A debug view: both draw the same run, so
+        /// switching changes nothing in it.
+        /// </summary>
+        public static bool ChartMap
+        {
+            get => PlayerPrefs.GetInt(ChartMapKey, 0) == 1;
+            set
+            {
+                if (value == ChartMap) return;
+                PlayerPrefs.SetInt(ChartMapKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+                MapStyleChanged?.Invoke();
             }
         }
 
