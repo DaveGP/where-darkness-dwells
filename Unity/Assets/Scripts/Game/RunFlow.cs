@@ -39,6 +39,8 @@ namespace WhereDarknessDwells.Game
         int _pendingChoice = -1;
         // Set once OnEnable found everything it needs.
         bool _ready;
+        // The heroes' live portraits, while the party screen is open.
+        HeroPortraits _portraits;
 
         VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
@@ -167,6 +169,8 @@ namespace WhereDarknessDwells.Game
 
         void OnDisable()
         {
+            _portraits?.Dispose();
+            _portraits = null;
             if (menus == null) return;
             menus.ContinueChosen -= ContinueRun;
             menus.NewExpeditionChosen -= ShowParty;
@@ -206,6 +210,8 @@ namespace WhereDarknessDwells.Game
         void ShowTitle(string note = null)
         {
             _run = null;
+            _portraits?.Dispose();
+            _portraits = null;
             DrawTopBar();
             menus.ShowTitle(SaveFile.Exists, note);
         }
@@ -282,6 +288,12 @@ namespace WhereDarknessDwells.Game
                     .Where(c => c.Owners.Count == 1 && c.IsOwnedBy(id)).Select(c => $"{c.Name}: {c.Text}")));
                 cards.AddToClassList("party-hero-cards");
                 view.Add(cards);
+                // The portrait stands down the card's left side, beside everything else.
+                var details = new VisualElement { pickingMode = PickingMode.Ignore };
+                details.AddToClassList("party-hero-details");
+                foreach (VisualElement child in view.Children().ToList()) details.Add(child);
+                view.Add(Portrait(hero));
+                view.Add(details);
                 view.RegisterCallback<ClickEvent>(_ => ToggleHero(id));
                 _partyHeroes.Add(view);
             }
@@ -443,8 +455,31 @@ namespace WhereDarknessDwells.Game
             }
         }
 
+        /// <summary>The hero's model at full length, or their initial when the model isn't on this machine.</summary>
+        VisualElement Portrait(HeroDef hero)
+        {
+            if (_portraits == null) _portraits = new HeroPortraits(content);
+            var frame = new VisualElement { pickingMode = PickingMode.Ignore };
+            frame.AddToClassList("party-portrait");
+            Texture texture = _portraits.For(hero.Id);
+            if (texture is RenderTexture live) frame.style.backgroundImage = Background.FromRenderTexture(live);
+            else
+            {
+                var initial = new Label(hero.Name.Substring(0, 1)) { pickingMode = PickingMode.Ignore };
+                initial.AddToClassList("party-portrait-initial");
+                frame.Add(initial);
+            }
+            return frame;
+        }
+
         void Show(VisualElement view)
         {
+            // The portraits' cameras draw every frame, so they only live while the party screen is up.
+            if (view != _partyView)
+            {
+                _portraits?.Dispose();
+                _portraits = null;
+            }
             _root.style.display = DisplayStyle.Flex;
             foreach (VisualElement v in new[] { _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView })
                 v.EnableInClassList("hidden", v != view);

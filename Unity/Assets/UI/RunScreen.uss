@@ -70,12 +70,13 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 1140px;
+    max-width: 1300px;
 }
 
-/* Six to choose from, in two rows of three. */
+/* Six to choose from, in two rows of three, each with its portrait down the left side. */
 .party-hero {
-    width: 340px;
+    flex-direction: row;
+    width: 400px;
     margin: 6px 12px;
     opacity: 0.6;
     border-width: 2px;
@@ -89,6 +90,39 @@
 .party-hero.is-chosen {
     opacity: 1;
     border-color: rgb(201, 162, 74);
+}
+
+/* The hero's model, drawn live by HeroPortraits over a backdrop in the hero's colour, which shows around the figure. */
+.party-portrait {
+    width: 112px;
+    margin: -10px 12px -10px -12px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: rgb(22, 18, 24);
+    -unity-background-scale-mode: scale-and-crop;
+    border-right-width: 1px;
+    border-right-color: rgb(58, 46, 60);
+    justify-content: center;
+    align-items: center;
+}
+
+.party-hero-details {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.owner-iron .party-portrait { background-color: rgb(44, 32, 22); }
+.owner-thorn .party-portrait { background-color: rgb(24, 36, 24); }
+.owner-ash .party-portrait { background-color: rgb(34, 26, 46); }
+.owner-bone .party-portrait { background-color: rgb(42, 40, 34); }
+.owner-steel .party-portrait { background-color: rgb(24, 32, 44); }
+.owner-bronze .party-portrait { background-color: rgb(42, 28, 20); }
+
+/* Stands in for a model that isn't on this machine. */
+.party-portrait-initial {
+    font-size: 64px;
+    -unity-font-style: bold;
+    color: rgba(232, 222, 200, 0.25);
 }
 
 .party-hero-cards {
