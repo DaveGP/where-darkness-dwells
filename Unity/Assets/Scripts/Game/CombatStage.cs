@@ -18,7 +18,7 @@ namespace WhereDarknessDwells.Game
     {
         [SerializeField] Transform[] heroSlots = new Transform[0];
         [SerializeField] Transform[] enemySlots = new Transform[0];
-        [Tooltip("Played on every hero and enemy model that has an Animator. Optional.")]
+        [Tooltip("Played on every hero and enemy model that has an Animator: an Idle loop, and the action states Act plays if it has them (Where Darkness Dwells > Build Combat Animator). Optional.")]
         [SerializeField] RuntimeAnimatorController idle;
 
         [Header("Lighting the set needs, applied while it is shown")]
@@ -30,7 +30,19 @@ namespace WhereDarknessDwells.Game
         [SerializeField] float fogStart;
         [SerializeField] float fogEnd = 150f;
 
+        /// <summary>What a fighter can be seen doing. CombatScreen picks one for each event it shows.</summary>
+        public enum FighterAction { Attack, Cast, Hit, Stagger, Guard, Death }
+
+        // The animator's states (CombatAnimatorBuilder makes them). Attacks take turns, so a fighter's swings differ.
+        public const string IdleState = "Idle", AttackState = "Attack", CastState = "Cast", HitState = "Hit",
+            StaggerState = "Stagger", GuardState = "Guard", DeathState = "Death";
+        public static readonly string[] AttackClips =
+        {
+            "A_Attack_HeavyStab01_ReturnToIdle_Sword", "A_Attack_LightFencing01_ReturnToIdle_Sword", "A_Attack_HeavyFlourish01_ReturnToIdle_Sword",
+        };
+
         readonly Dictionary<string, GameObject> _fighters = new Dictionary<string, GameObject>();
+        readonly Dictionary<string, int> _swings = new Dictionary<string, int>();
         readonly Dictionary<string, Transform> _places = new Dictionary<string, Transform>();
         Action _restoreLighting;
         Camera _camera;
@@ -128,7 +140,51 @@ namespace WhereDarknessDwells.Game
                 }
                 _fighters[fighter.Id] = placed;
             }
-            placed.SetActive(!fighter.IsDown);
+            // A fallen fighter lies where it fell when it can play a fall; otherwise it simply disappears.
+            placed.SetActive(!fighter.IsDown || HasState(placed, DeathState));
+        }
+
+        /// <summary>
+        /// Plays an action on a fighter's model, then lets it settle back into its idle loop. Does nothing for a fighter
+        /// without a model or an animator that lacks the action, so the stage works with the idle-only controller too.
+        /// </summary>
+        public void Act(string fighterId, FighterAction action, float speed = 1f)
+        {
+            if (!_fighters.TryGetValue(fighterId, out GameObject placed) || !placed.activeSelf) return;
+            Animator animator = placed.GetComponentInChildren<Animator>();
+            if (animator == null) return;
+            string state;
+            switch (action)
+            {
+                case FighterAction.Attack:
+                    _swings.TryGetValue(fighterId, out int swing);
+                    _swings[fighterId] = swing + 1;
+                    state = AttackState + (swing % AttackClips.Length + 1);
+                    break;
+                case FighterAction.Cast: state = CastState; break;
+                case FighterAction.Hit: state = HitState; break;
+                case FighterAction.Stagger: state = StaggerState; break;
+                case FighterAction.Guard: state = GuardState; break;
+                default: state = DeathState; break;
+            }
+            if (!HasState(placed, state)) return;
+            // Once fallen, a fighter stays down whatever else happens to it.
+            if (IsFallen(animator) && action != FighterAction.Death) return;
+            animator.speed = speed;
+            animator.CrossFadeInFixedTime(state, 0.12f);
+        }
+
+        static bool HasState(GameObject placed, string state)
+        {
+            Animator animator = placed.GetComponentInChildren<Animator>();
+            return animator != null && animator.runtimeAnimatorController != null && animator.HasState(0, Animator.StringToHash("Base Layer." + state));
+        }
+
+        static bool IsFallen(Animator animator)
+        {
+            AnimatorStateInfo now = animator.GetCurrentAnimatorStateInfo(0), next = animator.GetNextAnimatorStateInfo(0);
+            int fall = Animator.StringToHash(DeathState), lying = Animator.StringToHash(DeathState + " Pose");
+            return now.shortNameHash == fall || now.shortNameHash == lying || next.shortNameHash == fall || next.shortNameHash == lying;
         }
 
         // Stands in for a fighter whose model isn't on this machine, so no slot is left empty.
