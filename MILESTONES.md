@@ -258,8 +258,13 @@ flat background and its usual rows. Attack animations come later.
 Floor-plan map (David's request, 2026-10-25): the map is now drawn as a floor plan of the Keep, in the style of Betrayal
 at House on the Hill, with the chart kept as a debug view (a button on the map, F2, or Settings). How it works is in `GAME_DESIGN.md` under
 "The floor plan". The layout is `Core/Map/FloorPlan.cs` and `RunState.FloorPlan`, tested over 1,000 seeds in `FloorPlanTests`.
-The view is `Game/FloorPlanView.cs`. The tiles are placeholders: flat stone colours with each room type's border.
-Synty room art can come later.
+The view is `Game/FloorPlanView.cs`.
+Room tiles from the Dark Fantasy pack: **Where Darkness Dwells > Render Floor Tiles** (`Editor/FloorTileRenderer.cs`) builds a
+small lit diorama for each room type and photographs it from above. There are two fights, an elite cage, two
+investigations, a well and a feast for events, a chapel, the Lair's ritual circle, the Cistern's tomb and the gate. It also
+renders a tileable stone floor. The images go to `Assets/LocalArt/Resources/FloorTiles/` (gitignored). Each room is paved with
+the floor, and its picture sits in the middle, as wide as the room's narrower side. Without the images, the tiles stay plain.
+To change a picture, edit its recipe and run the menu item again.
 
 ## Milestone 7: release preparation
 

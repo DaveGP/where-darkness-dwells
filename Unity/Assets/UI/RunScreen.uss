@@ -278,6 +278,32 @@
     background-color: rgb(30, 26, 32);
 }
 
+/* A tile paved with the rendered stone floor, with its room's picture in the middle (FloorPlanView.Dress). Rooms behind
+   the party are a little dimmer than the one it stands in. */
+.tile.has-art {
+    -unity-background-image-tint-color: rgb(190, 184, 178);
+}
+
+.tile-art {
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(190, 184, 178);
+}
+
+.tile.has-art.is-current,
+.is-current > .tile-art {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.tile.has-art.is-current {
+    border-width: 3px;
+}
+
+.has-art .tile-name {
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.9);
+    text-shadow: 0 1px 4px rgb(0, 0, 0);
+}
+
 .tile.is-dark {
     background-color: rgb(22, 18, 24);
 }

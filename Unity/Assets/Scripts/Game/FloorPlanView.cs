@@ -72,11 +72,13 @@ namespace WhereDarknessDwells.Game
                     hall.EnableInClassList("is-unexplored", unexplored);
                     Rect r = Square(passage);
                     Place(hall, new Rect(r.x, r.y + tile * 0.22f, r.width, r.height * 0.56f));
+                    Pave(hall, tile * 2.5f / 6f);
                     canvas.Add(hall);
                 }
                 var body = Tile($"tile-{kind}", isHere, isNew);
                 body.EnableInClassList("is-unexplored", unexplored);
                 Place(body, new Rect(origin.x + room.X * tile, origin.y + room.Y * tile, room.Width * tile, room.Height * tile));
+                Dress(body, kind, room.RoomId, room.Width * tile, room.Height * tile);
                 var name = new Label(mapRoom == null ? "Entrance" : MapView.Label(run, mapRoom)) { pickingMode = PickingMode.Ignore };
                 name.AddToClassList("tile-name");
                 // A tall room one square wide reads its name sideways, so the name has the room's height to fit in.
@@ -144,6 +146,7 @@ namespace WhereDarknessDwells.Game
             var cellar = Tile("tile-secret", here == secret.Id, false);
             cellar.EnableInClassList("is-dark", !visited.Contains(secret.Id));
             Place(cellar, new Rect(area.x, area.y + 26, 180, area.height - 30));
+            Dress(cellar, "secret", secret.Id, 180, area.height - 30);
             var name = new Label(MapView.Label(run, secret)) { pickingMode = PickingMode.Ignore };
             name.AddToClassList("tile-name");
             cellar.Add(name);
@@ -165,6 +168,52 @@ namespace WhereDarknessDwells.Game
                 open.Add(button);
                 x += 232;
             }
+        }
+
+        /// <summary>
+        /// The rendered art (Where Darkness Dwells > Render Floor Tiles) by name before the dash: "combat" for combat-1 and
+        /// combat-2, and "floor" for the stone floor. It is licensed art, so a fresh clone has none and the tiles stay plain.
+        /// </summary>
+        static Dictionary<string, Texture2D[]> _art;
+
+        static Texture2D[] Art(string kind)
+        {
+            if (_art == null)
+                _art = Resources.LoadAll<Texture2D>("FloorTiles").GroupBy(t => t.name.Split('-')[0])
+                    .ToDictionary(g => g.Key, g => g.OrderBy(t => t.name).ToArray());
+            return _art.TryGetValue(kind, out Texture2D[] found) ? found : new Texture2D[0];
+        }
+
+        /// <summary>
+        /// Lays the stone floor over a tile, one slab to <paramref name="slab"/> pixels, so floors match in scale whatever
+        /// the room's shape.
+        /// </summary>
+        static void Pave(VisualElement tile, float slab)
+        {
+            Texture2D[] floor = Art("floor");
+            if (floor.Length == 0) return;
+            tile.style.backgroundImage = floor[0];
+            tile.style.backgroundRepeat = new BackgroundRepeat(Repeat.Repeat, Repeat.Repeat);
+            tile.style.backgroundSize = new BackgroundSize(slab, slab);
+            tile.AddToClassList("has-art");
+        }
+
+        /// <summary>
+        /// Paves the room and sets its kind's picture in the middle, as wide as the room's narrower side so it is never
+        /// stretched or cropped. Rooms of a kind take turns between its pictures by id, so neighbours differ.
+        /// </summary>
+        static void Dress(VisualElement tile, string kind, int roomId, float width, float height)
+        {
+            Texture2D[] variants = Art(kind);
+            if (variants.Length == 0) return;
+            // The pictures show about 6 m of floor, and a slab is 2.5 m.
+            float side = Mathf.Min(width, height);
+            Pave(tile, side * 2.5f / 6f);
+            var picture = new VisualElement { pickingMode = PickingMode.Ignore };
+            picture.AddToClassList("tile-art");
+            picture.style.backgroundImage = variants[Math.Abs(roomId) % variants.Length];
+            Place(picture, new Rect((width - side) / 2 - 2, (height - side) / 2 - 2, side, side));
+            tile.Insert(0, picture);
         }
 
         static VisualElement Tile(string kindClass, bool isHere, bool isNew)
