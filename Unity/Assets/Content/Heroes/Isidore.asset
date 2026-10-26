@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a8c15279dc64333819190cc766b1ceb, type: 3}
+  m_Name: Isidore
+  m_EditorClassIdentifier:
+  id: isidore
+  displayName: Isidore
+  title: the Exile
+  colour: Ember
+  maxHealth: 26
+  model: {fileID: 174760, guid: 3f42b29f9f09e0e40b05df7c984384f1, type: 3}

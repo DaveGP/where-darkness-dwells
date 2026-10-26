@@ -590,6 +590,36 @@
     background-color: rgb(176, 110, 62);
 }
 
+.owner-smoke .combatant-accent,
+.swatch.owner-smoke {
+    background-color: rgb(140, 140, 152);
+}
+
+.owner-ember .combatant-accent,
+.swatch.owner-ember {
+    background-color: rgb(222, 92, 52);
+}
+
+.owner-ink .combatant-accent,
+.swatch.owner-ink {
+    background-color: rgb(92, 100, 206);
+}
+
+.owner-rose .combatant-accent,
+.swatch.owner-rose {
+    background-color: rgb(206, 112, 150);
+}
+
+.owner-verdigris .combatant-accent,
+.swatch.owner-verdigris {
+    background-color: rgb(64, 164, 150);
+}
+
+.owner-tallow .combatant-accent,
+.swatch.owner-tallow {
+    background-color: rgb(222, 198, 92);
+}
+
 .card.owner-iron {
     background-color: rgb(52, 40, 30);
 }
@@ -612,6 +642,30 @@
 
 .card.owner-bronze {
     background-color: rgb(50, 34, 26);
+}
+
+.card.owner-smoke {
+    background-color: rgb(36, 36, 40);
+}
+
+.card.owner-ember {
+    background-color: rgb(54, 30, 24);
+}
+
+.card.owner-ink {
+    background-color: rgb(30, 32, 56);
+}
+
+.card.owner-rose {
+    background-color: rgb(52, 32, 42);
+}
+
+.card.owner-verdigris {
+    background-color: rgb(26, 46, 44);
+}
+
+.card.owner-tallow {
+    background-color: rgb(52, 48, 28);
 }
 
 /* A card that can't be played is dimmed by its colours, not its opacity, so its cost coin stays crisp.

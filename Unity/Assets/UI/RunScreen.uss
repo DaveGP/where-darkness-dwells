@@ -70,14 +70,14 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 1300px;
+    max-width: 1200px;
 }
 
-/* Six to choose from, in two rows of three, each with its portrait down the left side. */
+/* Twelve to choose from, in two rows of six: a portrait and a name. Health and cards show in .party-detail. */
 .party-hero {
-    flex-direction: row;
-    width: 400px;
-    margin: 6px 12px;
+    width: 172px;
+    margin: 5px 7px;
+    padding-top: 0;
     opacity: 0.6;
     border-width: 2px;
     border-color: rgba(0, 0, 0, 0);
@@ -92,23 +92,22 @@
     border-color: rgb(201, 162, 74);
 }
 
-/* The hero's model, drawn live by HeroPortraits over a backdrop in the hero's colour, which shows around the figure. */
-.party-portrait {
-    width: 112px;
-    margin: -10px 12px -10px -12px;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-    background-color: rgb(22, 18, 24);
-    -unity-background-scale-mode: scale-and-crop;
-    border-right-width: 1px;
-    border-right-color: rgb(58, 46, 60);
-    justify-content: center;
-    align-items: center;
+.party-hero .combatant-name {
+    font-size: 15px;
 }
 
-.party-hero-details {
-    flex-grow: 1;
-    flex-shrink: 1;
+/* The hero's model at full length, drawn live by HeroPortraits over a backdrop in the hero's colour. */
+.party-portrait {
+    height: 150px;
+    margin: 0 -12px 8px -12px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    background-color: rgb(22, 18, 24);
+    -unity-background-scale-mode: scale-to-fit;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(58, 46, 60);
+    justify-content: center;
+    align-items: center;
 }
 
 .owner-iron .party-portrait { background-color: rgb(44, 32, 22); }
@@ -117,6 +116,12 @@
 .owner-bone .party-portrait { background-color: rgb(42, 40, 34); }
 .owner-steel .party-portrait { background-color: rgb(24, 32, 44); }
 .owner-bronze .party-portrait { background-color: rgb(42, 28, 20); }
+.owner-smoke .party-portrait { background-color: rgb(30, 30, 34); }
+.owner-ember .party-portrait { background-color: rgb(46, 22, 16); }
+.owner-ink .party-portrait { background-color: rgb(22, 24, 46); }
+.owner-rose .party-portrait { background-color: rgb(44, 24, 34); }
+.owner-verdigris .party-portrait { background-color: rgb(18, 38, 36); }
+.owner-tallow .party-portrait { background-color: rgb(44, 40, 20); }
 
 /* Stands in for a model that isn't on this machine. */
 .party-portrait-initial {
@@ -125,11 +130,27 @@
     color: rgba(232, 222, 200, 0.25);
 }
 
-.party-hero-cards {
-    font-size: 12px;
+/* The cards of the hero under the mouse, or the last one picked. A fixed height, so the screen doesn't jump. */
+.party-detail {
+    width: 1000px;
+    height: 150px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background-color: rgb(30, 25, 33);
+}
+
+.party-detail-name {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: rgb(232, 212, 138);
+    margin-bottom: 4px;
+}
+
+.party-detail-cards {
+    font-size: 13px;
     white-space: normal;
     color: rgb(190, 180, 165);
-    margin-top: 6px;
 }
 
 /* map */

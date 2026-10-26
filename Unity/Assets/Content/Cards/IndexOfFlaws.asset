@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3832f007167744a1bbdca4161bc1d03c, type: 3}
+  m_Name: IndexOfFlaws
+  m_EditorClassIdentifier:
+  id: index_of_flaws
+  displayName: 'Index of Flaws'
+  owners:
+  - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
+  cost: 1
+  target: 0
+  text: 'Apply 1 Exposed to every enemy. Draw a card.'
+  effects:
+  - kind: 2
+    scope: 1
+    amount: 1
+    status: 0
+    bonusIfExposed: 0
+  - kind: 5
+    scope: 2
+    amount: 1
+    status: 0
+    bonusIfExposed: 0

@@ -17,6 +17,10 @@
             <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep, where the siege ended and something else began. Three of you go in." class="view-text" />
             <ui:Label text="Choose three heroes." class="view-subtext" />
             <ui:VisualElement name="party-heroes" class="party-heroes" />
+            <ui:VisualElement class="party-detail">
+                <ui:Label name="party-detail-name" class="party-detail-name" />
+                <ui:Label name="party-detail-cards" class="party-detail-cards" />
+            </ui:VisualElement>
             <ui:Label name="party-hint" class="hint" />
             <ui:Button name="enter-keep" text="Enter the Keep" class="big-button" />
         </ui:VisualElement>
