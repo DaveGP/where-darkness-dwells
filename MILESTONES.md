@@ -253,7 +253,15 @@ and three enemy places on the right, its own camera, and the crypt's ambient lig
 idle loop (`LocalArt/Combat/CombatIdle.controller`), and fighters who are down are hidden. A fighter without a model
 gets a capsule. On the stage, each fighter's panel sits just above its head (projected from the stage camera), or beside
 it when there's no room above, and panels are pushed apart so they never overlap. Without the prefab the fight keeps its
-flat background and its usual rows. Attack animations come later.
+flat background and its usual rows.
+
+Fight animations (2026-10-26): **Where Darkness Dwells > Build Combat Animator** (`Editor/CombatAnimatorBuilder.cs`) builds
+`LocalArt/Combat/CombatActions.controller` from Synty's Sword Combat and Base Locomotion clips (gitignored) and gives it to the
+stage prefab. The controller has the idle loop, three attacks taken in turn, a gesture for cards that hit no one, a flinch,
+a stagger for blows of 10 or more, a raised guard, and a fall that ends lying down. The builder sets the two death clips to
+fall in place. `CombatScreen.ShowOnStage` picks each fighter's action from the command's events, on the same beats as the
+floating numbers, and `CombatStage.Act` plays it. A fallen fighter now stays on the stage lying down instead of disappearing.
+With the idle-only controller, or none, the stage behaves as before. Fast animations play the clips at double speed.
 
 Floor-plan map (David's request, 2026-10-25): the map is now drawn as a floor plan of the Keep, in the style of Betrayal
 at House on the Hill, with the chart kept as a debug view (a button on the map, F2, or Settings). How it works is in `GAME_DESIGN.md` under
