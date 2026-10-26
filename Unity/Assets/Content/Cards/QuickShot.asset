@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Quick Shot'
   owners:
   - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Deal 6 damage.'
+  text: 'Deal 4 damage.'
   effects:
   - kind: 0
     scope: 0
-    amount: 6
+    amount: 4
     status: 0
     bonusIfExposed: 0

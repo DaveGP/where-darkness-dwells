@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Shield Wall'
   owners:
   - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Give an ally 7 Block.'
+  text: 'Give an ally 4 Block.'
   effects:
   - kind: 1
     scope: 0
-    amount: 7
+    amount: 4
     status: 0
     bonusIfExposed: 0

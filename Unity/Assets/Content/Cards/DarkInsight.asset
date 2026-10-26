@@ -18,15 +18,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
   cost: 0
   target: 0
-  text: 'Gain 1 Resolve. Draw a card.'
+  text: 'Draw 2 cards.'
   effects:
-  - kind: 4
-    scope: 2
-    amount: 1
-    status: 0
-    bonusIfExposed: 0
   - kind: 5
     scope: 2
-    amount: 1
+    amount: 2
     status: 0
     bonusIfExposed: 0

@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Bad Fortune'
   owners:
   - {fileID: 11400000, guid: d27b53b83f5b467db11813274af07e4a, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Remove all Hex from an enemy. Deal 3 damage for each stack removed.'
+  text: 'Remove all Hex from an enemy. Deal 2 damage for each stack removed.'
   effects:
   - kind: 6
     scope: 0
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0

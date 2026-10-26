@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 'Index of Flaws'
   owners:
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
-  cost: 1
+  cost: 0
   target: 0
   text: 'Apply 1 Exposed to every enemy. Draw a card.'
   effects:

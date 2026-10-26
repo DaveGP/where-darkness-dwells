@@ -17,13 +17,13 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
   - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Apply 4 Bleed. Heal yourself 2.'
+  text: 'Apply 3 Bleed. Heal yourself 2.'
   effects:
   - kind: 2
     scope: 0
-    amount: 4
+    amount: 3
     status: 2
     bonusIfExposed: 0
   - kind: 7

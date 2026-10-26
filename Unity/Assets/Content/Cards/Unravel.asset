@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Unravel'
   owners:
   - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
-  cost: 2
+  cost: 0
   target: 1
-  text: 'Remove all Hex from an enemy. Deal 4 damage for each stack removed.'
+  text: 'Remove all Hex from an enemy. Deal 2 damage for each stack removed.'
   effects:
   - kind: 6
     scope: 0
-    amount: 4
+    amount: 2
     status: 0
     bonusIfExposed: 0

@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Mend'
   owners:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Heal an ally 4.'
+  text: 'Heal an ally 3.'
   effects:
   - kind: 7
     scope: 0
-    amount: 4
+    amount: 3
     status: 0
     bonusIfExposed: 0

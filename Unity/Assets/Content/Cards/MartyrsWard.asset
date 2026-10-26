@@ -16,9 +16,9 @@ MonoBehaviour:
   displayName: 'Martyr''s Ward'
   owners:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Corvin pays 3 health. Give an ally 10 Block.'
+  text: 'Corvin pays 3 health. Give an ally 7 Block.'
   effects:
   - kind: 9
     scope: 2
@@ -27,6 +27,6 @@ MonoBehaviour:
     bonusIfExposed: 0
   - kind: 1
     scope: 0
-    amount: 10
+    amount: 7
     status: 0
     bonusIfExposed: 0

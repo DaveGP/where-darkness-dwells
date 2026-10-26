@@ -18,10 +18,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
   cost: 0
   target: 1
-  text: 'Apply 1 Exposed.'
+  text: 'Apply 1 Exposed. Draw 2 cards.'
   effects:
   - kind: 2
     scope: 0
     amount: 1
+    status: 0
+    bonusIfExposed: 0
+  - kind: 5
+    scope: 2
+    amount: 2
     status: 0
     bonusIfExposed: 0

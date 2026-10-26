@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Aimed Shot'
   owners:
   - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
-  cost: 2
+  cost: 0
   target: 1
-  text: 'Deal 11 damage, or 17 if the target is Exposed.'
+  text: 'Deal 5 damage, or 8 if the target is Exposed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 11
+    amount: 5
     status: 0
-    bonusIfExposed: 6
+    bonusIfExposed: 3

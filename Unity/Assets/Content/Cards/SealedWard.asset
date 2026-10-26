@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: 'Sealed Ward'
   owners:
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
-  cost: 2
+  cost: 0
   target: 2
-  text: 'Give an ally 10 Block. Draw a card.'
+  text: 'Give an ally 4 Block. Draw a card.'
   effects:
   - kind: 1
     scope: 0
-    amount: 10
+    amount: 4
     status: 0
     bonusIfExposed: 0
   - kind: 5

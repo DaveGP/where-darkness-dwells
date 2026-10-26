@@ -16,17 +16,17 @@ MonoBehaviour:
   displayName: 'Stubborn'
   owners:
   - {fileID: 11400000, guid: 7accd055131b4c85af815dc996934cbf, type: 2}
-  cost: 1
+  cost: 0
   target: 0
-  text: 'Tam gains 5 Block and 3 Riposte.'
+  text: 'Tam gains 4 Block and 2 Riposte.'
   effects:
   - kind: 1
     scope: 2
-    amount: 5
+    amount: 4
     status: 0
     bonusIfExposed: 0
   - kind: 2
     scope: 2
-    amount: 3
+    amount: 2
     status: 4
     bonusIfExposed: 0

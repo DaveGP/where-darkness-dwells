@@ -13,11 +13,11 @@ namespace WhereDarknessDwells.Game
 
         public static string OwnerClass(string colour) => $"owner-{(colour ?? "").ToLowerInvariant()}";
 
-        /// <summary>A card drawn from Card.uxml: cost, name, target, text, and its owners' colours and names.</summary>
+        /// <summary>A card drawn from Card.uxml: name, target, text, and its owners' colours and names. Cards are free, so the cost coin is hidden.</summary>
         public static VisualElement Card(VisualTreeAsset layout, CardDef def, ContentLibrary library)
         {
             VisualElement view = Copy(layout, "card");
-            view.Q<Label>("cost").text = def.Cost.ToString();
+            view.Q("cost").AddToClassList("hidden");
             view.Q<Label>("name").text = def.Name;
             view.Q<Label>("text").text = def.Text;
             view.Q<Label>("target").text = def.Target == CardTarget.Enemy ? "Target an enemy" : def.Target == CardTarget.Ally ? "Target an ally" : "";

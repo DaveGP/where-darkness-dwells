@@ -17,13 +17,13 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
   - {fileID: 11400000, guid: f5c7cc3ccb1c497f8182c462a266d302, type: 2}
-  cost: 2
+  cost: 0
   target: 0
-  text: 'Heal every hero 3. Apply 1 Weak to every enemy.'
+  text: 'Heal every hero 2. Apply 1 Weak to every enemy.'
   effects:
   - kind: 7
     scope: 3
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 2

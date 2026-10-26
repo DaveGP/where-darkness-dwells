@@ -78,28 +78,23 @@ namespace WhereDarknessDwells.Tests
         }
 
         [Test]
-        public void TheKeyringMakesOnlyTheFirstCardCheaper()
+        public void TheKeyringMakesTheHandHoldOneMoreCard()
         {
             CombatState combat = Fight("gaolers_keyring");
-            Assert.That(combat.TryActivate(StarterContent.Bram).Ok, Is.True);
-            CardInstance first = combat.Hand.First(c => combat.CardOf(c).IsOwnedBy(StarterContent.Bram) && combat.CardOf(c).Cost > 0);
-            Assert.That(combat.CostOf(first), Is.EqualTo(combat.CardOf(first).Cost - 1));
-            string target = combat.CardOf(first).Target == CardTarget.Enemy ? combat.Enemies[0].Id
-                : combat.CardOf(first).Target == CardTarget.Ally ? StarterContent.Wren : null;
-            Assert.That(combat.TryPlay(first.Id, target).Ok, Is.True);
-            Assert.That(combat.Resolve, Is.EqualTo(CombatState.ResolvePerActivation - combat.CardOf(first).Cost + 1));
-            Assert.That(combat.Hand.Select(c => combat.CostOf(c)), Is.EqualTo(combat.Hand.Select(c => combat.CardOf(c).Cost)));
+            Assert.That(combat.HandLimit, Is.EqualTo(CombatState.HandSize + 1));
+            Assert.That(combat.Hand.Count, Is.EqualTo(CombatState.HandSize + 1));
         }
 
         [Test]
-        public void TheSealRingGivesTheFirstActivationOneMoreResolve()
+        public void TheSealRingAllowsASecondDiscard()
         {
             CombatState combat = Fight("seal_ring");
             Assert.That(combat.TryActivate(StarterContent.Bram).Ok, Is.True);
-            Assert.That(combat.Resolve, Is.EqualTo(CombatState.ResolvePerActivation + 1));
-            Assert.That(combat.TryEndActivation().Ok, Is.True);
-            Assert.That(combat.TryActivate(StarterContent.Wren).Ok, Is.True);
-            Assert.That(combat.Resolve, Is.EqualTo(CombatState.ResolvePerActivation));
+            Assert.That(combat.TryDiscard(combat.Hand[0].Id).Ok, Is.True);
+            Assert.That(combat.TryDiscard(combat.Hand[0].Id).Ok, Is.True);
+            CombatResult third = combat.TryDiscard(combat.Hand[0].Id);
+            Assert.That(third.Ok, Is.False);
+            Assert.That(third.Reason, Is.EqualTo("Bram has already discarded 2 cards this activation."));
         }
 
         // ---------- Keepsakes in a run ----------

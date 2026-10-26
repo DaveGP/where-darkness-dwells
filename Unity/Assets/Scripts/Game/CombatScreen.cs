@@ -60,7 +60,7 @@ namespace WhereDarknessDwells.Game
         readonly Dictionary<string, VisualElement> _views = new Dictionary<string, VisualElement>();
         readonly List<KeyValuePair<CardDef, VisualElement>> _cardViews = new List<KeyValuePair<CardDef, VisualElement>>();
 
-        Label _round, _prompt, _seedLabel, _hint, _resolve, _piles, _endTitle, _endText;
+        Label _round, _prompt, _seedLabel, _hint, _playable, _piles, _endTitle, _endText;
         VisualElement _enemyRow, _heroRow, _hand, _endPanel, _floaters;
         ScrollView _log;
         Button _endActivation, _discard, _again;
@@ -72,7 +72,7 @@ namespace WhereDarknessDwells.Game
             _prompt = root.Q<Label>("prompt");
             _seedLabel = root.Q<Label>("seed");
             _hint = root.Q<Label>("hint");
-            _resolve = root.Q<Label>("resolve");
+            _playable = root.Q<Label>("playable");
             _piles = root.Q<Label>("piles");
             _endTitle = root.Q<Label>("end-title");
             _endText = root.Q<Label>("end-text");
@@ -447,7 +447,8 @@ namespace WhereDarknessDwells.Game
             _round.text = $"Round {_combat.Round}";
             _seedLabel.text = $"Seed {_seed}";
             _prompt.text = Prompt(selected);
-            _resolve.text = _combat.Phase == CombatPhase.Activation ? _combat.Resolve.ToString() : "-";
+            // Cards are free, so the hand is the only limit: show how many cards the active hero can play now.
+            _playable.text = _combat.Phase == CombatPhase.Activation ? _combat.Hand.Count(c => _combat.CanPlay(c.Id)).ToString() : "-";
             _endActivation.SetEnabled(_combat.Phase == CombatPhase.Activation);
             _discard.SetEnabled(_combat.Phase == CombatPhase.Activation && !_combat.HasDiscarded && _combat.Hand.Count > 0);
             _discard.text = selected != null ? $"Discard {selected.Name}" : _discarding ? "Cancel discard" : "Discard a card";
@@ -613,10 +614,6 @@ namespace WhereDarknessDwells.Game
         {
             CardDef def = _combat.CardOf(card);
             VisualElement view = Views.Card(cardView, def, _library);
-            // A Keepsake can make the first card of a fight cheaper.
-            int cost = _combat.CostOf(card);
-            view.Q<Label>("cost").text = cost.ToString();
-            view.EnableInClassList("is-discounted", cost < def.Cost);
 
             string reason = _combat.WhyCantPlay(card.Id);
             view.EnableInClassList("is-unplayable", reason != null && !_discarding);

@@ -50,7 +50,9 @@ namespace WhereDarknessDwells.Core
                 if (c.Owners.Distinct().Count() != c.Owners.Count) problems.Add($"Card '{c.Id}' lists the same owner twice.");
                 foreach (string owner in c.Owners)
                     if (!HasHero(owner)) problems.Add($"Card '{c.Id}' belongs to unknown hero '{owner}'.");
-                if (c.Cost < 0) problems.Add($"Card '{c.Id}' has a negative cost.");
+                // Cards are free in this version: there is no Resolve to pay or gain.
+                if (c.Cost != 0) problems.Add($"Card '{c.Id}' costs {c.Cost} Resolve, but cards are free.");
+                if (c.Effects.Any(e => e.Kind == EffectKind.GainResolve)) problems.Add($"Card '{c.Id}' gains Resolve, but cards are free.");
                 if (c.Effects.Count == 0) problems.Add($"Card '{c.Id}' does nothing.");
 
                 foreach (EffectDef e in c.Effects)

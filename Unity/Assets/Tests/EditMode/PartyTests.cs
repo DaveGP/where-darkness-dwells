@@ -89,8 +89,8 @@ namespace WhereDarknessDwells.Tests
             combat.Find(StarterContent.Wren).Health = 20;
             Assert.That(combat.TryActivate(StarterContent.Corvin).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "mend").Id, StarterContent.Wren).Ok, Is.True);
-            Assert.That(combat.Find(StarterContent.Wren).Health, Is.EqualTo(24));
-            combat.Find(StarterContent.Wren).Health = 25;
+            Assert.That(combat.Find(StarterContent.Wren).Health, Is.EqualTo(23));
+            combat.Find(StarterContent.Wren).Health = 26;
             Assert.That(combat.TryPlay(InHand(combat, "mend").Id, StarterContent.Wren).Ok, Is.True);
             Assert.That(combat.Find(StarterContent.Wren).Health, Is.EqualTo(28), "Wren's maximum is 28.");
         }
@@ -104,7 +104,6 @@ namespace WhereDarknessDwells.Tests
             Assert.That(combat.TryActivate(StarterContent.Corvin).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "blood_offering").Id).Ok, Is.True);
             Assert.That(combat.Find(StarterContent.Corvin).Health, Is.EqualTo(1));
-            Assert.That(combat.Resolve, Is.EqualTo(CombatState.ResolvePerActivation + 2));
             Assert.That(combat.Log.Select(e => CombatLogText.Describe(e, combat)), Has.Member("Corvin pays 1 health."));
         }
 
@@ -131,11 +130,11 @@ namespace WhereDarknessDwells.Tests
             Combatant mara = combat.Find(StarterContent.Mara), hound = combat.Enemies[0];
             Assert.That(combat.TryActivate(StarterContent.Mara).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "en_garde").Id).Ok, Is.True);
-            Assert.That(mara.Status(StatusKind.Riposte), Is.EqualTo(4));
+            Assert.That(mara.Status(StatusKind.Riposte), Is.EqualTo(3));
             hound.IntentTargetId = mara.Id; // Bite 5, aimed at Mara.
             int before = hound.Health;
             Assert.That(combat.TryEndActivation().Ok, Is.True);
-            Assert.That(hound.Health, Is.EqualTo(before - 4));
+            Assert.That(hound.Health, Is.EqualTo(before - 3));
             Assert.That(mara.Status(StatusKind.Riposte), Is.EqualTo(0), "Riposte lasts until the next player turn, like Block.");
         }
 
@@ -146,10 +145,10 @@ namespace WhereDarknessDwells.Tests
             CombatState combat = Fight(party, "gaol_hound", "gaol_hound");
             Assert.That(combat.TryActivate(StarterContent.Hollis).Ok, Is.True);
             Assert.That(combat.TryPlay(InHand(combat, "sanctuary_peal").Id).Ok, Is.True);
-            Assert.That(combat.Heroes.Select(h => h.Block), Is.All.EqualTo(4));
+            Assert.That(combat.Heroes.Select(h => h.Block), Is.All.EqualTo(3));
             Assert.That(combat.TryPlay(InHand(combat, "knell").Id).Ok, Is.True);
             Assert.That(combat.Enemies.Select(e => e.Status(StatusKind.Exposed)), Is.All.EqualTo(1));
-            Assert.That(combat.Enemies.Select(e => e.Health), Is.All.EqualTo(13));
+            Assert.That(combat.Enemies.Select(e => e.Health), Is.All.EqualTo(16));
         }
         [Test]
         public void FuryMakesEveryAttackHitHarderAndVaelGainsItEachTimeRound()

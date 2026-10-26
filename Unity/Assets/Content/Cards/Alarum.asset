@@ -17,7 +17,7 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: f5c7cc3ccb1c497f8182c462a266d302, type: 2}
   - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
-  cost: 1
+  cost: 0
   target: 2
   text: 'Guard another ally until your next turn. Apply 1 Weak to every enemy.'
   effects:

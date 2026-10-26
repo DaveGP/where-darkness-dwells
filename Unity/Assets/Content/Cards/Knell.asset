@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: 'Knell'
   owners:
   - {fileID: 11400000, guid: f5c7cc3ccb1c497f8182c462a266d302, type: 2}
-  cost: 2
+  cost: 0
   target: 0
-  text: 'Deal 5 damage and apply 1 Exposed to every enemy.'
+  text: 'Deal 2 damage and apply 1 Exposed to every enemy.'
   effects:
   - kind: 0
     scope: 1
-    amount: 5
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 2

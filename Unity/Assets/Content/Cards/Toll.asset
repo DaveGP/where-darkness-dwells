@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 'Toll'
   owners:
   - {fileID: 11400000, guid: f5c7cc3ccb1c497f8182c462a266d302, type: 2}
-  cost: 1
+  cost: 0
   target: 0
   text: 'Deal 2 damage and apply 1 Weak to every enemy. Draw a card.'
   effects:

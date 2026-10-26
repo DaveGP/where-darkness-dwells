@@ -17,7 +17,7 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
   - {fileID: 11400000, guid: e558b7710f684c6282cacaf0351bfe73, type: 2}
-  cost: 1
+  cost: 0
   target: 0
   text: 'Deal 2 damage and apply 2 Bleed to every enemy.'
   effects:

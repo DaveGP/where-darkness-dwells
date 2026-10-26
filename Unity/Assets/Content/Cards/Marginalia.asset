@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: 'Marginalia'
   owners:
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Deal 3 damage. Apply 2 Exposed.'
+  text: 'Deal 2 damage. Apply 2 Exposed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 2

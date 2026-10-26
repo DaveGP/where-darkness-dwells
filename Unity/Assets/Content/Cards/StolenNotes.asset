@@ -17,7 +17,7 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
-  cost: 1
+  cost: 0
   target: 1
   text: 'Apply 2 Exposed. Draw a card.'
   effects:

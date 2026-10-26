@@ -16,9 +16,9 @@ MonoBehaviour:
   displayName: 'Stand Guard'
   owners:
   - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Guard another ally until your next turn. Bram gains 4 Block.'
+  text: 'Guard another ally until your next turn. Bram gains 2 Block.'
   effects:
   - kind: 3
     scope: 0
@@ -27,6 +27,6 @@ MonoBehaviour:
     bonusIfExposed: 0
   - kind: 1
     scope: 2
-    amount: 4
+    amount: 2
     status: 0
     bonusIfExposed: 0

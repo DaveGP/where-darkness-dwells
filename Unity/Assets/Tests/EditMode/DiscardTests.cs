@@ -22,7 +22,7 @@ namespace WhereDarknessDwells.Tests
         static void Ok(CombatResult result) => Assert.That(result.Ok, Is.True, result.Reason);
 
         [Test]
-        public void TheActiveHeroCanDiscardAnyCardForFree()
+        public void TheActiveHeroCanDiscardAnyCard()
         {
             CombatState combat = Fight();
             Ok(combat.TryActivate(Wren));
@@ -33,7 +33,6 @@ namespace WhereDarknessDwells.Tests
             Ok(result);
             Assert.That(combat.Hand, Has.No.Member(card));
             Assert.That(combat.DiscardPile, Does.Contain(card));
-            Assert.That(combat.Resolve, Is.EqualTo(3));
             Assert.That(combat.CardsPlayed, Is.EqualTo(0));
             CombatEvent e = result.Events.Single();
             Assert.That(e.Kind, Is.EqualTo(CombatEventKind.CardDiscarded));

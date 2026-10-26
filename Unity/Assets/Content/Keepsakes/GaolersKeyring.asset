@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: gaolers_keyring
   displayName: 'Gaoler''s Keyring'
-  text: 'The first card each fight costs 1 less.'
+  text: 'The hand holds 1 more card at the start of each turn.'
   kind: 0
   amount: 1
   status: 0

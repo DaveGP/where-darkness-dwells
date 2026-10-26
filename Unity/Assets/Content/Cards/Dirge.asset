@@ -17,7 +17,7 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: f5c7cc3ccb1c497f8182c462a266d302, type: 2}
   - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
-  cost: 1
+  cost: 0
   target: 0
   text: 'Apply 2 Hex to every enemy.'
   effects:

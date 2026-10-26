@@ -16,12 +16,17 @@ MonoBehaviour:
   displayName: 'Dark Portent'
   owners:
   - {fileID: 11400000, guid: d27b53b83f5b467db11813274af07e4a, type: 2}
-  cost: 2
+  cost: 0
   target: 0
-  text: 'Apply 3 Hex to every enemy.'
+  text: 'Apply 2 Hex to every enemy. Draw a card.'
   effects:
   - kind: 2
     scope: 1
-    amount: 3
+    amount: 2
     status: 3
+    bonusIfExposed: 0
+  - kind: 5
+    scope: 2
+    amount: 1
+    status: 0
     bonusIfExposed: 0

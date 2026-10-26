@@ -66,6 +66,26 @@ owns a card.
 - The **starting deck** has 15 cards: 4 for each hero and 3 dual cards, one for each pair of heroes.
 - All cards share one draw pile, one hand and one discard pile.
 
+### Free cards **(experiment on the `free-cards` branch, David, 2026-10-26)**
+
+On this branch every card is free: there is no Resolve. The active hero can play every one of their cards (and the
+dual cards they share) that the hand holds. What limits a turn is the hand: the game becomes shaping it so that the
+hero you activate next holds as many of their own cards as possible. The rules below stay as they are, apart from
+these changes:
+
+- **No Resolve.** Activating a hero gives nothing to spend, cards show no cost, and nothing gains Resolve. The combat
+  screen's big number shows how many cards the active hero can play now ("Playable").
+- **The hand is the lever.** The hand refills to 6 each turn and unplayed cards stay, as before. Drawing cards and the
+  free discard are how you aim the next hand at a hero, so draw effects carry more weight.
+- **Every card is one play.** Cards that cost 2 or 3 were brought down to about the strength of a 1-cost card (rewards
+  stay a little stronger), and 0-cost cards were raised to one full play. The four cards that gained Resolve draw
+  cards instead: Dark Insight draws 2, Blood Offering is "pay 3 health, draw 3", Kindle deals 2 to every enemy and
+  draws 1, and Zeal is "pay 2 health, draw 3".
+- **Keepsakes:** the Gaoler's Keyring makes the hand hold 1 more card each turn, and the Steward's Seal-ring allows 1
+  more discard each activation.
+
+The Resolve version is unchanged on the other branches, so the two can be compared.
+
 ### Turn structure
 
 1. **Draw.** Draw until the hand holds 6 cards. Shuffle the discard pile in when the draw pile runs out.

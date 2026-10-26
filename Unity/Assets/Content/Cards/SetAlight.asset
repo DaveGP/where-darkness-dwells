@@ -16,17 +16,17 @@ MonoBehaviour:
   displayName: 'Set Alight'
   owners:
   - {fileID: 11400000, guid: 7accd055131b4c85af815dc996934cbf, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Deal 3 damage. Apply 4 Bleed.'
+  text: 'Deal 2 damage. Apply 3 Bleed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 2
     scope: 0
-    amount: 4
+    amount: 3
     status: 2
     bonusIfExposed: 0

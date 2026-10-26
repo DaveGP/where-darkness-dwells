@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 'Feint'
   owners:
   - {fileID: 11400000, guid: b23294622dc245009af5478447bd3bf0, type: 2}
-  cost: 1
+  cost: 0
   target: 1
   text: 'Deal 2 damage. Apply 1 Exposed. Draw a card.'
   effects:

@@ -18,10 +18,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
   cost: 0
   target: 0
-  text: 'Draw a card.'
+  text: 'Draw 2 cards.'
   effects:
   - kind: 5
     scope: 2
-    amount: 1
+    amount: 2
     status: 0
     bonusIfExposed: 0

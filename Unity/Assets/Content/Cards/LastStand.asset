@@ -16,17 +16,17 @@ MonoBehaviour:
   displayName: 'Last Stand'
   owners:
   - {fileID: 11400000, guid: 34490ab1b31148c3bcd46bdd681ddf37, type: 2}
-  cost: 2
+  cost: 0
   target: 0
-  text: 'Isolde gains 14 Block and 4 Riposte.'
+  text: 'Isolde gains 7 Block and 2 Riposte.'
   effects:
   - kind: 1
     scope: 2
-    amount: 14
+    amount: 7
     status: 0
     bonusIfExposed: 0
   - kind: 2
     scope: 2
-    amount: 4
+    amount: 2
     status: 4
     bonusIfExposed: 0

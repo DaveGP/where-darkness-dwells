@@ -17,13 +17,13 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
   - {fileID: 11400000, guid: 34490ab1b31148c3bcd46bdd681ddf37, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Give an ally 6 Block. Remove all Bleed from them.'
+  text: 'Give an ally 4 Block. Remove all Bleed from them.'
   effects:
   - kind: 1
     scope: 0
-    amount: 6
+    amount: 4
     status: 0
     bonusIfExposed: 0
   - kind: 8

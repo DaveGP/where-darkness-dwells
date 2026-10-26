@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Whirling Blade'
   owners:
   - {fileID: 11400000, guid: b23294622dc245009af5478447bd3bf0, type: 2}
-  cost: 2
+  cost: 0
   target: 0
-  text: 'Deal 5 damage to every enemy.'
+  text: 'Deal 3 damage to every enemy.'
   effects:
   - kind: 0
     scope: 1
-    amount: 5
+    amount: 3
     status: 0
     bonusIfExposed: 0
