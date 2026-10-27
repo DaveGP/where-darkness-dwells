@@ -291,8 +291,14 @@ Fury is a general enemy status (data), not a rule about Vael. With it, no boss f
   removed, say) is refused with a reason, and the title screen offers a new expedition instead.
 - **Title:** Continue (only when there is a save), New Expedition, Settings, Quit.
 - **Pause (Esc):** Resume, Settings, Quit to Title. Quitting keeps the save.
-- **Settings:** fullscreen, animation speed (normal or fast), and the map as a chart (a debug view). Volume comes with
-  sound in Milestone 6.5.
+- **Settings:** fullscreen, animation speed (normal or fast), the map as a chart (a debug view), and three volume
+  sliders: master, music and sound effects.
+- **Sound (decided: David, 2026-10-27):** all the audio is CC0, so it is committed and every clone has it (credits in
+  `Unity/Assets/Audio/CREDITS.md`). Each kind of screen has its own track: the title (also the party screen and the
+  ending), the map, the rooms, fights, and the Lair. Fights play effects on the same beats as the floating numbers:
+  a swing, a blow (heavier at 10 or more), a clang when Block stops it all, a fall, and quieter sounds for Block,
+  healing, statuses, drawing and discarding. Entering a room opens a door, the journal opens and closes like a book,
+  and buttons click.
 - **Map:** the first layer's rooms carry an entrance marker before the first room, and every room the party can
   enter next glows and pulses.
 

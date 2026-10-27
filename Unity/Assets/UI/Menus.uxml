@@ -37,7 +37,9 @@
                 <ui:Toggle name="fullscreen" label="Fullscreen" class="menu-toggle" />
                 <ui:Toggle name="fast-animations" label="Fast animations" class="menu-toggle" />
                 <ui:Toggle name="chart-map" label="Map as a chart (debug, F2)" class="menu-toggle" />
-                <ui:Label text="Volume arrives with sound and music." class="menu-note" />
+                <ui:Slider name="master-volume" label="Volume" low-value="0" high-value="1" class="menu-slider" />
+                <ui:Slider name="music-volume" label="Music" low-value="0" high-value="1" class="menu-slider" />
+                <ui:Slider name="effects-volume" label="Sound effects" low-value="0" high-value="1" class="menu-slider" />
                 <ui:Button name="settings-back" text="Back" class="big-button menu-button" />
             </ui:VisualElement>
         </ui:VisualElement>

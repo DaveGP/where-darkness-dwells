@@ -38,6 +38,8 @@ namespace WhereDarknessDwells.Game
         void Awake()
         {
             _camera = GetComponentInChildren<Camera>();
+            // The game's one listener is on GameAudio; the stage camera's would make two.
+            foreach (AudioListener listener in GetComponentsInChildren<AudioListener>(true)) listener.enabled = false;
             // In a browser, a dozen shadow-casting lights cost too much, so the stage keeps its lights and drops their shadows.
             if (Application.platform == RuntimePlatform.WebGLPlayer)
                 foreach (Light stageLight in GetComponentsInChildren<Light>(true)) stageLight.shadows = LightShadows.None;

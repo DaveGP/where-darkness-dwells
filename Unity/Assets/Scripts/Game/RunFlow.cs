@@ -128,10 +128,18 @@ namespace WhereDarknessDwells.Game
                 _found = null;
                 ShowPhase();
             };
-            _journal.clicked += () => ShowJournal(true);
+            _journal.clicked += () =>
+            {
+                GameAudio.Play("journal_open");
+                ShowJournal(true);
+            };
             _mapStyle.clicked += SwitchMapStyle;
             _wholePlan.clicked += SwitchWholePlan;
-            _root.Q<Button>("journal-close").clicked += () => ShowJournal(false);
+            _root.Q<Button>("journal-close").clicked += () =>
+            {
+                GameAudio.Play("journal_close");
+                ShowJournal(false);
+            };
             _newExpedition.clicked += ShowParty;
             // The map spreads its rooms over its measured size, so draw it again whenever that changes.
             _map.RegisterCallback<GeometryChangedEvent>(e =>
@@ -156,6 +164,7 @@ namespace WhereDarknessDwells.Game
             menus.QuitToTitleChosen += QuitToTitle;
             menus.EscapeTaken = () => combatScreen.UsesEscape;
             GameSettings.MapStyleChanged += RedrawMap;
+            GameAudio.ClickSounds(_root);
             _ready = true;
         }
 
@@ -360,6 +369,7 @@ namespace WhereDarknessDwells.Game
 
         void EnterRoom(MapRoom room)
         {
+            GameAudio.Play("door");
             // Saved at the door, so quitting inside the room brings the party back to the same room, not around it.
             if (_run.TrySnapshot(out RunSnapshot atDoor, room.Id).Ok) SaveFile.Write(atDoor);
             Apply(() => _run.TryEnterRoom(room.Id), $"Entered {MapView.Label(room.Kind)} on layer {room.Layer + 1}" +
@@ -426,6 +436,7 @@ namespace WhereDarknessDwells.Game
                 case RunPhase.ChooseRoom: ShowMap(); break;
                 case RunPhase.Combat:
                     _root.style.display = DisplayStyle.None;
+                    GameAudio.Play(_run.CurrentRoom?.Kind == RoomKind.Boss ? GameAudio.Track.Lair : GameAudio.Track.Battle);
                     combatScreen.Show(_run.Combat, _run.Seed, () =>
                     {
                         _root.style.display = DisplayStyle.Flex;
@@ -445,6 +456,9 @@ namespace WhereDarknessDwells.Game
 
         void Show(VisualElement view)
         {
+            // The map has its own ambience, the party screen and the ending share the title's, and every room has the rooms'.
+            GameAudio.Play(view == _mapView ? GameAudio.Track.Map
+                : view == _partyView || view == _endView ? GameAudio.Track.Title : GameAudio.Track.Rooms);
             _root.style.display = DisplayStyle.Flex;
             foreach (VisualElement v in new[] { _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView })
                 v.EnableInClassList("hidden", v != view);
@@ -492,7 +506,11 @@ namespace WhereDarknessDwells.Game
             {
                 CardDef def = _library.Card(id);
                 VisualElement view = Views.Card(cardView, def, _library);
-                view.RegisterCallback<ClickEvent>(_ => Apply(() => _run.TryTakeReward(id), $"Took {id}."));
+                view.RegisterCallback<ClickEvent>(_ =>
+                {
+                    GameAudio.Play("take_card");
+                    Apply(() => _run.TryTakeReward(id), $"Took {id}.");
+                });
                 view.RegisterCallback<PointerEnterEvent>(_ => _rewardHint.text = $"Add {def.Name} to the deck.");
                 view.RegisterCallback<PointerLeaveEvent>(_ => _rewardHint.text = "");
                 _rewardCards.Add(view);

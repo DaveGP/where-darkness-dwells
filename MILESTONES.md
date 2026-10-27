@@ -261,6 +261,13 @@ at House on the Hill, with the chart kept as a debug view (a button on the map, 
 The view is `Game/FloorPlanView.cs`. The tiles are placeholders: flat stone colours with each room type's border.
 Synty room art can come later.
 
+Sound and music (2026-10-27): `Game/GameAudio.cs` plays a crossfaded track for each kind of screen and short effects,
+loaded by name from `Assets/Audio/Resources/Audio`. There are 5 CC0 tracks from OpenGameArt and 33 CC0 Kenney effects;
+`Assets/Audio/CREDITS.md` lists each one. Settings has master, music and sound-effects volumes (PlayerPrefs). The audio
+player carries the game's one AudioListener and switches off the cameras' listeners, because the combat stage turns the
+main camera off during fights. Music streams, and the effects load up front. Not done yet: ambience for each room tile,
+and a sound for the boss's Blood Tithe.
+
 ## Milestone 7: release preparation
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store

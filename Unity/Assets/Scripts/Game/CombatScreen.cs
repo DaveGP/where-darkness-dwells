@@ -81,6 +81,7 @@ namespace WhereDarknessDwells.Game
             _hand = root.Q("hand");
             _endPanel = root.Q("end-panel");
             _floaters = root.Q("floaters");
+            GameAudio.ClickSounds(root);
             root.Q(className: "battlefield").RegisterCallback<GeometryChangedEvent>(OnPanelLaidOut);
             _log = root.Q<ScrollView>("log");
             _endActivation = root.Q<Button>("end-activation");
@@ -340,12 +341,15 @@ namespace WhereDarknessDwells.Game
             }
             SetHint("", false);
             Redraw();
+            // Before the floaters, which update the stacks they are given.
+            PlaySounds(result.Events, stacksBefore);
             ShowFloaters(result.Events, stacksBefore);
             return true;
         }
 
         void Refuse(string reason)
         {
+            GameAudio.Play("refused");
             Debug.Log($"[Combat] Refused: {reason}");
             SetHint(reason, true);
         }
@@ -746,6 +750,63 @@ namespace WhereDarknessDwells.Game
                 view.AddToClassList("is-acting");
                 view.schedule.Execute(() => view.RemoveFromClassList("is-acting")).StartingIn(Scaled(380));
             }).StartingIn(Scaled(beat * FloaterGapMs));
+        }
+
+        // ---------- sound ----------
+
+        /// <summary>How long after a swing starts its blow lands.</summary>
+        const long BlowDelayMs = 300;
+
+        /// <summary>
+        /// Plays the sounds of a command's events on the same beats as the floating numbers: a swing when someone strikes,
+        /// a blow (heavier from 10), a clang when Block stops it all, a fall when a fighter goes down, and quieter sounds
+        /// for Block, healing, statuses, drawing and discarding. A sound plays once per beat, however many targets share it.
+        /// </summary>
+        void PlaySounds(IReadOnlyList<CombatEvent> events, Dictionary<string, int> stacksBefore)
+        {
+            int beat = 0;
+            string actor = null;
+            var played = new HashSet<string>();
+            var stacks = new Dictionary<string, int>(stacksBefore);
+            void Sound(string name, long offsetMs = 0)
+            {
+                if (played.Add($"{name}/{beat}")) GameAudio.Play(name, Scaled(beat * FloaterGapMs + offsetMs) / 1000f);
+            }
+            foreach (CombatEvent e in events)
+            {
+                switch (e.Kind)
+                {
+                    case CombatEventKind.HeroActivated: Sound("ready"); break;
+                    case CombatEventKind.CardDiscarded: Sound("discard"); break;
+                    case CombatEventKind.CardPlayed:
+                        actor = e.SourceId;
+                        break;
+                    case CombatEventKind.EnemyActed:
+                        beat++;
+                        actor = e.SourceId;
+                        break;
+                    case CombatEventKind.Damaged:
+                        // Paying health and Bleed have no swing; a blow from the one acting does.
+                        if (e.SourceId != null && e.SourceId == actor && e.TargetId != actor) Sound("swing");
+                        if (e.TargetId == e.SourceId) break;
+                        Sound(e.Amount == 0 ? "clang" : e.Amount >= 10 ? "heavy" : "hit", BlowDelayMs);
+                        break;
+                    case CombatEventKind.BlockGained: Sound("guard", 150); break;
+                    case CombatEventKind.Healed: Sound("heal", 150); break;
+                    case CombatEventKind.StatusChanged:
+                        string key = $"{e.TargetId}/{e.Status}";
+                        stacks.TryGetValue(key, out int before);
+                        stacks[key] = e.Amount;
+                        if (e.Amount > before) Sound("curse", BlowDelayMs);
+                        break;
+                    // Drawn mid-turn by a card; the hand refilling at a new round is quiet.
+                    case CombatEventKind.CardsDrawn when actor != null && _combat.Phase == CombatPhase.Activation: Sound("cards", 150); break;
+                    case CombatEventKind.HeroDowned:
+                    case CombatEventKind.EnemyDefeated: Sound("fall", BlowDelayMs + 150); break;
+                    case CombatEventKind.CombatWon: Sound("won", BlowDelayMs + 600); break;
+                    case CombatEventKind.CombatLost: Sound("lost", BlowDelayMs + 600); break;
+                }
+            }
         }
 
         /// <summary>A delay in milliseconds at the player's animation speed.</summary>
