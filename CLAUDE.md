@@ -86,21 +86,19 @@ Assets/Tests/Content     Editor-only tests of the content assets. Unity's Test R
 Test builds stay on David's Mac. Publishing a GitHub release, even a pre-release, replaces the live public game on
 GitHub Pages, so don't use that for a build he hasn't reviewed.
 
-1. Close this project in the Editor if it's open: batch mode can't run on a project that's open.
-2. From the branch being tested, build the web player (it needs the Web Build Support module):
-
-   ```bash
-   /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath Unity -executeMethod WhereDarknessDwells.Editor.WebBuild.Build -logFile -
-   ```
-
+1. Open this project in the Editor, from the branch being tested, and keep Unity as the front app. Batch mode doesn't
+   work here: it fails to start the licence, and the scripts then fail to compile.
+2. Run **Where Darkness Dwells > Build for Web** (it needs the Web Build Support module). The build goes to
+   `Unity/Builds/Web`.
 3. Serve it locally, and test at http://localhost:8000:
 
    ```bash
    python3 -m http.server 8000 --directory Unity/Builds/Web
    ```
 
-The build switches the Editor's platform to Web and may rewrite settings files. Don't commit those changes, and restore
-them with `git restore` if they aren't part of the work.
+The build switches the Editor's platform to Web and rewrites settings files. Switch back to macOS afterwards, close the
+Editor, and restore those files with `git restore` unless they're part of the work. Test runs can also leave
+`Unity/Assets/Resources/` behind, which isn't part of the game.
 
 ## Third-party assets
 
