@@ -1,7 +1,4 @@
-/* Run screens: party, map, reward, Sanctuary, Investigation, the secret room, unwritten rooms, the journal and the
-   run's end. Card and panel styles come from
-   CombatScreen.uss. */
-
+/* The Siege Ledger. Exact slices match SpriteImporter; default Unity font uses approved sizes. */
 .view {
     flex-grow: 1;
 }
@@ -13,9 +10,7 @@
 }
 
 .view-title {
-    font-size: 44px;
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
     margin-bottom: 12px;
 }
 
@@ -23,18 +18,14 @@
     width: 760px;
     white-space: normal;
     -unity-text-align: middle-center;
-    font-size: 18px;
     margin-bottom: 24px;
 }
 
 .big-button {
     width: 240px;
     height: 48px;
-    font-size: 18px;
     margin-top: 16px;
 }
-
-/* top bar */
 
 .party-health {
     flex-direction: row;
@@ -49,9 +40,7 @@
 
 .health-chip .swatch {
     flex-grow: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
+    border-radius: 0;
     margin-right: 6px;
 }
 
@@ -64,8 +53,6 @@
     font-size: 14px;
 }
 
-/* party */
-
 .party-heroes {
     flex-direction: row;
     flex-wrap: wrap;
@@ -73,93 +60,49 @@
     max-width: 1200px;
 }
 
-/* Twelve to choose from, in two rows of six: a portrait and a name. Health and cards show in .party-detail. */
 .party-hero {
     width: 172px;
     margin: 5px 7px;
     padding-top: 0;
-    opacity: 0.6;
     border-width: 2px;
-    border-color: rgba(0, 0, 0, 0);
 }
 
-.party-hero:hover {
-    opacity: 0.85;
-}
-
-.party-hero.is-chosen {
-    opacity: 1;
-    border-color: rgb(201, 162, 74);
-}
-
-.party-hero .combatant-name {
-    font-size: 15px;
-}
-
-/* The hero's model at full length, drawn live by HeroPortraits over a backdrop in the hero's colour. */
 .party-portrait {
     height: 150px;
     margin: 0 -12px 8px -12px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    background-color: rgb(22, 18, 24);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    background-color: var(--void);
     -unity-background-scale-mode: scale-to-fit;
     border-bottom-width: 1px;
-    border-bottom-color: rgb(58, 46, 60);
+    border-bottom-color: var(--card-rose);
     justify-content: center;
     align-items: center;
 }
 
-.owner-iron .party-portrait { background-color: rgb(44, 32, 22); }
-.owner-thorn .party-portrait { background-color: rgb(24, 36, 24); }
-.owner-ash .party-portrait { background-color: rgb(34, 26, 46); }
-.owner-bone .party-portrait { background-color: rgb(42, 40, 34); }
-.owner-steel .party-portrait { background-color: rgb(24, 32, 44); }
-.owner-bronze .party-portrait { background-color: rgb(42, 28, 20); }
-.owner-smoke .party-portrait { background-color: rgb(30, 30, 34); }
-.owner-ember .party-portrait { background-color: rgb(46, 22, 16); }
-.owner-ink .party-portrait { background-color: rgb(22, 24, 46); }
-.owner-rose .party-portrait { background-color: rgb(44, 24, 34); }
-.owner-verdigris .party-portrait { background-color: rgb(18, 38, 36); }
-.owner-tallow .party-portrait { background-color: rgb(44, 40, 20); }
-
-/* Stands in for a model that isn't on this machine. */
 .party-portrait-initial {
     font-size: 64px;
     -unity-font-style: bold;
-    color: rgba(232, 222, 200, 0.25);
 }
 
-/* The cards of the hero under the mouse, or the last one picked. A fixed height, so the screen doesn't jump. */
 .party-detail {
-    width: 1000px;
-    height: 150px;
     margin-top: 10px;
-    padding: 8px 14px;
-    border-radius: 6px;
-    background-color: rgb(30, 25, 33);
+    border-radius: 0;
 }
 
 .party-detail-name {
-    font-size: 15px;
     -unity-font-style: bold;
-    color: rgb(232, 212, 138);
     margin-bottom: 4px;
 }
 
 .party-detail-cards {
-    font-size: 13px;
     white-space: normal;
-    color: rgb(190, 180, 165);
 }
-
-/* map */
 
 .map-view {
     flex-direction: row;
 }
 
-/* The map takes whatever width the side panel leaves; MapView spreads the rooms over its measured size. */
 .map {
     flex-grow: 1;
     flex-shrink: 1;
@@ -181,54 +124,23 @@
     margin: 0;
     padding: 0;
     border-width: 2px;
-    border-radius: 8px;
-    border-color: rgb(58, 46, 60);
-    background-color: rgb(34, 28, 36);
-    color: rgb(150, 140, 146);
+    border-radius: 0;
+    border-color: var(--card-rose);
     font-size: 16px;
     -unity-font-style: bold;
 }
 
-/* Only reachable rooms react to the mouse (see .room.is-reachable:hover). */
-.room:hover,
-.room:active {
-    background-color: rgb(34, 28, 36);
-    color: rgb(150, 140, 146);
+.room-boss {
+    width: 150px;
+    height: 72px;
+    font-size: 20px;
 }
 
-.room-combat { border-color: rgb(120, 60, 60); }
-.room-elite { border-color: rgb(200, 70, 60); }
-.room-investigation { border-color: rgb(90, 120, 170); }
-.room-event { border-color: rgb(130, 110, 160); }
-.room-sanctuary { border-color: rgb(110, 160, 100); }
-.room-secret { border-color: rgb(90, 160, 170); }
-.room-boss { border-color: rgb(201, 162, 74); width: 150px; height: 72px; font-size: 20px; }
-
 .room.is-reachable {
-    background-color: rgb(64, 52, 40);
-    color: rgb(245, 236, 216);
+    color: var(--text);
     border-width: 3px;
 }
 
-.room.is-reachable:hover {
-    scale: 1.08 1.08;
-    background-color: rgb(84, 68, 48);
-}
-
-.room.is-visited {
-    background-color: rgb(70, 56, 26);
-    color: rgb(232, 212, 138);
-}
-
-.room.is-current {
-    border-color: rgb(232, 212, 138);
-}
-
-.room.is-closed {
-    opacity: 0.35;
-}
-
-/* Where every route starts: bright until the party enters the first room. */
 .map-entrance {
     position: absolute;
     width: 104px;
@@ -237,25 +149,19 @@
     font-size: 15px;
     -unity-font-style: bold;
     border-width: 2px;
-    border-radius: 24px;
-    border-color: rgb(110, 96, 106);
-    background-color: rgb(34, 28, 36);
-    color: rgb(150, 140, 146);
+    border-radius: 0;
+    border-color: var(--edge);
 }
 
 .map-entrance.is-start {
-    border-color: rgb(232, 212, 138);
-    background-color: rgb(70, 56, 26);
-    color: rgb(255, 240, 200);
+    background-color: var(--selected);
+    color: var(--text);
 }
 
-/* Behind each room the party can enter. MapView toggles .is-pulse on the glow layer to make it breathe. */
 .room-glow {
     position: absolute;
-    border-width: 2px;
-    border-radius: 14px;
-    border-color: rgba(240, 200, 120, 0.5);
-    background-color: rgba(240, 190, 100, 0.12);
+    border-radius: 0;
+    border-color: var(--scrim);
     opacity: 0.45;
     transition-property: opacity, scale;
     transition-duration: 0.8s;
@@ -265,8 +171,7 @@
 .is-pulse .room-glow {
     opacity: 1;
     scale: 1.06 1.06;
-    border-color: rgba(255, 220, 140, 0.9);
-    background-color: rgba(240, 190, 100, 0.28);
+    border-color: var(--scrim);
 }
 
 .map-side {
@@ -293,21 +198,15 @@
 
 .map-legend {
     white-space: normal;
-    font-size: 13px;
-    color: rgb(150, 140, 146);
 }
 
-/* floor plan (FloorPlanView): lit tiles on a dark board, doors on the walls between them */
-
 .plan-board {
-    border-radius: 6px;
-    background-color: rgb(14, 11, 16);
+    border-radius: 0;
 }
 
 .tile {
     border-width: 2px;
-    border-color: rgb(58, 46, 60);
-    background-color: rgb(52, 44, 50);
+    border-color: var(--card-rose);
     justify-content: center;
     align-items: center;
     overflow: hidden;
@@ -316,37 +215,23 @@
     transition-timing-function: ease-out-back;
 }
 
-/* A room just entered starts small and settles against its door. */
 .tile.is-new {
     scale: 0.6 0.6;
     opacity: 0;
 }
 
-.tile.is-current {
-    border-color: rgb(232, 212, 138);
-    background-color: rgb(70, 56, 26);
-}
-
-/* Debug: a room the party hasn't entered, shown by "Show the whole plan". */
-.tile.is-unexplored {
-    opacity: 0.45;
-    background-color: rgb(30, 26, 32);
-}
-
-/* A tile paved with the rendered stone floor, with its room's picture in the middle (FloorPlanView.Dress). Rooms behind
-   the party are a little dimmer than the one it stands in. */
 .tile.has-art {
-    -unity-background-image-tint-color: rgb(190, 184, 178);
+    -unity-background-image-tint-color: var(--hero-smoke);
 }
 
 .tile-art {
     -unity-background-scale-mode: scale-to-fit;
-    -unity-background-image-tint-color: rgb(190, 184, 178);
+    -unity-background-image-tint-color: var(--hero-smoke);
 }
 
 .tile.has-art.is-current,
 .is-current > .tile-art {
-    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-background-image-tint-color: var(--text);
 }
 
 .tile.has-art.is-current {
@@ -354,37 +239,18 @@
 }
 
 .has-art .tile-name {
-    -unity-text-outline-width: 1px;
-    -unity-text-outline-color: rgba(0, 0, 0, 0.9);
-    text-shadow: 0 1px 4px rgb(0, 0, 0);
+    -unity-text-outline-color: var(--scrim);
 }
 
-.tile.is-dark {
-    background-color: rgb(22, 18, 24);
-}
-
-/* A passage is part of its room, drawn narrower so it reads as a corridor. */
 .tile-passage {
     border-width: 1px;
-    background-color: rgb(40, 34, 40);
 }
-
-.tile-entrance { border-color: rgb(150, 140, 146); }
-.tile-combat { border-color: rgb(120, 60, 60); }
-.tile-elite { border-color: rgb(200, 70, 60); }
-.tile-investigation { border-color: rgb(90, 120, 170); }
-.tile-event { border-color: rgb(130, 110, 160); }
-.tile-sanctuary { border-color: rgb(110, 160, 100); }
-.tile-secret { border-color: rgb(90, 160, 170); }
-.tile-boss { border-color: rgb(201, 162, 74); }
 
 .tile-name {
     white-space: normal;
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    color: rgb(232, 222, 200);
     margin: 0;
-    padding: 0 2px;
 }
 
 .tile-stairs {
@@ -393,59 +259,40 @@
     right: 0;
     bottom: 2px;
     -unity-text-align: lower-center;
-    color: rgb(90, 160, 170);
     margin: 0;
-    padding: 0;
 }
 
 .door {
     position: absolute;
-    border-radius: 2px;
-    background-color: rgb(78, 64, 58);
+    border-radius: 0;
 }
 
-.door.is-travelled { background-color: rgb(201, 162, 74); }
-.door.is-open { background-color: rgb(245, 220, 150); }
-
-/* What lies behind an open door, written in the dark beyond it. FloorPlanView pulses the layer they sit on. */
 .door-tag {
     position: absolute;
     margin: 0;
     padding: 0 4px;
     border-width: 2px;
-    border-radius: 6px;
-    background-color: rgba(64, 52, 40, 0.85);
-    color: rgb(245, 236, 216);
+    border-radius: 0;
     -unity-font-style: bold;
     white-space: normal;
-    opacity: 0.75;
     transition-property: opacity, scale;
     transition-duration: 0.8s;
     transition-timing-function: ease-in-out;
 }
 
-.is-pulse .door-tag {
-    opacity: 1;
-}
-
 .door-tag:hover {
-    scale: 1.08 1.08;
     opacity: 1;
-    background-color: rgb(84, 68, 48);
 }
 
 .stairs-tag {
-    border-color: rgb(90, 160, 170);
+    border-color: var(--hero-thorn);
     font-size: 14px;
 }
 
 .cellar-title {
-    color: rgb(90, 160, 170);
     font-size: 14px;
     -unity-font-style: bold;
 }
-
-/* rewards and Sanctuary */
 
 .card-row {
     flex-direction: row;
@@ -457,7 +304,7 @@
 .card-row .card:hover,
 .deck-grid .card:hover {
     translate: 0 -10px;
-    border-color: rgb(232, 212, 138);
+    border-color: var(--hero-tallow);
 }
 
 .choice-row {
@@ -467,7 +314,7 @@
 }
 
 .choice-button.is-selected {
-    border-color: rgb(201, 162, 74);
+    border-color: var(--brass);
     border-width: 2px;
 }
 
@@ -498,23 +345,17 @@
     margin: 14px 6px 0 6px;
 }
 
-/* end */
-
 .run-summary {
     font-size: 16px;
-    color: rgb(190, 182, 172);
     -unity-text-align: middle-center;
     white-space: normal;
 }
-
-/* clues */
 
 .view-subtext {
     width: 760px;
     white-space: normal;
     -unity-text-align: middle-center;
     font-size: 15px;
-    color: rgb(190, 182, 172);
     margin-bottom: 16px;
 }
 
@@ -523,14 +364,12 @@
     white-space: normal;
     -unity-text-align: middle-center;
     font-size: 17px;
-    color: rgb(150, 190, 240);
     margin-bottom: 18px;
 }
 
 .clue-count {
     margin-top: 24px;
     font-size: 15px;
-    color: rgb(150, 190, 240);
 }
 
 .journal-button {
@@ -547,18 +386,15 @@
     bottom: 0;
     align-items: center;
     justify-content: center;
-    background-color: rgba(10, 8, 12, 0.85);
 }
 
 .journal-page {
     width: 820px;
     max-height: 90%;
-    padding: 28px 36px;
     align-items: center;
     border-width: 2px;
-    border-radius: 8px;
-    border-color: rgb(120, 100, 70);
-    background-color: rgb(30, 25, 30);
+    border-radius: 0;
+    border-color: var(--health);
 }
 
 .journal-scroll {
@@ -570,32 +406,757 @@
     margin-bottom: 14px;
     padding: 10px 14px;
     border-left-width: 3px;
-    border-color: rgb(90, 120, 170);
 }
 
 .journal-entry.is-unknown {
-    border-color: rgb(60, 54, 62);
+    border-color: var(--card-rose);
 }
 
 .journal-entry-name {
-    font-size: 18px;
     -unity-font-style: bold;
-    color: rgb(232, 212, 138);
-}
-
-.journal-entry.is-unknown .journal-entry-name {
-    color: rgb(110, 100, 108);
 }
 
 .journal-entry-text {
     white-space: normal;
-    font-size: 15px;
 }
 
 .searcher {
     width: 260px;
 }
 
+.map-side,
+.journal-page,
+.party-detail {
+    background-image: url("Art/Frames/folio.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 16;
+    -unity-slice-top: 16;
+    -unity-slice-right: 16;
+    -unity-slice-bottom: 16;
+    -unity-slice-scale: 1px;
+}
+
+.found-clue,
+.run-summary {
+    background-image: url("Art/Frames/strip.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 4;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 4;
+    -unity-slice-scale: 1px;
+}
+
+.tile-name,
+.has-art .tile-name,
+.tile-stairs {
+    background-image: url("Art/Map/name-plate.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 6;
+    -unity-slice-top: 6;
+    -unity-slice-right: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 1px;
+}
+
+.tile-passage > .room-wall {
+    background-image: url("Art/Map/passage.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 4;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 4;
+    -unity-slice-scale: 1px;
+}
+
+.door {
+    background-image: url("Art/Map/door-shut.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 8;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.door.is-travelled {
+    background-image: url("Art/Map/door-travelled.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 8;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.door.is-open {
+    background-image: url("Art/Map/door-open.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 8;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.door-tag,
+.stairs-tag {
+    background-image: url("Art/Map/door-tag.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 8;
+    -unity-slice-top: 8;
+    -unity-slice-right: 8;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.room,
+.map-entrance {
+    background-image: url("Art/Map/chart-room.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 10;
+    -unity-slice-scale: 1px;
+}
+
+.room-glow {
+    background-image: url("Art/Map/reachable-rim.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 16;
+    -unity-slice-top: 16;
+    -unity-slice-right: 16;
+    -unity-slice-bottom: 16;
+    -unity-slice-scale: 1px;
+}
+
+.journal-entry {
+    background-image: url("Art/Journal/entry.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 12;
+    -unity-slice-top: 8;
+    -unity-slice-right: 8;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+#sanctuary-view,
+#investigation-view,
+#secret-view,
+#event-view,
+#found-view,
+#unwritten-view,
+#end-view {
+    background-image: url("Art/Frames/narrative.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 24;
+    -unity-slice-top: 16;
+    -unity-slice-right: 16;
+    -unity-slice-bottom: 16;
+    -unity-slice-scale: 1px;
+}
+
+.view-title {
+    font-size: 40px;
+}
+
+.view-text {
+    font-size: 18px;
+}
+
+.big-button {
+    font-size: 16px;
+}
+
+.health-chip .swatch {
+    width: 24px;
+    height: 24px;
+    background-color: var(--panel);
+}
+
+.health-chip .hero-mark {
+    width: 20px;
+    height: 20px;
+}
+
+.party-hero,
+.party-hero:hover,
+.party-hero.is-chosen {
+    opacity: 1;
+}
+
+.party-hero {
+    border-color: var(--edge-quiet);
+    background-color: var(--panel);
+}
+
+.party-hero:hover {
+    background-color: var(--hover);
+    border-color: var(--brass);
+}
+
+.party-hero:active {
+    background-color: var(--pressed);
+}
+
+.party-hero.is-chosen {
+    border-color: var(--focus);
+}
+
+.party-portrait-initial {
+    width: 64px;
+    height: 64px;
+    color: rgba(0, 0, 0, 0);
+}
+
+.party-hero .combatant-name {
+    font-size: 15px;
+}
+
+.party-hero .combatant-title {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.party-detail {
+    width: 1160px;
+    max-width: 95%;
+    height: auto;
+    min-height: 150px;
+    padding: 12px;
+    background-color: var(--panel);
+}
+
+.party-detail-name {
+    font-size: 16px;
+    color: var(--brass);
+}
+
+.party-detail-cards {
+    font-size: 14px;
+    color: var(--text);
+}
+
+.map-side,
+.journal-page {
+    background-color: var(--panel);
+}
+
+.room,
+.room:hover,
+.room:active,
+.map-entrance {
+    background-color: var(--panel);
+    color: var(--text);
+}
+
+.room.is-reachable {
+    background-color: var(--selected);
+}
+
+.room.is-reachable:hover {
+    background-color: var(--hover);
+    scale: 1 1;
+}
+
+.room.is-reachable:active {
+    background-color: var(--pressed);
+}
+
+.room.is-visited {
+    background-color: var(--selected);
+    color: var(--text);
+}
+
+.room.is-closed {
+    opacity: 1;
+    color: var(--text-muted);
+}
+
+.room.is-current,
+.map-entrance.is-start {
+    border-color: var(--focus);
+}
+
+.room-glow,
+.is-pulse .room-glow {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.plan-board {
+    background-color: var(--void);
+}
+
+.tile {
+    background-color: var(--panel);
+}
+
+.tile.is-current {
+    background-color: var(--panel);
+    border-color: var(--focus);
+}
+
+.tile.is-unexplored {
+    opacity: 1;
+    background-color: var(--recess);
+}
+
+.tile.is-dark {
+    background-color: var(--recess);
+}
+
+.tile-passage {
+    background-color: var(--panel);
+}
+
+.tile-name,
+.has-art .tile-name,
+.tile-stairs {
+    background-color: var(--panel);
+    color: var(--text);
+    padding: 4px 6px;
+    -unity-text-outline-width: 0;
+}
+
+.door,
+.door.is-travelled,
+.door.is-open {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.door-tag,
+.is-pulse .door-tag {
+    opacity: 1;
+    background-color: var(--selected);
+    color: var(--text);
+}
+
+.door-tag:hover {
+    background-color: var(--hover);
+    border-color: var(--focus);
+    scale: 1 1;
+}
+
+.door-tag:active {
+    background-color: var(--pressed);
+}
+
+.tile-room-icon {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    background-color: var(--panel);
+}
+
+.chart-room-icon {
+    position: absolute;
+    left: 5px;
+    top: 16px;
+}
+
+.room {
+    padding-left: 24px;
+}
+
+.room:disabled {
+    opacity: 1;
+    color: var(--text-muted);
+}
+
+.journal-panel {
+    background-color: var(--scrim);
+}
+
+.journal-page {
+    padding: 28px 28px 28px 32px;
+}
+
+.journal-entry {
+    background-color: var(--panel);
+    border-color: var(--room-investigation);
+    padding-left: 36px;
+}
+
+.journal-entry-name {
+    font-size: 20px;
+    color: var(--brass);
+}
+
+.journal-entry-text {
+    font-size: 16px;
+    color: var(--text);
+}
+
+.journal-entry.is-unknown .journal-entry-name {
+    color: var(--text-muted);
+}
+
 .searcher.is-unavailable {
-    opacity: 0.45;
+    opacity: 1;
+}
+
+.run-summary {
+    color: var(--text-secondary);
+}
+
+.found-clue {
+    color: var(--text);
+    background-color: var(--panel);
+    padding: 8px 28px;
+}
+
+.narrative-emblem {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 12px;
+    -unity-background-image-tint-color: var(--brass);
+}
+
+#sanctuary-view,
+#investigation-view,
+#secret-view,
+#event-view,
+#found-view,
+#unwritten-view,
+#end-view {
+    background-color: var(--panel);
+    margin: 24px;
+}
+
+.hidden {
+    display: none;
+}
+
+.tile-entrance,
+.room-entrance {
+    border-color: var(--room-entrance);
+}
+
+.tile-entrance .tile-room-icon,
+.room-entrance .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-entrance);
+}
+
+.tile-entrance > .room-wall {
+    -unity-background-image-tint-color: var(--room-entrance);
+}
+
+.tile-combat,
+.room-combat {
+    border-color: var(--room-combat);
+}
+
+.tile-combat .tile-room-icon,
+.room-combat .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-combat);
+}
+
+.tile-combat > .room-wall {
+    -unity-background-image-tint-color: var(--room-combat);
+}
+
+.tile-elite,
+.room-elite {
+    border-color: var(--room-elite);
+}
+
+.tile-elite .tile-room-icon,
+.room-elite .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-elite);
+}
+
+.tile-elite > .room-wall {
+    -unity-background-image-tint-color: var(--room-elite);
+}
+
+.tile-investigation,
+.room-investigation {
+    border-color: var(--room-investigation);
+}
+
+.tile-investigation .tile-room-icon,
+.room-investigation .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-investigation);
+}
+
+.tile-investigation > .room-wall {
+    -unity-background-image-tint-color: var(--room-investigation);
+}
+
+.tile-event,
+.room-event {
+    border-color: var(--room-event);
+}
+
+.tile-event .tile-room-icon,
+.room-event .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-event);
+}
+
+.tile-event > .room-wall {
+    -unity-background-image-tint-color: var(--room-event);
+}
+
+.tile-sanctuary,
+.room-sanctuary {
+    border-color: var(--room-sanctuary);
+}
+
+.tile-sanctuary .tile-room-icon,
+.room-sanctuary .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-sanctuary);
+}
+
+.tile-sanctuary > .room-wall {
+    -unity-background-image-tint-color: var(--room-sanctuary);
+}
+
+.tile-secret,
+.room-secret {
+    border-color: var(--room-secret);
+}
+
+.tile-secret .tile-room-icon,
+.room-secret .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-secret);
+}
+
+.tile-secret > .room-wall {
+    -unity-background-image-tint-color: var(--room-secret);
+}
+
+.tile-boss,
+.room-boss {
+    border-color: var(--room-boss);
+}
+
+.tile-boss .tile-room-icon,
+.room-boss .chart-room-icon {
+    -unity-background-image-tint-color: var(--room-boss);
+}
+
+.tile-boss > .room-wall {
+    -unity-background-image-tint-color: var(--room-boss);
+}
+
+.view-title {
+    color: var(--brass);
+}
+
+.view-text,
+.map-hint,
+.health-chip-text {
+    color: var(--text);
+}
+
+.view-subtext,
+.map-legend,
+.clue-count,
+.cellar-title {
+    color: var(--text-secondary);
+}
+
+.map-legend {
+    font-size: 13px;
+}
+
+.map-entrance {
+    padding-left: 22px;
+}
+
+.map-entrance.is-start > .current-mark {
+    display: flex;
+}
+
+.party-hero .statuses {
+    display: none;
+}
+
+.party-hero {
+    padding-bottom: 6px;
+}
+
+.party-scroll {
+    width: 100%;
+    flex-grow: 1;
+}
+
+.party-scroll-content {
+    align-items: center;
+    padding: 8px 0;
+}
+
+#party-view {
+    padding: 12px;
+}
+
+#party-view .view-title {
+    margin-bottom: 4px;
+}
+
+#party-view .view-text {
+    margin-bottom: 8px;
+}
+
+#party-view .view-subtext {
+    margin-bottom: 4px;
+}
+
+.door-tag.with-icon,
+.tile-stairs.with-icon {
+    padding-left: 24px;
+}
+
+.tile-stairs .label-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.room:focus {
+    border-color: var(--focus);
+}
+
+.owner-iron .party-portrait {
+    background-color: var(--card-iron);
+    border-bottom-color: var(--hero-iron);
+}
+
+.owner-thorn .party-portrait {
+    background-color: var(--card-thorn);
+    border-bottom-color: var(--hero-thorn);
+}
+
+.owner-ash .party-portrait {
+    background-color: var(--card-ash);
+    border-bottom-color: var(--hero-ash);
+}
+
+.owner-bone .party-portrait {
+    background-color: var(--card-bone);
+    border-bottom-color: var(--hero-bone);
+}
+
+.owner-steel .party-portrait {
+    background-color: var(--card-steel);
+    border-bottom-color: var(--hero-steel);
+}
+
+.owner-bronze .party-portrait {
+    background-color: var(--card-bronze);
+    border-bottom-color: var(--hero-bronze);
+}
+
+.owner-smoke .party-portrait {
+    background-color: var(--card-smoke);
+    border-bottom-color: var(--hero-smoke);
+}
+
+.owner-ember .party-portrait {
+    background-color: var(--card-ember);
+    border-bottom-color: var(--hero-ember);
+}
+
+.owner-ink .party-portrait {
+    background-color: var(--card-ink);
+    border-bottom-color: var(--hero-ink);
+}
+
+.owner-rose .party-portrait {
+    background-color: var(--card-rose);
+    border-bottom-color: var(--hero-rose);
+}
+
+.owner-verdigris .party-portrait {
+    background-color: var(--card-verdigris);
+    border-bottom-color: var(--hero-verdigris);
+}
+
+.owner-tallow .party-portrait {
+    background-color: var(--card-tallow);
+    border-bottom-color: var(--hero-tallow);
+}
+
+/* Review fixes: reserve each top-bar item's width before distributing party space.
+   Wrap the bar if its logical width is too narrow for three complete names. */
+.top-bar {
+    padding-left: 16px;
+    padding-right: 16px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 48px;
+}
+.top-bar .place,
+.top-bar .round {
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+.party-health {
+    min-width: 600px;
+    flex-basis: auto;
+    flex-shrink: 0;
+}
+.health-chip {
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+.health-chip .swatch {
+    flex-shrink: 0;
+}
+.health-chip-text {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.top-bar .deck-count.with-icon {
+    width: 116px;
+    min-width: 116px;
+    flex-shrink: 0;
+    padding-left: 26px;
+    margin-right: 10px;
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+.top-bar .seed {
+    width: 126px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.top-bar .journal-button.with-icon {
+    width: 150px;
+    flex-shrink: 0;
+    padding-left: 28px;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+.door-tag.with-icon,
+.tile-stairs.with-icon {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    white-space: nowrap;
+}
+.door-tag.with-icon > .label-icon,
+.tile-stairs.with-icon > .label-icon {
+    position: relative;
+    left: auto;
+    top: auto;
+    translate: 0 0;
+    width: 12px;
+    height: 12px;
+    margin-right: 3px;
+}
+.tag-caption {
+    margin: 0;
+    padding: 0;
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: nowrap;
+    -unity-text-align: middle-center;
+}
+.tile-stairs.with-icon {
+    min-height: 18px;
 }

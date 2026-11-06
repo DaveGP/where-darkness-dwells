@@ -6,23 +6,27 @@
             <ui:Label text="The Black Keep" class="place" />
             <ui:Label name="depth" class="round" />
             <ui:VisualElement name="party-health" class="party-health" />
-            <ui:Label name="deck-count" class="deck-count" />
-            <ui:Label name="keepsake-count" class="deck-count" />
+            <ui:Label name="deck-count" class="with-icon deck-count"><ui:VisualElement class="ui-icon icon-deck label-icon" picking-mode="Ignore" /></ui:Label>
+            <ui:Label name="keepsake-count" class="with-icon deck-count"><ui:VisualElement class="ui-icon icon-keepsake label-icon" picking-mode="Ignore" /></ui:Label>
             <ui:Label name="seed" class="seed" />
-            <ui:Button name="journal" text="Journal" class="journal-button hidden" />
+            <ui:Button name="journal" text="Journal" class="with-icon journal-button hidden"><ui:VisualElement class="ui-icon icon-journal label-icon" picking-mode="Ignore" /></ui:Button>
         </ui:VisualElement>
 
         <ui:VisualElement name="party-view" class="view centred">
-            <ui:Label text="The Black Keep" class="view-title" />
-            <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep, where the siege ended and something else began. Three of you go in." class="view-text" />
-            <ui:Label text="Choose three heroes." class="view-subtext" />
-            <ui:VisualElement name="party-heroes" class="party-heroes" />
-            <ui:VisualElement class="party-detail">
-                <ui:Label name="party-detail-name" class="party-detail-name" />
-                <ui:Label name="party-detail-cards" class="party-detail-cards" />
-            </ui:VisualElement>
-            <ui:Label name="party-hint" class="hint" />
-            <ui:Button name="enter-keep" text="Enter the Keep" class="big-button" />
+            <ui:ScrollView class="party-scroll">
+                <ui:VisualElement class="party-scroll-content">
+                    <ui:Label text="The Black Keep" class="view-title" />
+                    <ui:Label text="A plague, a curse, a missing lord. The rumours all lead to the Black Keep, where the siege ended and something else began. Three of you go in." class="view-text" />
+                    <ui:Label text="Choose three heroes." class="view-subtext" />
+                    <ui:VisualElement name="party-heroes" class="party-heroes" />
+                    <ui:VisualElement class="party-detail">
+                        <ui:Label name="party-detail-name" class="party-detail-name" />
+                        <ui:Label name="party-detail-cards" class="party-detail-cards" />
+                    </ui:VisualElement>
+                    <ui:Label name="party-hint" class="hint" />
+                    <ui:Button name="enter-keep" text="Enter the Keep" class="big-button" />
+                </ui:VisualElement>
+            </ui:ScrollView>
         </ui:VisualElement>
 
         <ui:VisualElement name="map-view" class="view map-view">
@@ -40,13 +44,14 @@
         <ui:VisualElement name="reward-view" class="view centred">
             <ui:Label text="Victory" class="view-title" />
             <ui:Label text="Choose a card to add to the deck, or skip." class="view-text" />
-            <ui:Label name="reward-clue" class="found-clue hidden" />
+            <ui:Label name="reward-clue" class="with-icon found-clue hidden"><ui:VisualElement class="ui-icon icon-clue label-icon" picking-mode="Ignore" /></ui:Label>
             <ui:VisualElement name="reward-cards" class="card-row" />
             <ui:Label name="reward-hint" class="hint" />
             <ui:Button name="skip-reward" text="Skip" class="big-button" />
         </ui:VisualElement>
 
         <ui:VisualElement name="sanctuary-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-room-sanctuary narrative-emblem" picking-mode="Ignore" />
             <ui:Label text="Sanctuary" class="view-title" />
             <ui:Label name="sanctuary-text" text="A chapel the corruption never reached. Candles still burn. Rest, or reflect and leave something behind." class="view-text" />
             <ui:VisualElement name="sanctuary-choices" class="choice-row">
@@ -62,6 +67,7 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="investigation-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-room-investigation narrative-emblem" picking-mode="Ignore" />
             <ui:Label text="Investigation" class="view-title" />
             <ui:Label name="investigation-text" class="view-text" />
             <ui:Label name="search-help" class="view-subtext" />
@@ -71,6 +77,7 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="secret-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-room-secret narrative-emblem" picking-mode="Ignore" />
             <ui:Label name="secret-title" class="view-title" />
             <ui:Label name="secret-text" class="view-text" />
             <ui:VisualElement class="choice-row">
@@ -80,6 +87,7 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="event-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-room-event narrative-emblem" picking-mode="Ignore" />
             <ui:Label name="event-title" class="view-title" />
             <ui:Label name="event-scene" class="view-text" />
             <ui:VisualElement name="event-choices" class="choice-row" />
@@ -89,6 +97,7 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="remove-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-remove-card narrative-emblem" picking-mode="Ignore" />
             <ui:Label text="Leave a card behind" class="view-title" />
             <ui:Label name="remove-text" class="view-text" />
             <ui:ScrollView class="deck-grid-scroll">
@@ -98,18 +107,21 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="found-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-clue narrative-emblem" picking-mode="Ignore" />
             <ui:Label name="found-title" class="view-title" />
             <ui:Label name="found-text" class="view-text" />
             <ui:Button name="found-continue" text="Return to the map" class="big-button" />
         </ui:VisualElement>
 
         <ui:VisualElement name="unwritten-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-empty-folio narrative-emblem" picking-mode="Ignore" />
             <ui:Label name="unwritten-title" class="view-title" />
             <ui:Label name="unwritten-text" class="view-text" />
             <ui:Button name="leave-room" text="Return to the map" class="big-button" />
         </ui:VisualElement>
 
         <ui:VisualElement name="end-view" class="view centred">
+            <ui:VisualElement class="ui-icon icon-seal-whole narrative-emblem" picking-mode="Ignore" />
             <ui:Label name="run-end-title" class="view-title" />
             <ui:Label name="run-end-text" class="view-text" />
             <ui:Label name="run-end-summary" class="run-summary" />

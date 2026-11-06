@@ -44,8 +44,12 @@ namespace WhereDarknessDwells.Game
             _musicVolume = _root.Q<Slider>("music-volume");
             _effectsVolume = _root.Q<Slider>("effects-volume");
 
+            DecorateVolume(_masterVolume);
+            DecorateVolume(_musicVolume);
+            DecorateVolume(_effectsVolume);
+
             // The backdrop is rendered from licensed art that is never committed, so a fresh clone won't have it
-            // and the title keeps its plain background.
+            // and the title keeps its independent ledger-cover background.
             var backdrop = Resources.Load<Texture2D>("TitleBackdrop");
             if (backdrop != null)
             {
@@ -90,6 +94,30 @@ namespace WhereDarknessDwells.Game
             Close();
         }
 
+        static void DecorateVolume(Slider slider)
+        {
+            var tracker = slider.Q(className: "unity-base-slider__tracker");
+            var thumb = slider.Q(className: "unity-base-slider__dragger");
+            if (tracker == null || thumb == null || tracker.Q(className: "volume-fill") != null) return;
+            var fill = Views.Decoration(tracker, "volume-fill");
+            void Refresh()
+            {
+                float fraction = Mathf.InverseLerp(slider.lowValue, slider.highValue, slider.value);
+                float width = tracker.contentRect.width;
+                if (float.IsNaN(width) || width <= 0) return;
+                // Thumb centre in track coordinates also accounts for Unity's end-cap inset.
+                float centre = tracker.WorldToLocal(thumb.worldBound.center).x;
+                fill.style.width = fraction <= 0 ? 0 : fraction >= 1 ? width : Mathf.Clamp(centre, 0, width);
+            }
+            slider.userData = (Action)Refresh;
+            slider.RegisterValueChangedCallback(_ => slider.schedule.Execute(Refresh));
+            slider.RegisterCallback<GeometryChangedEvent>(_ => Refresh());
+            thumb.RegisterCallback<GeometryChangedEvent>(_ => Refresh());
+            slider.RegisterCallback<FocusInEvent>(_ => slider.AddToClassList("has-keyboard-focus"));
+            slider.RegisterCallback<FocusOutEvent>(_ => slider.RemoveFromClassList("has-keyboard-focus"));
+            slider.RegisterCallback<AttachToPanelEvent>(_ => slider.schedule.Execute(Refresh));
+        }
+
         public bool IsOpen => _root.style.display != DisplayStyle.None;
 
         /// <summary>The title screen. Continue shows only when there is a run to carry on; <paramref name="note"/> says why one couldn't load.</summary>
@@ -120,6 +148,9 @@ namespace WhereDarknessDwells.Game
             _musicVolume.SetValueWithoutNotify(GameSettings.MusicVolume);
             _effectsVolume.SetValueWithoutNotify(GameSettings.EffectsVolume);
             Show(_settingsView);
+            // SetValueWithoutNotify intentionally skips callbacks; repaint after layout when opening settings.
+            foreach (var slider in new[] { _masterVolume, _musicVolume, _effectsVolume })
+                slider.schedule.Execute(() => (slider.userData as Action)?.Invoke());
         }
 
         void Choose(Action choice)

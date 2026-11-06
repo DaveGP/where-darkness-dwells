@@ -1,0 +1,63 @@
+/* Approved palette, shared by both sibling document roots. */
+.screen, .menus {
+    --void: #10151C;
+    --recess: #151C24;
+    --panel: #1C2630;
+    --raised: #293644;
+    --hover: #344656;
+    --pressed: #202B36;
+    --selected: #3C3526;
+    --disabled: #20262D;
+    --paper: #E9DCBD;
+    --ink: #10151C;
+    --text: #F1E8D5;
+    --text-secondary: #B9C2CC;
+    --text-muted: #ABB5C1;
+    --brass: #D6AF63;
+    --focus: #F5DDA3;
+    --edge: #647486;
+    --edge-quiet: #465362;
+    --danger: #F49A91;
+    --benefit: #A2D8AF;
+    --health: #68323F;
+    --health-track: #30212B;
+    --warning-surface: #402A30;
+    --badge-surface: #263442;
+    --scrim: rgba(16, 21, 28, 0.88);
+
+    --hero-iron: #E6B34F;
+    --hero-thorn: #71C596;
+    --hero-ash: #B39AE8;
+    --hero-bone: #DCD5BE;
+    --hero-steel: #79BFE8;
+    --hero-bronze: #E78E79;
+    --card-iron: #342B1B;
+    --card-thorn: #1B3028;
+    --card-ash: #2C253C;
+    --card-bone: #302E27;
+    --card-steel: #1D2C3A;
+    --card-bronze: #392420;
+
+    --hero-smoke: #B4B8C7;
+    --card-smoke: #292B34;
+    --hero-ember: #F5A36E;
+    --card-ember: #39281F;
+    --hero-ink: #92A8EC;
+    --card-ink: #222B40;
+    --hero-rose: #EAA6CA;
+    --card-rose: #372636;
+    --hero-verdigris: #6DCECA;
+    --card-verdigris: #183332;
+    --hero-tallow: #D8D17D;
+    --card-tallow: #32301E;
+
+    --room-combat: #E58CA0;
+    --room-elite: #F0B15C;
+    --room-investigation: #85B8EB;
+    --room-event: #B6A0E5;
+    --room-sanctuary: #8AC99A;
+    --room-secret: #70CED0;
+    --room-boss: #D6AF63;
+    --room-entrance: #B9C2CC;
+}
+

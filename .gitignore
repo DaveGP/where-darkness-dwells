@@ -120,3 +120,6 @@ Unity/[Aa]ssets/LocalArt.meta
 
 # Rider project files
 Unity/.idea/
+
+# Web and player builds. They hold compiled Synty art, so they must never be committed.
+Unity/Builds/

@@ -73,6 +73,7 @@ namespace WhereDarknessDwells.Game
                     Rect r = Square(passage);
                     Place(hall, new Rect(r.x, r.y + tile * 0.22f, r.width, r.height * 0.56f));
                     Pave(hall, tile * 2.5f / 6f);
+                    Views.Decoration(hall, "room-wall");
                     canvas.Add(hall);
                 }
                 var body = Tile($"tile-{kind}", isHere, isNew);
@@ -90,14 +91,19 @@ namespace WhereDarknessDwells.Game
                     Place(name, new Rect((tile - across) / 2, (room.Height * tile - tile) / 2, across, tile));
                     name.style.rotate = new Rotate(-90);
                 }
+                Views.Decoration(body, "room-wall");
+                Views.Icon(body, "room-" + kind, "tile-room-icon");
                 body.Add(name);
                 if (mapRoom != null && secret != null && (map.SecretFrom.Contains(mapRoom.Id) || secret.Next.Contains(mapRoom.Id)))
                 {
                     var stairs = new Label(map.SecretFrom.Contains(mapRoom.Id) ? "Stairs down" : "Stairs up") { pickingMode = PickingMode.Ignore };
                     stairs.AddToClassList("tile-stairs");
                     stairs.style.fontSize = Mathf.Clamp(tile * 0.2f, 9, 13);
+                    Views.LabelIcon(stairs, "stairs");
                     body.Add(stairs);
                 }
+                body.Q(className: "current-mark").BringToFront();
+                body.Q(className: "selection-frame").BringToFront();
                 canvas.Add(body);
             }
 
@@ -110,6 +116,7 @@ namespace WhereDarknessDwells.Game
                 bool canOpen = door.FromId == here && reachable.Contains(door.ToId);
                 var mark = new VisualElement { pickingMode = PickingMode.Ignore };
                 mark.AddToClassList("door");
+                Views.Icon(mark, "check", "route-mark");
                 mark.EnableInClassList("is-travelled", travelled);
                 mark.EnableInClassList("is-open", canOpen);
                 Rect from = Square(door.From);
@@ -120,6 +127,7 @@ namespace WhereDarknessDwells.Game
                 MapRoom behind = map.Room(door.ToId);
                 var tag = new Button(() => onClick(behind)) { text = MapView.Label(run, behind) };
                 tag.AddToClassList("door-tag");
+                Views.LabelIcon(tag, "room-" + behind.Kind.ToString().ToLowerInvariant());
                 tag.AddToClassList($"tile-{behind.Kind.ToString().ToLowerInvariant()}");
                 tag.style.fontSize = Mathf.Clamp(tile * 0.2f, 9, 15);
                 Rect to = Square(door.To);
@@ -149,6 +157,8 @@ namespace WhereDarknessDwells.Game
             Dress(cellar, "secret", secret.Id, 180, area.height - 30);
             var name = new Label(MapView.Label(run, secret)) { pickingMode = PickingMode.Ignore };
             name.AddToClassList("tile-name");
+            Views.Decoration(cellar, "room-wall");
+            Views.Icon(cellar, "room-secret", "tile-room-icon");
             cellar.Add(name);
             canvas.Add(cellar);
 
@@ -162,6 +172,7 @@ namespace WhereDarknessDwells.Game
                 var button = new Button(() => onClick(r)) { text = r == secret ? $"Stairs down: {MapView.Label(run, r)}" : $"Stairs up: {MapView.Label(run, r)}" };
                 button.AddToClassList("door-tag");
                 button.AddToClassList("stairs-tag");
+                Views.LabelIcon(button, "stairs");
                 Place(button, new Rect(x, area.y + 34, 220, 44));
                 button.RegisterCallback<PointerEnterEvent>(_ => onHover(r));
                 button.RegisterCallback<PointerLeaveEvent>(_ => onHover(null));
@@ -205,10 +216,10 @@ namespace WhereDarknessDwells.Game
         static void Dress(VisualElement tile, string kind, int roomId, float width, float height)
         {
             Texture2D[] variants = Art(kind);
-            if (variants.Length == 0) return;
             // The pictures show about 6 m of floor, and a slab is 2.5 m.
             float side = Mathf.Min(width, height);
             Pave(tile, side * 2.5f / 6f);
+            if (variants.Length == 0) return;
             var picture = new VisualElement { pickingMode = PickingMode.Ignore };
             picture.AddToClassList("tile-art");
             picture.style.backgroundImage = variants[Math.Abs(roomId) % variants.Length];
@@ -220,6 +231,9 @@ namespace WhereDarknessDwells.Game
         {
             var tile = new VisualElement { pickingMode = PickingMode.Ignore };
             tile.AddToClassList("tile");
+            Views.Icon(tile, "current", "current-mark");
+            Views.Icon(tile, "empty-folio", "unexplored-mark");
+            Views.Decoration(tile, "selection-frame");
             tile.AddToClassList(kindClass);
             tile.EnableInClassList("is-current", isHere);
             if (isNew)

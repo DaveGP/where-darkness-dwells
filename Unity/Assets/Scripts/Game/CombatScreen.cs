@@ -472,6 +472,7 @@ namespace WhereDarknessDwells.Game
             if (_combat.IsOver)
             {
                 bool won = _combat.Phase == CombatPhase.Won;
+                Views.SetEmblem(_endPanel, won ? "seal-whole" : "defeat");
                 _endTitle.text = won ? "Victory" : "Defeat";
                 _endText.text = won
                     ? $"The room falls silent after {_combat.Round} rounds."
@@ -528,6 +529,7 @@ namespace WhereDarknessDwells.Game
 
             Label state = view.Q<Label>("state");
             state.text = hero.IsDown ? "Down" : active ? "Active" : "";
+            if (hero.IsDown) Views.LabelIcon(state, "defeat");
             state.EnableInClassList("hidden", !hero.IsDown && !active);
             view.EnableInClassList("is-active", active);
             view.EnableInClassList("is-down", hero.IsDown);
@@ -557,6 +559,26 @@ namespace WhereDarknessDwells.Game
                 // A vague intent shows only its line: no numbers, no target and no outcome.
                 view.Q<Label>("intent").text = _combat.IntentText(enemy, enemy.Intent) + (enemy.IntentCancelled ? " (cancelled)" : "");
                 view.Q<Label>("intent-target").text = vague || enemy.IntentCancelled ? "" : IntentTargetText(enemy);
+                var icons = view.Q(className: "intent-icons");
+                if (vague) Views.Icon(icons, "unknown");
+                else if (enemy.IntentCancelled) Views.Icon(icons, "cancelled");
+                else
+                {
+                    Views.Icon(icons, IntentIcon(enemy.Intent));
+                    if (enemy.Intent.Kind == IntentKind.ApplyStatus)
+                        Views.Icon(icons, enemy.Intent.Status.ToString().ToLowerInvariant());
+                    if (enemy.Intent.Target != IntentTarget.AllHeroes && enemy.Intent.Target != IntentTarget.Self
+                        && enemy.IntentTargetId != null)
+                    {
+                        var target = _combat.Find(enemy.IntentTargetId);
+                        if (target?.Hero != null)
+                        {
+                            var targetLabel = view.Q("intent-target");
+                            targetLabel.AddToClassList("with-owner-mark");
+                            Views.OwnerMark(targetLabel, target.Hero.Colour);
+                        }
+                    }
+                }
             }
             Label outcome = view.Q<Label>("intent-outcome");
             outcome.text = showIntent && !vague ? OutcomeText(enemy) : "";
@@ -593,6 +615,19 @@ namespace WhereDarknessDwells.Game
         }
 
         bool IsVague(string combatantId) => combatantId != null && _combat.IsVague(_combat.Find(combatantId));
+
+        // Every current Core intent kind is mapped explicitly. Unknown future kinds get no false attack cue.
+        static string IntentIcon(IntentDef intent)
+        {
+            switch (intent.Kind)
+            {
+                case IntentKind.Attack: return intent.Target == IntentTarget.AllHeroes ? "attack-all" : "attack";
+                case IntentKind.Block: return "block";
+                case IntentKind.Heal: return "heal";
+                case IntentKind.ApplyStatus: return "apply-status";
+                default: return "unknown";
+            }
+        }
 
         /// <summary>What this enemy's intent would really do now, after Block, Weak, Exposed and Guard.</summary>
         string OutcomeText(Combatant enemy)
@@ -893,6 +928,7 @@ namespace WhereDarknessDwells.Game
             {
                 var chip = new Label($"{status.Key} {status.Value}");
                 chip.AddToClassList("status");
+                Views.LabelIcon(chip, status.Key.ToString().ToLowerInvariant());
                 chip.AddToClassList($"status-{status.Key.ToString().ToLowerInvariant()}");
                 string help = StatusHelp[status.Key];
                 chip.RegisterCallback<PointerEnterEvent>(_ => SetHint(help, false));

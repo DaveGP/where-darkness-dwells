@@ -1,22 +1,16 @@
-/* The title, pause and settings menus. They draw over the run and combat screens. */
-
+/* The Siege Ledger. Exact slices match SpriteImporter; default Unity font uses approved sizes. */
 .menus {
     flex-grow: 1;
-    color: rgb(222, 214, 200);
     font-size: 16px;
 }
 
 .title-view {
     flex-grow: 1;
-    align-items: center;
     justify-content: center;
-    background-color: rgb(16, 13, 18);
 }
 
 .game-title {
-    font-size: 64px;
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
     margin-bottom: 16px;
 }
 
@@ -36,7 +30,6 @@
     flex-grow: 1;
     align-items: center;
     justify-content: center;
-    background-color: rgba(10, 8, 12, 0.85);
 }
 
 .menu-panel {
@@ -44,36 +37,21 @@
     padding: 28px 36px;
     align-items: center;
     border-width: 2px;
-    border-radius: 8px;
-    border-color: rgb(120, 100, 70);
-    background-color: rgb(30, 25, 30);
+    border-radius: 0;
 }
 
 .menu-heading {
-    font-size: 28px;
     margin-bottom: 8px;
 }
 
 .menu-toggle {
-    width: 260px;
     margin-top: 14px;
     font-size: 18px;
 }
 
-.menu-toggle > .unity-label {
-    color: rgb(222, 214, 200);
-    min-width: 200px;
-}
-
 .menu-slider {
-    width: 300px;
     margin: 6px 0;
     font-size: 18px;
-}
-
-.menu-slider > .unity-label {
-    min-width: 130px;
-    color: rgb(222, 214, 200);
 }
 
 .menu-note {
@@ -81,24 +59,15 @@
     white-space: normal;
     -unity-text-align: middle-center;
     font-size: 14px;
-    color: rgb(150, 140, 146);
 }
 
-.title-column {
-    align-items: center;
-}
-
-/* With a backdrop image (GameMenus loads it when the local art is there), the menu moves to the left third
-   over a dark fade, so the lair stays visible on the right. Without one, the title looks as it always has. */
 .title-view.has-backdrop {
     align-items: flex-start;
     -unity-background-scale-mode: scale-and-crop;
 }
 
 .title-view.has-backdrop .title-column {
-    width: 760px;
     padding-left: 90px;
-    align-items: flex-start;
 }
 
 .title-view.has-backdrop .view-text {
@@ -123,10 +92,372 @@
     display: flex;
 }
 
-/* Overlapping bands stand in for a gradient: darkest behind the menu, fading out towards the lair. */
-.title-shade-1 { left: 0; width: 34%; background-color: rgba(10, 8, 12, 0.4); }
-.title-shade-2 { left: 0; width: 39%; background-color: rgba(10, 8, 12, 0.18); }
-.title-shade-3 { left: 0; width: 44%; background-color: rgba(10, 8, 12, 0.14); }
-.title-shade-4 { left: 0; width: 49%; background-color: rgba(10, 8, 12, 0.1); }
-.title-shade-5 { left: 0; width: 54%; background-color: rgba(10, 8, 12, 0.07); }
-.title-shade-6 { left: 0; width: 59%; background-color: rgba(10, 8, 12, 0.05); }
+.title-shade-2 {
+    left: 0;
+    width: 39%;
+}
+
+.title-shade-3 {
+    left: 0;
+    width: 44%;
+}
+
+.title-shade-4 {
+    left: 0;
+    width: 49%;
+}
+
+.title-shade-5 {
+    left: 0;
+    width: 54%;
+}
+
+.title-shade-6 {
+    left: 0;
+    width: 59%;
+}
+
+.title-view {
+    background-image: url("Art/Title/keep-ledger.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.menu-panel,
+.title-column {
+    background-image: url("Art/Frames/folio.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 16;
+    -unity-slice-top: 16;
+    -unity-slice-right: 16;
+    -unity-slice-bottom: 16;
+    -unity-slice-scale: 1px;
+}
+
+.title-shade-1 {
+    background-image: url("Art/Title/title-fade.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.menu-toggle .unity-toggle__input {
+    background-image: url("Art/Controls/toggle-box.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 6;
+    -unity-slice-top: 6;
+    -unity-slice-right: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 1px;
+}
+
+.menu-slider .unity-base-slider__tracker {
+    background-image: url("Art/Controls/volume-track.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 5;
+    -unity-slice-top: 4;
+    -unity-slice-right: 5;
+    -unity-slice-bottom: 4;
+    -unity-slice-scale: 1px;
+}
+
+.volume-fill {
+    background-image: url("Art/Controls/volume-fill.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 2;
+    -unity-slice-top: 2;
+    -unity-slice-right: 2;
+    -unity-slice-bottom: 2;
+    -unity-slice-scale: 1px;
+}
+
+.menu-slider .unity-base-slider__dragger {
+    background-image: url("Art/Controls/volume-grip.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 4;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 4;
+    -unity-slice-scale: 1px;
+}
+
+.menu-toggle .unity-toggle__checkmark {
+    background-image: url("Art/Controls/toggle-check.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.menus {
+    color: var(--text);
+}
+
+.title-view {
+    background-color: var(--void);
+    align-items: flex-start;
+}
+
+.game-title {
+    font-size: 60px;
+    white-space: normal;
+    color: var(--brass);
+}
+
+.menu-heading {
+    font-size: 28px;
+    -unity-font-style: bold;
+}
+
+.title-column,
+.title-view.has-backdrop .title-column {
+    width: 760px;
+    padding: 28px 40px;
+    margin-left: 50px;
+    align-items: flex-start;
+    background-color: var(--void);
+}
+
+.title-column .view-text,
+.title-column .title-note {
+    width: 640px;
+    -unity-text-align: middle-left;
+}
+
+.title-shade-1,
+.title-view.has-backdrop .title-shade-1 {
+    display: flex;
+    left: 0;
+    width: 70%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.title-shade-2,
+.title-shade-3,
+.title-shade-4,
+.title-shade-5,
+.title-shade-6,
+.title-view.has-backdrop .title-shade-2,
+.title-view.has-backdrop .title-shade-3,
+.title-view.has-backdrop .title-shade-4,
+.title-view.has-backdrop .title-shade-5,
+.title-view.has-backdrop .title-shade-6 {
+    display: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.menu-overlay {
+    background-color: var(--scrim);
+}
+
+.menu-panel {
+    background-color: var(--panel);
+    border-color: var(--edge);
+}
+
+.menu-note {
+    color: var(--text-muted);
+}
+
+.menu-toggle {
+    width: 300px;
+}
+
+.menu-toggle > .unity-label {
+    white-space: normal;
+    min-width: 200px;
+    color: var(--text);
+}
+
+.menu-toggle .unity-toggle__input {
+    width: 28px;
+    height: 28px;
+    background-color: var(--recess);
+    border-width: 1px;
+    border-color: var(--edge);
+}
+
+.menu-toggle .unity-toggle__checkmark {
+    width: 16px;
+    height: 16px;
+    -unity-background-image-tint-color: var(--paper);
+}
+
+.menu-toggle:hover .unity-toggle__input {
+    border-color: var(--brass);
+}
+
+.menu-toggle:active .unity-toggle__input {
+    background-color: var(--pressed);
+}
+
+.menu-toggle:focus .unity-toggle__input {
+    border-color: var(--focus);
+    border-width: 2px;
+}
+
+.menu-toggle:disabled .unity-toggle__input {
+    border-color: var(--edge-quiet);
+    background-color: var(--disabled);
+}
+
+.menu-toggle:disabled > .unity-label {
+    color: var(--text-muted);
+}
+
+.menu-slider {
+    width: 300px;
+    min-height: 32px;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+.menu-slider > .unity-label {
+    min-width: 130px;
+    color: var(--text);
+}
+
+.menu-slider .unity-base-slider__tracker {
+    height: 8px;
+    background-color: var(--recess);
+    border-color: var(--edge);
+    border-width: 1px;
+}
+
+.volume-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    -unity-background-image-tint-color: var(--brass);
+}
+
+.menu-slider .unity-base-slider__dragger {
+    width: 20px;
+    height: 28px;
+    background-color: var(--raised);
+    border-width: 2px;
+    border-color: var(--edge);
+}
+
+.menu-slider .unity-base-slider__dragger-border {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.menu-slider:hover .unity-base-slider__dragger {
+    background-color: var(--hover);
+    border-color: var(--brass);
+}
+
+.menu-slider:active .unity-base-slider__dragger {
+    background-color: var(--pressed);
+    border-color: var(--focus);
+}
+
+.menu-slider:focus,
+.menu-slider.has-keyboard-focus {
+    border-color: var(--focus);
+}
+
+.menu-slider:disabled .unity-base-slider__dragger {
+    background-color: var(--disabled);
+    border-color: var(--edge-quiet);
+}
+
+.menu-slider:disabled > .unity-label {
+    color: var(--text-muted);
+}
+
+.menu-slider:disabled .volume-fill {
+    -unity-background-image-tint-color: var(--text-muted);
+}
+
+.menu-slider:disabled {
+    opacity: 1;
+}
+
+.hidden {
+    display: none;
+}
+
+.menu-toggle .unity-toggle__checkmark {
+    opacity: 0;
+}
+
+.menu-toggle:checked .unity-toggle__checkmark {
+    opacity: 1;
+}
+
+.menu-toggle:disabled .unity-toggle__checkmark {
+    -unity-background-image-tint-color: var(--text-muted);
+}
+
+.menu-slider .unity-base-slider__dragger:active {
+    background-color: var(--pressed);
+    border-color: var(--focus);
+}
+
+.menu-slider:disabled .unity-base-slider__dragger:active {
+    background-color: var(--disabled);
+    border-color: var(--edge-quiet);
+}
+
+/* Review fixes: content-sized folio and a broad, seamless backdrop ramp. */
+.title-column,
+.title-view.has-backdrop .title-column {
+    width: 900px;
+    height: auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding: 24px 32px;
+}
+.title-column .game-title {
+    font-size: 60px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.title-column .title-note {
+    height: auto;
+    min-height: 0;
+    margin-top: 8px;
+}
+.title-shade-1,
+.title-view.has-backdrop .title-shade-1 {
+    width: 64%;
+}
+.menu-toggle {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 32px;
+}
+.menu-toggle > .unity-label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin-right: 12px;
+}
+.menu-toggle .unity-toggle__input {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 28px;
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+}
+.menu-toggle .unity-toggle__checkmark {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-image-tint-color: var(--paper);
+}
+/* The Run document may be visible beneath title Settings. Occlude it without changing flow. */
+#settings-view {
+    background-color: var(--void);
+}

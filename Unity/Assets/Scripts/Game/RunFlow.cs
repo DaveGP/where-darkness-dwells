@@ -419,7 +419,11 @@ namespace WhereDarknessDwells.Game
         void Search(string heroId, ClueDef clue) => Apply(() =>
         {
             RunResult result = _run.TrySearch(heroId);
-            if (result.Ok) _found = (clue.Name, clue.Journal);
+            if (result.Ok)
+            {
+                _found = (clue.Name, clue.Journal);
+                Views.SetEmblem(_foundView, "clue");
+            }
             return result;
         }, $"{heroId} searched and found the clue {clue.Id}.");
 
@@ -429,7 +433,11 @@ namespace WhereDarknessDwells.Game
             Apply(() =>
             {
                 RunResult result = _run.TryUseSecret();
-                if (result.Ok) _found = (secret.Name, $"It is done. {BossName()} will start the fight with {secret.BossHealthLossPercent}% less health.");
+                if (result.Ok)
+                {
+                    _found = (secret.Name, $"It is done. {BossName()} will start the fight with {secret.BossHealthLossPercent}% less health.");
+                    Views.SetEmblem(_foundView, "room-secret");
+                }
                 return result;
             }, $"Used the secret room: {secret.ActionLabel}.");
         }
@@ -444,7 +452,12 @@ namespace WhereDarknessDwells.Game
                 if (!result.Ok) return result;
                 _pendingChoice = -1;
                 // Shown before the map or the fight. A card choice or removal shows it on its own screen.
-                if (_run.Phase == RunPhase.ChooseRoom || _run.Phase == RunPhase.Combat) _found = (ev.Title, _run.EventResult);
+                if (_run.Phase == RunPhase.ChooseRoom || _run.Phase == RunPhase.Combat)
+                {
+                    _found = (ev.Title, _run.EventResult);
+                    Views.SetEmblem(_foundView, choice.Outcomes.Any(o => o.Kind == EventOutcomeKind.GainClue) ? "clue"
+                        : choice.Outcomes.Any(o => o.Kind == EventOutcomeKind.GainKeepsake) ? "keepsake" : "seal-whole");
+                }
                 return result;
             }, $"Event {ev.Id}: chose \"{choice.Label}\"{(heroId != null ? $" for {heroId}" : "")}.");
         }
@@ -485,7 +498,7 @@ namespace WhereDarknessDwells.Game
             }
         }
 
-        /// <summary>The hero's model at full length, or their initial when the model isn't on this machine.</summary>
+        /// <summary>The live model at full length, or the hero's signature mark when the model is missing.</summary>
         VisualElement Portrait(HeroDef hero)
         {
             if (_portraits == null) _portraits = new HeroPortraits(content);
@@ -495,10 +508,13 @@ namespace WhereDarknessDwells.Game
             if (texture is RenderTexture live) frame.style.backgroundImage = Background.FromRenderTexture(live);
             else
             {
-                var initial = new Label(hero.Name.Substring(0, 1)) { pickingMode = PickingMode.Ignore };
+                var initial = new Label("") { pickingMode = PickingMode.Ignore };
                 initial.AddToClassList("party-portrait-initial");
+                initial.AddToClassList("hero-mark");
+                initial.AddToClassList(Views.OwnerClass(hero.Colour));
                 frame.Add(initial);
             }
+            Views.Decoration(frame, "portrait-frame");
             return frame;
         }
 
@@ -554,6 +570,8 @@ namespace WhereDarknessDwells.Game
             KeepsakeDef keepsake = _run.RewardKeepsake == null ? null : _expedition.Keepsake(_run.RewardKeepsake);
             if (keepsake != null) found.Add($"You take a Keepsake: {keepsake.Name}. {keepsake.Text}");
             _rewardClue.text = string.Join("\n\n", found);
+            _rewardClue.Q(className: "label-icon").RemoveFromHierarchy();
+            Views.LabelIcon(_rewardClue, clue != null ? "clue" : keepsake != null ? "keepsake" : "room-event");
             _rewardClue.EnableInClassList("hidden", found.Count == 0);
             _rewardCards.Clear();
             foreach (string id in _run.RewardOffer)
@@ -728,6 +746,7 @@ namespace WhereDarknessDwells.Game
                 var entry = new VisualElement();
                 entry.AddToClassList("journal-entry");
                 entry.AddToClassList("is-keepsake");
+                Views.Icon(entry, "keepsake", "label-icon");
                 var name = new Label($"Keepsake: {keepsake.Name}");
                 name.AddToClassList("journal-entry-name");
                 entry.Add(name);
@@ -746,6 +765,7 @@ namespace WhereDarknessDwells.Game
                 var entry = new VisualElement();
                 entry.AddToClassList("journal-entry");
                 entry.EnableInClassList("is-unknown", !found);
+                Views.Icon(entry, found ? "clue" : "empty-folio", "label-icon");
                 var name = new Label(found ? clue.Name : "Not found yet");
                 name.AddToClassList("journal-entry-name");
                 entry.Add(name);
@@ -761,6 +781,7 @@ namespace WhereDarknessDwells.Game
             {
                 var entry = new VisualElement();
                 entry.AddToClassList("journal-entry");
+                Views.Icon(entry, "stairs", "label-icon");
                 var name = new Label(_run.Villain.SecretRoom.Name);
                 name.AddToClassList("journal-entry-name");
                 entry.Add(name);
@@ -783,6 +804,7 @@ namespace WhereDarknessDwells.Game
             bool won = _run.Phase == RunPhase.Won;
             Debug.Log($"[Run] Expedition {(won ? "won" : "lost")}: seed {_run.Seed}, {_run.Route.Count} rooms, {_run.FightsWon} fights won, " +
                 $"{_run.CluesFound.Count} clues{(_run.TrueEnding ? ", true ending" : "")}.");
+            Views.SetEmblem(_endView, !won ? "defeat" : _run.TrueEnding ? "seal-broken" : "seal-whole");
             _endTitle.text = !won ? "Defeat" : _run.TrueEnding ? "The True Ending" : "Victory";
             _endText.text = won
                 ? _run.EndingText ?? "The thing at the heart of the Keep is still. For now, the Black Keep is quiet."
@@ -818,6 +840,7 @@ namespace WhereDarknessDwells.Game
                 swatch.AddToClassList("health-chip-swatch");
                 swatch.AddToClassList("swatch");
                 swatch.AddToClassList(Views.OwnerClass(hero.Colour));
+                Views.OwnerMark(swatch, hero.Colour);
                 chip.Add(swatch);
                 var text = new Label($"{hero.Name} {_run.Health(id)} / {_run.MaxHealth(id)}");
                 text.AddToClassList("health-chip-text");
