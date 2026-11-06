@@ -81,6 +81,27 @@ Assets/Tests/Content     Editor-only tests of the content assets. Unity's Test R
 - **Keep the docs current.** When a decision changes, update `GAME_DESIGN.md` and the milestone status in
   `MILESTONES.md`. Don't repeat the same facts across the files.
 
+## Deploying a test build
+
+Test builds stay on David's Mac. Publishing a GitHub release, even a pre-release, replaces the live public game on
+GitHub Pages, so don't use that for a build he hasn't reviewed.
+
+1. Close this project in the Editor if it's open: batch mode can't run on a project that's open.
+2. From the branch being tested, build the web player (it needs the Web Build Support module):
+
+   ```bash
+   /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath Unity -executeMethod WhereDarknessDwells.Editor.WebBuild.Build -logFile -
+   ```
+
+3. Serve it locally, and test at http://localhost:8000:
+
+   ```bash
+   python3 -m http.server 8000 --directory Unity/Builds/Web
+   ```
+
+The build switches the Editor's platform to Web and may rewrite settings files. Don't commit those changes, and restore
+them with `git restore` if they aren't part of the work.
+
 ## Third-party assets
 
 - **Synty assets are licensed to David and must not be committed.** The repo is public and the licence
