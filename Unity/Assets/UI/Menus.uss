@@ -65,6 +65,17 @@
     min-width: 200px;
 }
 
+.menu-slider {
+    width: 300px;
+    margin: 6px 0;
+    font-size: 18px;
+}
+
+.menu-slider > .unity-label {
+    min-width: 130px;
+    color: rgb(222, 214, 200);
+}
+
 .menu-note {
     margin-top: 16px;
     white-space: normal;

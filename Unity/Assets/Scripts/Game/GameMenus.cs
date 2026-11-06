@@ -25,6 +25,7 @@ namespace WhereDarknessDwells.Game
         Button _continue;
         Label _titleNote;
         Toggle _fullscreen, _fastAnimations, _chartMap;
+        Slider _masterVolume, _musicVolume, _effectsVolume;
         // Where Back on the settings menu returns to.
         VisualElement _settingsFrom;
 
@@ -39,6 +40,9 @@ namespace WhereDarknessDwells.Game
             _fullscreen = _root.Q<Toggle>("fullscreen");
             _fastAnimations = _root.Q<Toggle>("fast-animations");
             _chartMap = _root.Q<Toggle>("chart-map");
+            _masterVolume = _root.Q<Slider>("master-volume");
+            _musicVolume = _root.Q<Slider>("music-volume");
+            _effectsVolume = _root.Q<Slider>("effects-volume");
 
             // The backdrop is rendered from licensed art that is never committed, so a fresh clone won't have it
             // and the title keeps its plain background.
@@ -76,6 +80,12 @@ namespace WhereDarknessDwells.Game
                 Debug.Log($"[Settings] Map drawn as {(e.newValue ? "the chart" : "the floor plan")}.");
             });
 
+            // Volumes change as the slider moves, so the player hears the level they are choosing.
+            _masterVolume.RegisterValueChangedCallback(e => GameSettings.MasterVolume = e.newValue);
+            _musicVolume.RegisterValueChangedCallback(e => GameSettings.MusicVolume = e.newValue);
+            _effectsVolume.RegisterValueChangedCallback(e => GameSettings.EffectsVolume = e.newValue);
+            GameAudio.ClickSounds(_root);
+
             GameSettings.Apply();
             Close();
         }
@@ -88,6 +98,7 @@ namespace WhereDarknessDwells.Game
             CanPause = false;
             _continue.EnableInClassList("hidden", !canContinue);
             _titleNote.text = note ?? "";
+            GameAudio.Play(GameAudio.Track.Title);
             Show(_titleView);
         }
 
@@ -105,6 +116,9 @@ namespace WhereDarknessDwells.Game
             _fullscreen.SetValueWithoutNotify(GameSettings.Fullscreen);
             _fastAnimations.SetValueWithoutNotify(GameSettings.FastAnimations);
             _chartMap.SetValueWithoutNotify(GameSettings.ChartMap);
+            _masterVolume.SetValueWithoutNotify(GameSettings.MasterVolume);
+            _musicVolume.SetValueWithoutNotify(GameSettings.MusicVolume);
+            _effectsVolume.SetValueWithoutNotify(GameSettings.EffectsVolume);
             Show(_settingsView);
         }
 
