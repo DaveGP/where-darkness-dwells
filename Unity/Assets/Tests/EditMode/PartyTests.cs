@@ -5,7 +5,7 @@ using WhereDarknessDwells.Core;
 
 namespace WhereDarknessDwells.Tests
 {
-    /// <summary>Choosing three of the six heroes, and the Milestone 5 heroes' new effects.</summary>
+    /// <summary>Choosing three of the twelve heroes, and the Milestone 5 heroes' new effects.</summary>
     public class PartyTests
     {
         static readonly ContentLibrary Library = StarterContent.Library();
@@ -22,7 +22,8 @@ namespace WhereDarknessDwells.Tests
         [Test]
         public void EveryPartyStartsWithFifteenCardsTheyCanAllPlay()
         {
-            Assert.That(EveryParty().Count(), Is.EqualTo(20));
+            // 12 heroes, so 220 parties of three.
+            Assert.That(EveryParty().Count(), Is.EqualTo(220));
             foreach (string[] party in EveryParty())
             {
                 var run = new RunState(Library, StarterContent.Expedition(), 1, party);

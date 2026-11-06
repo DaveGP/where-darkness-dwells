@@ -35,6 +35,9 @@ namespace WhereDarknessDwells.Game
         Action _restoreLighting;
         Camera _camera;
 
+        /// <summary>The idle loop the fighters play, or null. The party screen's portraits use it too.</summary>
+        public RuntimeAnimatorController Idle => idle;
+
         void Awake()
         {
             _camera = GetComponentInChildren<Camera>();

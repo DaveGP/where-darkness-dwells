@@ -245,7 +245,18 @@ Bell Ringer (Gravedigger), Blood Thrall (Demon). The Bloodbound Knight is a red,
 Cistern Leech in fights, which have no models because the pack has no animal rigs. In a fresh
 clone the references are missing, so the field reads as empty and a placeholder is used.
 Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
-the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard.
+the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard. The party screen shows each hero's model at full length down the left of their card, breathing through the stage's idle
+loop, lit warm from the front and cold from behind over a backdrop in the hero's colour (`Game/HeroPortraits.cs`). Without the
+model, the card shows the hero's initial there instead.
+
+Six more heroes (David's request, 2026-10-26), one for each unused character model: Silas (Rogue), Isidore (Sorcerer),
+Aldous (Wizard), Vesna (Gypsy), Lady Isolde (Queen) and Tam (Peasant). The design is in `GAME_DESIGN.md` under "Six more
+heroes". The party screen is now a roster of twelve, with a card panel below it. The new content is 6 heroes and 99 cards: 24
+starters, 24 rewards, 15 bespoke duals and 36 Back to Back duals, in `StarterContent` and as assets.
+Balance (`tools/Balance -- parties 100`, after tuning): parties with each hero win 45 to 54% of the time, an average of 50%.
+Parties of only the first six win 51%, only the new six 44%, and mixed 50%. The weakest party is Aldous, Vesna and
+Isolde (25%), three support heroes together. Tuning raised Vesna (13% at first) and Aldous (21%): their first decks dealt
+almost no damage. Back to Back went from Block and a draw to 5 damage and 4 Block, which lifted mixed parties from 38%.
 
 Fight stage: when `Assets/LocalArt/Resources/CombatStage.prefab` is there, each fight is shown on a 3D set behind the
 combat screen (`Game/CombatStage.cs`). It is the Background-Layout crypt with three hero places on the left of the aisle

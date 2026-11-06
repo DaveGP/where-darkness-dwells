@@ -39,13 +39,15 @@ namespace WhereDarknessDwells.Game
         int _pendingChoice = -1;
         // Set once OnEnable found everything it needs.
         bool _ready;
+        // The heroes' live portraits, while the party screen is open.
+        HeroPortraits _portraits;
 
         VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
         VisualElement _eventChoices, _eventHeroes, _removeGrid;
         Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _mapLegend, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
-        Label _partyHint, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
+        Label _partyHint, _partyDetailName, _partyDetailCards, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
         Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue, _mapStyle, _wholePlan;
         // Debug: draw the whole floor plan as if explored. Only for this session; it changes nothing in the run.
         bool _showWholePlan;
@@ -79,6 +81,8 @@ namespace WhereDarknessDwells.Game
             _removeGrid = _root.Q("remove-grid");
             _keepsakeCount = _root.Q<Label>("keepsake-count");
             _partyHint = _root.Q<Label>("party-hint");
+            _partyDetailName = _root.Q<Label>("party-detail-name");
+            _partyDetailCards = _root.Q<Label>("party-detail-cards");
             _eventTitle = _root.Q<Label>("event-title");
             _eventScene = _root.Q<Label>("event-scene");
             _eventHeroHelp = _root.Q<Label>("event-hero-help");
@@ -167,6 +171,8 @@ namespace WhereDarknessDwells.Game
 
         void OnDisable()
         {
+            _portraits?.Dispose();
+            _portraits = null;
             if (menus == null) return;
             menus.ContinueChosen -= ContinueRun;
             menus.NewExpeditionChosen -= ShowParty;
@@ -206,6 +212,8 @@ namespace WhereDarknessDwells.Game
         void ShowTitle(string note = null)
         {
             _run = null;
+            _portraits?.Dispose();
+            _portraits = null;
             DrawTopBar();
             menus.ShowTitle(SaveFile.Exists, note);
         }
@@ -277,18 +285,41 @@ namespace WhereDarknessDwells.Game
                 view.Q<Label>("title").text = hero.Title;
                 view.Q<Label>("health").text = $"{hero.MaxHealth} / {hero.MaxHealth}";
                 foreach (string hidden in new[] { "block", "guard", "incoming", "activate", "state" }) view.Q(hidden).AddToClassList("hidden");
-                // The hero's own starting cards, so the choice says what each one does.
-                var cards = new Label(string.Join("\n", _expedition.StartingDeck.Distinct().Select(_library.Card)
-                    .Where(c => c.Owners.Count == 1 && c.IsOwnedBy(id)).Select(c => $"{c.Name}: {c.Text}")));
-                cards.AddToClassList("party-hero-cards");
-                view.Add(cards);
+                // Twelve cards need to stay small, so health shows in the panel below instead of a bar.
+                view.Q(className: "bar").AddToClassList("hidden");
+                view.Insert(0, Portrait(hero));
                 view.RegisterCallback<ClickEvent>(_ => ToggleHero(id));
+                // The panel under the roster shows the cards of the hero under the mouse, or else the last one picked.
+                view.RegisterCallback<PointerEnterEvent>(_ => ShowPartyDetail(id));
+                view.RegisterCallback<PointerLeaveEvent>(_ => ShowPartyDetail(_chosen.LastOrDefault()));
                 _partyHeroes.Add(view);
             }
+            ShowPartyDetail(_chosen.LastOrDefault());
             string why = RunState.WhyCantChoose(_expedition, _chosen);
             _enterKeep.SetEnabled(why == null);
             _partyHint.text = why == null ? $"{string.Join(", ", _chosen.Select(h => _library.Hero(h).Name))} go in."
                 : $"{why} Chosen: {_chosen.Count} of {RunState.PartySize}.";
+        }
+
+        /// <summary>
+        /// A hero's own starting cards, and the dual cards they would share with the heroes already chosen, so the
+        /// choice says what each one does. With no hero, a prompt to look.
+        /// </summary>
+        void ShowPartyDetail(string id)
+        {
+            if (id == null)
+            {
+                _partyDetailName.text = "";
+                _partyDetailCards.text = "Point at a hero to see the cards they bring.";
+                return;
+            }
+            HeroDef hero = _library.Hero(id);
+            _partyDetailName.text = $"{hero.Name}, {hero.Title}. {hero.MaxHealth} health.";
+            List<CardDef> starters = _expedition.StartingDeck.Distinct().Select(_library.Card).Where(c => c.IsOwnedBy(id)).ToList();
+            IEnumerable<string> own = starters.Where(c => c.Owners.Count == 1).Select(c => $"{c.Name}: {c.Text}");
+            IEnumerable<string> shared = starters.Where(c => c.Owners.Count == 2 && c.Owners.Any(o => o != id && _chosen.Contains(o)))
+                .Select(c => $"With {_library.Hero(c.Owners.First(o => o != id)).Name}, {c.Name}: {c.Text}");
+            _partyDetailCards.text = string.Join("\n", own.Concat(shared));
         }
 
         void ToggleHero(string id)
@@ -443,8 +474,31 @@ namespace WhereDarknessDwells.Game
             }
         }
 
+        /// <summary>The hero's model at full length, or their initial when the model isn't on this machine.</summary>
+        VisualElement Portrait(HeroDef hero)
+        {
+            if (_portraits == null) _portraits = new HeroPortraits(content);
+            var frame = new VisualElement { pickingMode = PickingMode.Ignore };
+            frame.AddToClassList("party-portrait");
+            Texture texture = _portraits.For(hero.Id);
+            if (texture is RenderTexture live) frame.style.backgroundImage = Background.FromRenderTexture(live);
+            else
+            {
+                var initial = new Label(hero.Name.Substring(0, 1)) { pickingMode = PickingMode.Ignore };
+                initial.AddToClassList("party-portrait-initial");
+                frame.Add(initial);
+            }
+            return frame;
+        }
+
         void Show(VisualElement view)
         {
+            // The portraits' cameras draw every frame, so they only live while the party screen is up.
+            if (view != _partyView)
+            {
+                _portraits?.Dispose();
+                _portraits = null;
+            }
             _root.style.display = DisplayStyle.Flex;
             foreach (VisualElement v in new[] { _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView })
                 v.EnableInClassList("hidden", v != view);
