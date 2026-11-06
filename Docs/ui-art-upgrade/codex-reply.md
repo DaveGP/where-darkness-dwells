@@ -1,5 +1,8 @@
-Created [style-guide.md](/Users/davidpearson/where-darkness-dwells/Docs/ui-art-upgrade/style-guide.md) covering the art direction, checked palette, typography, components, icons, asset schedule and USS constraints.
+Updated the guide in place, preserving The Siege Ledger direction, materials, typography and existing tokens.
 
-Added [four samples](/Users/davidpearson/where-darkness-dwells/Docs/ui-art-upgrade/samples/README.md): three generated PNG concepts and one exact-size card SVG, with prompts and documented limitations.
+- Added twelve-hero identities, calculated contrasts and all 66 dual-pair checks.
+- Updated party roster, live portraits and signature-mark fallbacks.
+- Covered room pictures, volume sliders, moving fighters, asset inventory and acceptance checks.
+- Corrected outdated claims in `samples/README.md`.
 
-Unity rendering and final font/card readability remain unverified. Changed only `Docs/ui-art-upgrade/`; no game changes or commits.
+No new sample or Unity validation was performed. Only the two documentation files changed; no commits made.
