@@ -341,6 +341,7 @@ namespace WhereDarknessDwells.Game
             SetHint("", false);
             Redraw();
             ShowFloaters(result.Events, stacksBefore);
+            ShowOnStage(result.Events);
             return true;
         }
 
@@ -746,6 +747,69 @@ namespace WhereDarknessDwells.Game
                 view.AddToClassList("is-acting");
                 view.schedule.Execute(() => view.RemoveFromClassList("is-acting")).StartingIn(Scaled(380));
             }).StartingIn(Scaled(beat * FloaterGapMs));
+        }
+
+        // ---------- the stage ----------
+
+        /// <summary>How long after a swing starts its blow lands, and the target flinches.</summary>
+        const long HitDelayMs = 300;
+
+        /// <summary>
+        /// Shows the events on the 3D stage, on the same beats as the floating numbers. Whoever plays a card or acts
+        /// swings if it hits someone, and makes a gesture if it doesn't. Whoever is hit flinches, or staggers under a
+        /// heavy blow. Block, a blow that Block stopped, and guarding an ally raise a guard. The fallen fall and stay down.
+        /// </summary>
+        void ShowOnStage(IReadOnlyList<CombatEvent> events)
+        {
+            if (_stage == null) return;
+            int beat = 0;
+            string actor = null;
+            bool swung = false;
+            for (int i = 0; i < events.Count; i++)
+            {
+                CombatEvent e = events[i];
+                switch (e.Kind)
+                {
+                    case CombatEventKind.CardPlayed:
+                    case CombatEventKind.EnemyActed:
+                        if (e.Kind == CombatEventKind.EnemyActed) beat++;
+                        actor = e.SourceId;
+                        swung = false;
+                        // The swing waits for the first blow; an action that hits no one is a gesture instead.
+                        bool hits = events.Skip(i + 1)
+                            .TakeWhile(n => n.Kind != CombatEventKind.CardPlayed && n.Kind != CombatEventKind.EnemyActed)
+                            .Any(n => n.Kind == CombatEventKind.Damaged && n.SourceId == actor && n.TargetId != actor);
+                        if (!hits) Stage(actor, CombatStage.FighterAction.Cast, beat, 0);
+                        break;
+                    case CombatEventKind.Damaged:
+                        if (e.SourceId != null && e.SourceId == actor && e.TargetId != actor && !swung)
+                        {
+                            Stage(actor, CombatStage.FighterAction.Attack, beat, 0);
+                            swung = true;
+                        }
+                        // Paying health is no blow.
+                        if (e.TargetId == e.SourceId) break;
+                        Stage(e.TargetId, e.Amount == 0 ? CombatStage.FighterAction.Guard : e.Amount >= 10 ? CombatStage.FighterAction.Stagger : CombatStage.FighterAction.Hit, beat, HitDelayMs);
+                        break;
+                    case CombatEventKind.BlockGained:
+                        Stage(e.TargetId, CombatStage.FighterAction.Guard, beat, 150);
+                        break;
+                    case CombatEventKind.Guarded:
+                        Stage(e.SourceId, CombatStage.FighterAction.Guard, beat, 150);
+                        break;
+                    case CombatEventKind.HeroDowned:
+                    case CombatEventKind.EnemyDefeated:
+                        Stage(e.SourceId, CombatStage.FighterAction.Death, beat, HitDelayMs + 150);
+                        break;
+                }
+            }
+        }
+
+        void Stage(string fighterId, CombatStage.FighterAction action, int beat, long offsetMs)
+        {
+            if (fighterId == null) return;
+            _floaters.schedule.Execute(() => _stage?.Act(fighterId, action, 1f / GameSettings.AnimationScale))
+                .StartingIn(Scaled(beat * FloaterGapMs + offsetMs));
         }
 
         /// <summary>A delay in milliseconds at the player's animation speed.</summary>
