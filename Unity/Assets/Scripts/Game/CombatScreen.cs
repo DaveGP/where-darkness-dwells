@@ -502,6 +502,14 @@ namespace WhereDarknessDwells.Game
             view.AddToClassList(Views.OwnerClass(hero.Hero.Colour));
             view.Q<Label>("name").text = hero.Name;
             view.Q<Label>("title").text = hero.Hero.Title;
+            // The painted portrait carries the hero's mark, so it takes the medal's place. Without one, the medal stays.
+            VisualElement portrait = Views.Portrait(content, hero.Hero, "combatant-portrait");
+            if (!portrait.ClassListContains("is-missing"))
+            {
+                VisualElement heading = view.Q(className: "fighter-heading");
+                heading.Q(className: "owner-medal").AddToClassList("hidden");
+                heading.Insert(0, portrait);
+            }
             DrawHealth(view, hero);
             DrawBlockAndStatuses(view, hero);
 

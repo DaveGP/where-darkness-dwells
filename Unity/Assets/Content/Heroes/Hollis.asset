@@ -18,3 +18,4 @@ MonoBehaviour:
   colour: Bronze
   maxHealth: 32
   model: {fileID: 110800, guid: 97c46f85ed671244b83b2409f56039d1, type: 3}
+  portrait: {fileID: 2800000, guid: 9cb3e079cc2ea45a2857245051fc1822, type: 3}

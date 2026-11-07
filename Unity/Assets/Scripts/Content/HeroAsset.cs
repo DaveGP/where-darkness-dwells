@@ -15,10 +15,14 @@ namespace WhereDarknessDwells.Content
         [SerializeField, Min(1)] int maxHealth = 30;
         [Tooltip("The character shown for this hero. Optional: the Synty prefabs aren't in the repository, so a fresh clone has none and shows a placeholder.")]
         [SerializeField] GameObject model;
+        [Tooltip("The hero's painted bust, shown on the party screen, the combat panels, the journal and the run's end. Original art in the repository, so every clone has it.")]
+        [SerializeField] Texture2D portrait;
 
         public string Id => id;
         /// <summary>The hero's character prefab, or null when it has none or the art isn't on this machine.</summary>
         public GameObject Model => model;
+        /// <summary>The hero's painted bust, or null when it has none.</summary>
+        public Texture2D Portrait => portrait;
 
         public HeroDef ToDef() => new HeroDef(id, displayName, title, colour, maxHealth);
     }

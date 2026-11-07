@@ -18,3 +18,4 @@ MonoBehaviour:
   colour: Iron
   maxHealth: 40
   model: {fileID: 3186528172670679936, guid: 48e71803e3dc7e248a1a532cdef1be17, type: 3}
+  portrait: {fileID: 2800000, guid: 1241a62b25b3141179eb9e439f2527fd, type: 3}

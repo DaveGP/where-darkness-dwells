@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.UIElements;
+using WhereDarknessDwells.Content;
 using WhereDarknessDwells.Core;
 
 namespace WhereDarknessDwells.Game
@@ -38,6 +40,27 @@ namespace WhereDarknessDwells.Game
             var mark = Decoration(medal, "hero-mark");
             mark.AddToClassList(OwnerClass(colour));
             return medal;
+        }
+
+        /// <summary>
+        /// The hero's painted bust in a frame of their colour, or their signature mark when the hero has no portrait.
+        /// Decorative: the hero's name is always shown beside it.
+        /// </summary>
+        public static VisualElement Portrait(ContentDatabase content, HeroDef hero, string extraClass)
+        {
+            var frame = new VisualElement { pickingMode = PickingMode.Ignore };
+            frame.AddToClassList("hero-portrait");
+            frame.AddToClassList(extraClass);
+            frame.AddToClassList(OwnerClass(hero.Colour));
+            Texture2D painting = content.Heroes.FirstOrDefault(h => h.Id == hero.Id)?.Portrait;
+            if (painting != null) frame.style.backgroundImage = Background.FromTexture2D(painting);
+            else
+            {
+                frame.AddToClassList("is-missing");
+                Decoration(frame, "hero-mark").AddToClassList(OwnerClass(hero.Colour));
+            }
+            Decoration(frame, "portrait-frame");
+            return frame;
         }
 
         public static void SetEmblem(VisualElement view, string stem)

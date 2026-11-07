@@ -11,10 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a8c15279dc64333819190cc766b1ceb, type: 3}
   m_Name: Tam
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: tam
   displayName: Tam
   title: the Torchbearer
   colour: Tallow
   maxHealth: 34
   model: {fileID: 194510, guid: 66ec70d7de4f4c644a7ace1f5f0a2a9f, type: 3}
+  portrait: {fileID: 2800000, guid: beb7a60cbe8fd454baaded22ea9c8f40, type: 3}
