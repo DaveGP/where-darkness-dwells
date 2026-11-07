@@ -24,11 +24,11 @@ namespace WhereDarknessDwells.Game
         const long PulseMs = 800;
         const float MaxRoomGap = 190;
 
-        static readonly Color TravelledLine = new Color32(201, 162, 74, 255);
-        static readonly Color OpenLine = new Color32(232, 222, 200, 255);
-        static readonly Color AheadLine = new Color32(110, 96, 106, 255);
-        static readonly Color ClosedLine = new Color32(48, 40, 50, 255);
-        static readonly Color SecretLine = new Color32(90, 160, 170, 255);
+        static readonly Color TravelledLine = new Color32(245, 221, 163, 255);
+        static readonly Color OpenLine = new Color32(214, 175, 99, 255);
+        static readonly Color AheadLine = new Color32(70, 83, 98, 255);
+        static readonly Color ClosedLine = new Color32(70, 83, 98, 255);
+        static readonly Color SecretLine = new Color32(112, 206, 208, 255);
         /// <summary>Room for the secret room under the others, when it is shown.</summary>
         const float SecretRow = 110;
 
@@ -127,6 +127,8 @@ namespace WhereDarknessDwells.Game
 
             var start = new Label("Entrance") { pickingMode = PickingMode.Ignore };
             start.AddToClassList("map-entrance");
+            Views.Icon(start, "room-entrance", "chart-room-icon");
+            Views.Icon(start, "current", "current-mark");
             start.EnableInClassList("is-start", atStart);
             start.style.left = entrance.x - EntranceWidth / 2;
             start.style.top = entrance.y - EntranceHeight / 2;
@@ -156,6 +158,10 @@ namespace WhereDarknessDwells.Game
                 MapRoom r = room;
                 var button = new Button(() => onClick(r)) { text = Label(run, r) };
                 button.AddToClassList("room");
+                Views.Icon(button, "room-" + r.Kind.ToString().ToLowerInvariant(), "chart-room-icon");
+                Views.Icon(button, "current", "current-mark");
+                Views.Icon(button, "check", "route-mark");
+                Views.Decoration(button, "selection-frame");
                 button.AddToClassList($"room-{r.Kind.ToString().ToLowerInvariant()}");
                 button.EnableInClassList("is-reachable", reachable.Contains(r));
                 button.EnableInClassList("is-visited", visited.Contains(r.Id));

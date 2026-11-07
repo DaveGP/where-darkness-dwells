@@ -72,11 +72,14 @@ namespace WhereDarknessDwells.Game
                     hall.EnableInClassList("is-unexplored", unexplored);
                     Rect r = Square(passage);
                     Place(hall, new Rect(r.x, r.y + tile * 0.22f, r.width, r.height * 0.56f));
+                    Pave(hall, tile * 2.5f / 6f);
+                    Views.Decoration(hall, "room-wall");
                     canvas.Add(hall);
                 }
                 var body = Tile($"tile-{kind}", isHere, isNew);
                 body.EnableInClassList("is-unexplored", unexplored);
                 Place(body, new Rect(origin.x + room.X * tile, origin.y + room.Y * tile, room.Width * tile, room.Height * tile));
+                Dress(body, kind, room.RoomId, room.Width * tile, room.Height * tile);
                 var name = new Label(mapRoom == null ? "Entrance" : MapView.Label(run, mapRoom)) { pickingMode = PickingMode.Ignore };
                 name.AddToClassList("tile-name");
                 // A tall room one square wide reads its name sideways, so the name has the room's height to fit in.
@@ -88,14 +91,19 @@ namespace WhereDarknessDwells.Game
                     Place(name, new Rect((tile - across) / 2, (room.Height * tile - tile) / 2, across, tile));
                     name.style.rotate = new Rotate(-90);
                 }
+                Views.Decoration(body, "room-wall");
+                Views.Icon(body, "room-" + kind, "tile-room-icon");
                 body.Add(name);
                 if (mapRoom != null && secret != null && (map.SecretFrom.Contains(mapRoom.Id) || secret.Next.Contains(mapRoom.Id)))
                 {
                     var stairs = new Label(map.SecretFrom.Contains(mapRoom.Id) ? "Stairs down" : "Stairs up") { pickingMode = PickingMode.Ignore };
                     stairs.AddToClassList("tile-stairs");
                     stairs.style.fontSize = Mathf.Clamp(tile * 0.2f, 9, 13);
+                    Views.LabelIcon(stairs, "stairs");
                     body.Add(stairs);
                 }
+                body.Q(className: "current-mark").BringToFront();
+                body.Q(className: "selection-frame").BringToFront();
                 canvas.Add(body);
             }
 
@@ -108,6 +116,7 @@ namespace WhereDarknessDwells.Game
                 bool canOpen = door.FromId == here && reachable.Contains(door.ToId);
                 var mark = new VisualElement { pickingMode = PickingMode.Ignore };
                 mark.AddToClassList("door");
+                Views.Icon(mark, "check", "route-mark");
                 mark.EnableInClassList("is-travelled", travelled);
                 mark.EnableInClassList("is-open", canOpen);
                 Rect from = Square(door.From);
@@ -118,6 +127,7 @@ namespace WhereDarknessDwells.Game
                 MapRoom behind = map.Room(door.ToId);
                 var tag = new Button(() => onClick(behind)) { text = MapView.Label(run, behind) };
                 tag.AddToClassList("door-tag");
+                Views.LabelIcon(tag, "room-" + behind.Kind.ToString().ToLowerInvariant());
                 tag.AddToClassList($"tile-{behind.Kind.ToString().ToLowerInvariant()}");
                 tag.style.fontSize = Mathf.Clamp(tile * 0.2f, 9, 15);
                 Rect to = Square(door.To);
@@ -144,8 +154,11 @@ namespace WhereDarknessDwells.Game
             var cellar = Tile("tile-secret", here == secret.Id, false);
             cellar.EnableInClassList("is-dark", !visited.Contains(secret.Id));
             Place(cellar, new Rect(area.x, area.y + 26, 180, area.height - 30));
+            Dress(cellar, "secret", secret.Id, 180, area.height - 30);
             var name = new Label(MapView.Label(run, secret)) { pickingMode = PickingMode.Ignore };
             name.AddToClassList("tile-name");
+            Views.Decoration(cellar, "room-wall");
+            Views.Icon(cellar, "room-secret", "tile-room-icon");
             cellar.Add(name);
             canvas.Add(cellar);
 
@@ -159,6 +172,7 @@ namespace WhereDarknessDwells.Game
                 var button = new Button(() => onClick(r)) { text = r == secret ? $"Stairs down: {MapView.Label(run, r)}" : $"Stairs up: {MapView.Label(run, r)}" };
                 button.AddToClassList("door-tag");
                 button.AddToClassList("stairs-tag");
+                Views.LabelIcon(button, "stairs");
                 Place(button, new Rect(x, area.y + 34, 220, 44));
                 button.RegisterCallback<PointerEnterEvent>(_ => onHover(r));
                 button.RegisterCallback<PointerLeaveEvent>(_ => onHover(null));
@@ -167,10 +181,59 @@ namespace WhereDarknessDwells.Game
             }
         }
 
+        /// <summary>
+        /// The rendered art (Where Darkness Dwells > Render Floor Tiles) by name before the dash: "combat" for combat-1 and
+        /// combat-2, and "floor" for the stone floor. It is licensed art, so a fresh clone has none and the tiles stay plain.
+        /// </summary>
+        static Dictionary<string, Texture2D[]> _art;
+
+        static Texture2D[] Art(string kind)
+        {
+            if (_art == null)
+                _art = Resources.LoadAll<Texture2D>("FloorTiles").GroupBy(t => t.name.Split('-')[0])
+                    .ToDictionary(g => g.Key, g => g.OrderBy(t => t.name).ToArray());
+            return _art.TryGetValue(kind, out Texture2D[] found) ? found : new Texture2D[0];
+        }
+
+        /// <summary>
+        /// Lays the stone floor over a tile, one slab to <paramref name="slab"/> pixels, so floors match in scale whatever
+        /// the room's shape.
+        /// </summary>
+        static void Pave(VisualElement tile, float slab)
+        {
+            Texture2D[] floor = Art("floor");
+            if (floor.Length == 0) return;
+            tile.style.backgroundImage = floor[0];
+            tile.style.backgroundRepeat = new BackgroundRepeat(Repeat.Repeat, Repeat.Repeat);
+            tile.style.backgroundSize = new BackgroundSize(slab, slab);
+            tile.AddToClassList("has-art");
+        }
+
+        /// <summary>
+        /// Paves the room and sets its kind's picture in the middle, as wide as the room's narrower side so it is never
+        /// stretched or cropped. Rooms of a kind take turns between its pictures by id, so neighbours differ.
+        /// </summary>
+        static void Dress(VisualElement tile, string kind, int roomId, float width, float height)
+        {
+            Texture2D[] variants = Art(kind);
+            // The pictures show about 6 m of floor, and a slab is 2.5 m.
+            float side = Mathf.Min(width, height);
+            Pave(tile, side * 2.5f / 6f);
+            if (variants.Length == 0) return;
+            var picture = new VisualElement { pickingMode = PickingMode.Ignore };
+            picture.AddToClassList("tile-art");
+            picture.style.backgroundImage = variants[Math.Abs(roomId) % variants.Length];
+            Place(picture, new Rect((width - side) / 2 - 2, (height - side) / 2 - 2, side, side));
+            tile.Insert(0, picture);
+        }
+
         static VisualElement Tile(string kindClass, bool isHere, bool isNew)
         {
             var tile = new VisualElement { pickingMode = PickingMode.Ignore };
             tile.AddToClassList("tile");
+            Views.Icon(tile, "current", "current-mark");
+            Views.Icon(tile, "empty-folio", "unexplored-mark");
+            Views.Decoration(tile, "selection-frame");
             tile.AddToClassList(kindClass);
             tile.EnableInClassList("is-current", isHere);
             if (isNew)

@@ -13,6 +13,58 @@ namespace WhereDarknessDwells.Game
 
         public static string OwnerClass(string colour) => $"owner-{(colour ?? "").ToLowerInvariant()}";
 
+        /// <summary>Decorative, non-picking art; the surrounding live label remains authoritative.</summary>
+        public static VisualElement Icon(VisualElement parent, string stem, string extraClass = null)
+        {
+            var icon = new VisualElement { pickingMode = PickingMode.Ignore };
+            icon.AddToClassList("ui-icon");
+            icon.AddToClassList("icon-" + stem);
+            if (extraClass != null) icon.AddToClassList(extraClass);
+            parent.Add(icon);
+            return icon;
+        }
+
+        public static VisualElement Decoration(VisualElement parent, string className)
+        {
+            var element = new VisualElement { pickingMode = PickingMode.Ignore };
+            element.AddToClassList(className);
+            parent.Add(element);
+            return element;
+        }
+
+        public static VisualElement OwnerMark(VisualElement parent, string colour)
+        {
+            var medal = Decoration(parent, "owner-medal");
+            var mark = Decoration(medal, "hero-mark");
+            mark.AddToClassList(OwnerClass(colour));
+            return medal;
+        }
+
+        public static void SetEmblem(VisualElement view, string stem)
+        {
+            var emblem = view.Q(className: "narrative-emblem");
+            if (emblem == null) return;
+            foreach (string previous in new[] { "seal-whole", "seal-broken", "defeat", "clue", "keepsake", "room-secret" })
+                emblem.RemoveFromClassList("icon-" + previous);
+            emblem.AddToClassList("icon-" + stem);
+        }
+
+        public static void LabelIcon(VisualElement label, string stem)
+        {
+            label.AddToClassList("with-icon");
+            Icon(label, stem, "label-icon");
+            // These map captions are static. Lay out their text and icon as one centred group.
+            // Live labels elsewhere retain their text binding on the original element.
+            if ((label.ClassListContains("door-tag") || label.ClassListContains("tile-stairs"))
+                && label is TextElement caption)
+            {
+                var text = new Label(caption.text) { pickingMode = PickingMode.Ignore };
+                text.AddToClassList("tag-caption");
+                caption.text = "";
+                caption.Add(text);
+            }
+        }
+
         /// <summary>A card drawn from Card.uxml: cost, name, target, text, and its owners' colours and names.</summary>
         public static VisualElement Card(VisualTreeAsset layout, CardDef def, ContentLibrary library)
         {
@@ -25,9 +77,11 @@ namespace WhereDarknessDwells.Game
             List<HeroDef> owners = def.Owners.Select(library.Hero).ToList();
             view.Q<Label>("owner-names").text = string.Join(" or ", owners.Select(o => o.Name));
             VisualElement swatches = view.Q("owners");
+            var marks = view.Q(className: "owner-marks");
             foreach (HeroDef owner in owners)
             {
-                var swatch = new VisualElement();
+                var swatch = new VisualElement { pickingMode = PickingMode.Ignore };
+                OwnerMark(marks, owner.Colour);
                 swatch.AddToClassList("swatch");
                 swatch.AddToClassList(OwnerClass(owner.Colour));
                 swatches.Add(swatch);

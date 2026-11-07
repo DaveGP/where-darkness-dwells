@@ -81,6 +81,7 @@ namespace WhereDarknessDwells.Game
             _hand = root.Q("hand");
             _endPanel = root.Q("end-panel");
             _floaters = root.Q("floaters");
+            GameAudio.ClickSounds(root);
             root.Q(className: "battlefield").RegisterCallback<GeometryChangedEvent>(OnPanelLaidOut);
             _log = root.Q<ScrollView>("log");
             _endActivation = root.Q<Button>("end-activation");
@@ -340,12 +341,16 @@ namespace WhereDarknessDwells.Game
             }
             SetHint("", false);
             Redraw();
+            // Before the floaters, which update the stacks they are given.
+            PlaySounds(result.Events, stacksBefore);
             ShowFloaters(result.Events, stacksBefore);
+            ShowOnStage(result.Events);
             return true;
         }
 
         void Refuse(string reason)
         {
+            GameAudio.Play("refused");
             Debug.Log($"[Combat] Refused: {reason}");
             SetHint(reason, true);
         }
@@ -467,6 +472,7 @@ namespace WhereDarknessDwells.Game
             if (_combat.IsOver)
             {
                 bool won = _combat.Phase == CombatPhase.Won;
+                Views.SetEmblem(_endPanel, won ? "seal-whole" : "defeat");
                 _endTitle.text = won ? "Victory" : "Defeat";
                 _endText.text = won
                     ? $"The room falls silent after {_combat.Round} rounds."
@@ -523,6 +529,7 @@ namespace WhereDarknessDwells.Game
 
             Label state = view.Q<Label>("state");
             state.text = hero.IsDown ? "Down" : active ? "Active" : "";
+            if (hero.IsDown) Views.LabelIcon(state, "defeat");
             state.EnableInClassList("hidden", !hero.IsDown && !active);
             view.EnableInClassList("is-active", active);
             view.EnableInClassList("is-down", hero.IsDown);
@@ -552,6 +559,26 @@ namespace WhereDarknessDwells.Game
                 // A vague intent shows only its line: no numbers, no target and no outcome.
                 view.Q<Label>("intent").text = _combat.IntentText(enemy, enemy.Intent) + (enemy.IntentCancelled ? " (cancelled)" : "");
                 view.Q<Label>("intent-target").text = vague || enemy.IntentCancelled ? "" : IntentTargetText(enemy);
+                var icons = view.Q(className: "intent-icons");
+                if (vague) Views.Icon(icons, "unknown");
+                else if (enemy.IntentCancelled) Views.Icon(icons, "cancelled");
+                else
+                {
+                    Views.Icon(icons, IntentIcon(enemy.Intent));
+                    if (enemy.Intent.Kind == IntentKind.ApplyStatus)
+                        Views.Icon(icons, enemy.Intent.Status.ToString().ToLowerInvariant());
+                    if (enemy.Intent.Target != IntentTarget.AllHeroes && enemy.Intent.Target != IntentTarget.Self
+                        && enemy.IntentTargetId != null)
+                    {
+                        var target = _combat.Find(enemy.IntentTargetId);
+                        if (target?.Hero != null)
+                        {
+                            var targetLabel = view.Q("intent-target");
+                            targetLabel.AddToClassList("with-owner-mark");
+                            Views.OwnerMark(targetLabel, target.Hero.Colour);
+                        }
+                    }
+                }
             }
             Label outcome = view.Q<Label>("intent-outcome");
             outcome.text = showIntent && !vague ? OutcomeText(enemy) : "";
@@ -588,6 +615,19 @@ namespace WhereDarknessDwells.Game
         }
 
         bool IsVague(string combatantId) => combatantId != null && _combat.IsVague(_combat.Find(combatantId));
+
+        // Every current Core intent kind is mapped explicitly. Unknown future kinds get no false attack cue.
+        static string IntentIcon(IntentDef intent)
+        {
+            switch (intent.Kind)
+            {
+                case IntentKind.Attack: return intent.Target == IntentTarget.AllHeroes ? "attack-all" : "attack";
+                case IntentKind.Block: return "block";
+                case IntentKind.Heal: return "heal";
+                case IntentKind.ApplyStatus: return "apply-status";
+                default: return "unknown";
+            }
+        }
 
         /// <summary>What this enemy's intent would really do now, after Block, Weak, Exposed and Guard.</summary>
         string OutcomeText(Combatant enemy)
@@ -748,6 +788,126 @@ namespace WhereDarknessDwells.Game
             }).StartingIn(Scaled(beat * FloaterGapMs));
         }
 
+        // ---------- the stage ----------
+
+        /// <summary>How long after a swing starts its blow lands, and the target flinches.</summary>
+        const long HitDelayMs = 300;
+
+        /// <summary>
+        /// Shows the events on the 3D stage, on the same beats as the floating numbers. Whoever plays a card or acts
+        /// swings if it hits someone, and makes a gesture if it doesn't. Whoever is hit flinches, or staggers under a
+        /// heavy blow. Block, a blow that Block stopped, and guarding an ally raise a guard. The fallen fall and stay down.
+        /// </summary>
+        void ShowOnStage(IReadOnlyList<CombatEvent> events)
+        {
+            if (_stage == null) return;
+            int beat = 0;
+            string actor = null;
+            bool swung = false;
+            for (int i = 0; i < events.Count; i++)
+            {
+                CombatEvent e = events[i];
+                switch (e.Kind)
+                {
+                    case CombatEventKind.CardPlayed:
+                    case CombatEventKind.EnemyActed:
+                        if (e.Kind == CombatEventKind.EnemyActed) beat++;
+                        actor = e.SourceId;
+                        swung = false;
+                        // The swing waits for the first blow; an action that hits no one is a gesture instead.
+                        bool hits = events.Skip(i + 1)
+                            .TakeWhile(n => n.Kind != CombatEventKind.CardPlayed && n.Kind != CombatEventKind.EnemyActed)
+                            .Any(n => n.Kind == CombatEventKind.Damaged && n.SourceId == actor && n.TargetId != actor);
+                        if (!hits) Stage(actor, CombatStage.FighterAction.Cast, beat, 0);
+                        break;
+                    case CombatEventKind.Damaged:
+                        if (e.SourceId != null && e.SourceId == actor && e.TargetId != actor && !swung)
+                        {
+                            Stage(actor, CombatStage.FighterAction.Attack, beat, 0);
+                            swung = true;
+                        }
+                        // Paying health is no blow.
+                        if (e.TargetId == e.SourceId) break;
+                        Stage(e.TargetId, e.Amount == 0 ? CombatStage.FighterAction.Guard : e.Amount >= 10 ? CombatStage.FighterAction.Stagger : CombatStage.FighterAction.Hit, beat, HitDelayMs);
+                        break;
+                    case CombatEventKind.BlockGained:
+                        Stage(e.TargetId, CombatStage.FighterAction.Guard, beat, 150);
+                        break;
+                    case CombatEventKind.Guarded:
+                        Stage(e.SourceId, CombatStage.FighterAction.Guard, beat, 150);
+                        break;
+                    case CombatEventKind.HeroDowned:
+                    case CombatEventKind.EnemyDefeated:
+                        Stage(e.SourceId, CombatStage.FighterAction.Death, beat, HitDelayMs + 150);
+                        break;
+                }
+            }
+        }
+
+        void Stage(string fighterId, CombatStage.FighterAction action, int beat, long offsetMs)
+        {
+            if (fighterId == null) return;
+            _floaters.schedule.Execute(() => _stage?.Act(fighterId, action, 1f / GameSettings.AnimationScale))
+                .StartingIn(Scaled(beat * FloaterGapMs + offsetMs));
+        }
+
+        // ---------- sound ----------
+
+        /// <summary>How long after a swing starts its blow lands.</summary>
+        const long BlowDelayMs = 300;
+
+        /// <summary>
+        /// Plays the sounds of a command's events on the same beats as the floating numbers: a swing when someone strikes,
+        /// a blow (heavier from 10), a clang when Block stops it all, a fall when a fighter goes down, and quieter sounds
+        /// for Block, healing, statuses, drawing and discarding. A sound plays once per beat, however many targets share it.
+        /// </summary>
+        void PlaySounds(IReadOnlyList<CombatEvent> events, Dictionary<string, int> stacksBefore)
+        {
+            int beat = 0;
+            string actor = null;
+            var played = new HashSet<string>();
+            var stacks = new Dictionary<string, int>(stacksBefore);
+            void Sound(string name, long offsetMs = 0)
+            {
+                if (played.Add($"{name}/{beat}")) GameAudio.Play(name, Scaled(beat * FloaterGapMs + offsetMs) / 1000f);
+            }
+            foreach (CombatEvent e in events)
+            {
+                switch (e.Kind)
+                {
+                    case CombatEventKind.HeroActivated: Sound("ready"); break;
+                    case CombatEventKind.CardDiscarded: Sound("discard"); break;
+                    case CombatEventKind.CardPlayed:
+                        actor = e.SourceId;
+                        break;
+                    case CombatEventKind.EnemyActed:
+                        beat++;
+                        actor = e.SourceId;
+                        break;
+                    case CombatEventKind.Damaged:
+                        // Paying health and Bleed have no swing; a blow from the one acting does.
+                        if (e.SourceId != null && e.SourceId == actor && e.TargetId != actor) Sound("swing");
+                        if (e.TargetId == e.SourceId) break;
+                        Sound(e.Amount == 0 ? "clang" : e.Amount >= 10 ? "heavy" : "hit", BlowDelayMs);
+                        break;
+                    case CombatEventKind.BlockGained: Sound("guard", 150); break;
+                    case CombatEventKind.Healed: Sound("heal", 150); break;
+                    case CombatEventKind.StatusChanged:
+                        string key = $"{e.TargetId}/{e.Status}";
+                        stacks.TryGetValue(key, out int before);
+                        stacks[key] = e.Amount;
+                        if (e.Amount > before) Sound("curse", BlowDelayMs);
+                        break;
+                    // Drawn mid-turn by a card; the hand refilling at a new round is quiet.
+                    case CombatEventKind.CardsDrawn when actor != null && _combat.Phase == CombatPhase.Activation: Sound("cards", 150); break;
+                    case CombatEventKind.HeroDowned:
+                    case CombatEventKind.EnemyDefeated: Sound("fall", BlowDelayMs + 150); break;
+                    case CombatEventKind.CombatWon: Sound("won", BlowDelayMs + 600); break;
+                    case CombatEventKind.CombatLost: Sound("lost", BlowDelayMs + 600); break;
+                }
+            }
+        }
+
         /// <summary>A delay in milliseconds at the player's animation speed.</summary>
         static long Scaled(long ms) => (long)(ms * GameSettings.AnimationScale);
 
@@ -768,6 +928,7 @@ namespace WhereDarknessDwells.Game
             {
                 var chip = new Label($"{status.Key} {status.Value}");
                 chip.AddToClassList("status");
+                Views.LabelIcon(chip, status.Key.ToString().ToLowerInvariant());
                 chip.AddToClassList($"status-{status.Key.ToString().ToLowerInvariant()}");
                 string help = StatusHelp[status.Key];
                 chip.RegisterCallback<PointerEnterEvent>(_ => SetHint(help, false));

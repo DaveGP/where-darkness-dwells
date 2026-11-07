@@ -8,6 +8,11 @@
         </ui:VisualElement>
         <ui:Label name="target" text="Enemy" class="card-target" />
         <ui:Label name="text" text="Deal 6 damage." class="card-text" />
+        <ui:VisualElement class="owner-marks" picking-mode="Ignore" />
         <ui:Label name="owner-names" text="Wren" class="card-owner-names" />
+        <ui:VisualElement class="ui-icon icon-boost card-state boost-mark" picking-mode="Ignore" />
+        <ui:VisualElement class="ui-icon icon-discount card-state discount-mark" picking-mode="Ignore" />
+        <ui:VisualElement class="ui-icon icon-lock card-state lock-mark" picking-mode="Ignore" />
+        <ui:VisualElement class="selection-frame" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

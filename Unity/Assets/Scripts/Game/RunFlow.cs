@@ -39,13 +39,15 @@ namespace WhereDarknessDwells.Game
         int _pendingChoice = -1;
         // Set once OnEnable found everything it needs.
         bool _ready;
+        // The heroes' live portraits, while the party screen is open.
+        HeroPortraits _portraits;
 
         VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
         VisualElement _eventChoices, _eventHeroes, _removeGrid;
         Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _mapLegend, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
-        Label _partyHint, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
+        Label _partyHint, _partyDetailName, _partyDetailCards, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
         Button _rest, _newExpedition, _useSecret, _journal, _enterKeep, _foundContinue, _mapStyle, _wholePlan;
         // Debug: draw the whole floor plan as if explored. Only for this session; it changes nothing in the run.
         bool _showWholePlan;
@@ -79,6 +81,8 @@ namespace WhereDarknessDwells.Game
             _removeGrid = _root.Q("remove-grid");
             _keepsakeCount = _root.Q<Label>("keepsake-count");
             _partyHint = _root.Q<Label>("party-hint");
+            _partyDetailName = _root.Q<Label>("party-detail-name");
+            _partyDetailCards = _root.Q<Label>("party-detail-cards");
             _eventTitle = _root.Q<Label>("event-title");
             _eventScene = _root.Q<Label>("event-scene");
             _eventHeroHelp = _root.Q<Label>("event-hero-help");
@@ -128,10 +132,18 @@ namespace WhereDarknessDwells.Game
                 _found = null;
                 ShowPhase();
             };
-            _journal.clicked += () => ShowJournal(true);
+            _journal.clicked += () =>
+            {
+                GameAudio.Play("journal_open");
+                ShowJournal(true);
+            };
             _mapStyle.clicked += SwitchMapStyle;
             _wholePlan.clicked += SwitchWholePlan;
-            _root.Q<Button>("journal-close").clicked += () => ShowJournal(false);
+            _root.Q<Button>("journal-close").clicked += () =>
+            {
+                GameAudio.Play("journal_close");
+                ShowJournal(false);
+            };
             _newExpedition.clicked += ShowParty;
             // The map spreads its rooms over its measured size, so draw it again whenever that changes.
             _map.RegisterCallback<GeometryChangedEvent>(e =>
@@ -156,6 +168,7 @@ namespace WhereDarknessDwells.Game
             menus.QuitToTitleChosen += QuitToTitle;
             menus.EscapeTaken = () => combatScreen.UsesEscape;
             GameSettings.MapStyleChanged += RedrawMap;
+            GameAudio.ClickSounds(_root);
             _ready = true;
         }
 
@@ -167,6 +180,8 @@ namespace WhereDarknessDwells.Game
 
         void OnDisable()
         {
+            _portraits?.Dispose();
+            _portraits = null;
             if (menus == null) return;
             menus.ContinueChosen -= ContinueRun;
             menus.NewExpeditionChosen -= ShowParty;
@@ -206,6 +221,8 @@ namespace WhereDarknessDwells.Game
         void ShowTitle(string note = null)
         {
             _run = null;
+            _portraits?.Dispose();
+            _portraits = null;
             DrawTopBar();
             menus.ShowTitle(SaveFile.Exists, note);
         }
@@ -277,18 +294,41 @@ namespace WhereDarknessDwells.Game
                 view.Q<Label>("title").text = hero.Title;
                 view.Q<Label>("health").text = $"{hero.MaxHealth} / {hero.MaxHealth}";
                 foreach (string hidden in new[] { "block", "guard", "incoming", "activate", "state" }) view.Q(hidden).AddToClassList("hidden");
-                // The hero's own starting cards, so the choice says what each one does.
-                var cards = new Label(string.Join("\n", _expedition.StartingDeck.Distinct().Select(_library.Card)
-                    .Where(c => c.Owners.Count == 1 && c.IsOwnedBy(id)).Select(c => $"{c.Name}: {c.Text}")));
-                cards.AddToClassList("party-hero-cards");
-                view.Add(cards);
+                // Twelve cards need to stay small, so health shows in the panel below instead of a bar.
+                view.Q(className: "bar").AddToClassList("hidden");
+                view.Insert(0, Portrait(hero));
                 view.RegisterCallback<ClickEvent>(_ => ToggleHero(id));
+                // The panel under the roster shows the cards of the hero under the mouse, or else the last one picked.
+                view.RegisterCallback<PointerEnterEvent>(_ => ShowPartyDetail(id));
+                view.RegisterCallback<PointerLeaveEvent>(_ => ShowPartyDetail(_chosen.LastOrDefault()));
                 _partyHeroes.Add(view);
             }
+            ShowPartyDetail(_chosen.LastOrDefault());
             string why = RunState.WhyCantChoose(_expedition, _chosen);
             _enterKeep.SetEnabled(why == null);
             _partyHint.text = why == null ? $"{string.Join(", ", _chosen.Select(h => _library.Hero(h).Name))} go in."
                 : $"{why} Chosen: {_chosen.Count} of {RunState.PartySize}.";
+        }
+
+        /// <summary>
+        /// A hero's own starting cards, and the dual cards they would share with the heroes already chosen, so the
+        /// choice says what each one does. With no hero, a prompt to look.
+        /// </summary>
+        void ShowPartyDetail(string id)
+        {
+            if (id == null)
+            {
+                _partyDetailName.text = "";
+                _partyDetailCards.text = "Point at a hero to see the cards they bring.";
+                return;
+            }
+            HeroDef hero = _library.Hero(id);
+            _partyDetailName.text = $"{hero.Name}, {hero.Title}. {hero.MaxHealth} health.";
+            List<CardDef> starters = _expedition.StartingDeck.Distinct().Select(_library.Card).Where(c => c.IsOwnedBy(id)).ToList();
+            IEnumerable<string> own = starters.Where(c => c.Owners.Count == 1).Select(c => $"{c.Name}: {c.Text}");
+            IEnumerable<string> shared = starters.Where(c => c.Owners.Count == 2 && c.Owners.Any(o => o != id && _chosen.Contains(o)))
+                .Select(c => $"With {_library.Hero(c.Owners.First(o => o != id)).Name}, {c.Name}: {c.Text}");
+            _partyDetailCards.text = string.Join("\n", own.Concat(shared));
         }
 
         void ToggleHero(string id)
@@ -360,6 +400,7 @@ namespace WhereDarknessDwells.Game
 
         void EnterRoom(MapRoom room)
         {
+            GameAudio.Play("door");
             // Saved at the door, so quitting inside the room brings the party back to the same room, not around it.
             if (_run.TrySnapshot(out RunSnapshot atDoor, room.Id).Ok) SaveFile.Write(atDoor);
             Apply(() => _run.TryEnterRoom(room.Id), $"Entered {MapView.Label(room.Kind)} on layer {room.Layer + 1}" +
@@ -378,7 +419,11 @@ namespace WhereDarknessDwells.Game
         void Search(string heroId, ClueDef clue) => Apply(() =>
         {
             RunResult result = _run.TrySearch(heroId);
-            if (result.Ok) _found = (clue.Name, clue.Journal);
+            if (result.Ok)
+            {
+                _found = (clue.Name, clue.Journal);
+                Views.SetEmblem(_foundView, "clue");
+            }
             return result;
         }, $"{heroId} searched and found the clue {clue.Id}.");
 
@@ -388,7 +433,11 @@ namespace WhereDarknessDwells.Game
             Apply(() =>
             {
                 RunResult result = _run.TryUseSecret();
-                if (result.Ok) _found = (secret.Name, $"It is done. {BossName()} will start the fight with {secret.BossHealthLossPercent}% less health.");
+                if (result.Ok)
+                {
+                    _found = (secret.Name, $"It is done. {BossName()} will start the fight with {secret.BossHealthLossPercent}% less health.");
+                    Views.SetEmblem(_foundView, "room-secret");
+                }
                 return result;
             }, $"Used the secret room: {secret.ActionLabel}.");
         }
@@ -403,7 +452,12 @@ namespace WhereDarknessDwells.Game
                 if (!result.Ok) return result;
                 _pendingChoice = -1;
                 // Shown before the map or the fight. A card choice or removal shows it on its own screen.
-                if (_run.Phase == RunPhase.ChooseRoom || _run.Phase == RunPhase.Combat) _found = (ev.Title, _run.EventResult);
+                if (_run.Phase == RunPhase.ChooseRoom || _run.Phase == RunPhase.Combat)
+                {
+                    _found = (ev.Title, _run.EventResult);
+                    Views.SetEmblem(_foundView, choice.Outcomes.Any(o => o.Kind == EventOutcomeKind.GainClue) ? "clue"
+                        : choice.Outcomes.Any(o => o.Kind == EventOutcomeKind.GainKeepsake) ? "keepsake" : "seal-whole");
+                }
                 return result;
             }, $"Event {ev.Id}: chose \"{choice.Label}\"{(heroId != null ? $" for {heroId}" : "")}.");
         }
@@ -426,6 +480,7 @@ namespace WhereDarknessDwells.Game
                 case RunPhase.ChooseRoom: ShowMap(); break;
                 case RunPhase.Combat:
                     _root.style.display = DisplayStyle.None;
+                    GameAudio.Play(_run.CurrentRoom?.Kind == RoomKind.Boss ? GameAudio.Track.Lair : GameAudio.Track.Battle);
                     combatScreen.Show(_run.Combat, _run.Seed, () =>
                     {
                         _root.style.display = DisplayStyle.Flex;
@@ -443,8 +498,37 @@ namespace WhereDarknessDwells.Game
             }
         }
 
+        /// <summary>The live model at full length, or the hero's signature mark when the model is missing.</summary>
+        VisualElement Portrait(HeroDef hero)
+        {
+            if (_portraits == null) _portraits = new HeroPortraits(content);
+            var frame = new VisualElement { pickingMode = PickingMode.Ignore };
+            frame.AddToClassList("party-portrait");
+            Texture texture = _portraits.For(hero.Id);
+            if (texture is RenderTexture live) frame.style.backgroundImage = Background.FromRenderTexture(live);
+            else
+            {
+                var initial = new Label("") { pickingMode = PickingMode.Ignore };
+                initial.AddToClassList("party-portrait-initial");
+                initial.AddToClassList("hero-mark");
+                initial.AddToClassList(Views.OwnerClass(hero.Colour));
+                frame.Add(initial);
+            }
+            Views.Decoration(frame, "portrait-frame");
+            return frame;
+        }
+
         void Show(VisualElement view)
         {
+            // The portraits' cameras draw every frame, so they only live while the party screen is up.
+            if (view != _partyView)
+            {
+                _portraits?.Dispose();
+                _portraits = null;
+            }
+            // The map has its own ambience, the party screen and the ending share the title's, and every room has the rooms'.
+            GameAudio.Play(view == _mapView ? GameAudio.Track.Map
+                : view == _partyView || view == _endView ? GameAudio.Track.Title : GameAudio.Track.Rooms);
             _root.style.display = DisplayStyle.Flex;
             foreach (VisualElement v in new[] { _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView })
                 v.EnableInClassList("hidden", v != view);
@@ -486,13 +570,19 @@ namespace WhereDarknessDwells.Game
             KeepsakeDef keepsake = _run.RewardKeepsake == null ? null : _expedition.Keepsake(_run.RewardKeepsake);
             if (keepsake != null) found.Add($"You take a Keepsake: {keepsake.Name}. {keepsake.Text}");
             _rewardClue.text = string.Join("\n\n", found);
+            _rewardClue.Q(className: "label-icon").RemoveFromHierarchy();
+            Views.LabelIcon(_rewardClue, clue != null ? "clue" : keepsake != null ? "keepsake" : "room-event");
             _rewardClue.EnableInClassList("hidden", found.Count == 0);
             _rewardCards.Clear();
             foreach (string id in _run.RewardOffer)
             {
                 CardDef def = _library.Card(id);
                 VisualElement view = Views.Card(cardView, def, _library);
-                view.RegisterCallback<ClickEvent>(_ => Apply(() => _run.TryTakeReward(id), $"Took {id}."));
+                view.RegisterCallback<ClickEvent>(_ =>
+                {
+                    GameAudio.Play("take_card");
+                    Apply(() => _run.TryTakeReward(id), $"Took {id}.");
+                });
                 view.RegisterCallback<PointerEnterEvent>(_ => _rewardHint.text = $"Add {def.Name} to the deck.");
                 view.RegisterCallback<PointerLeaveEvent>(_ => _rewardHint.text = "");
                 _rewardCards.Add(view);
@@ -656,6 +746,7 @@ namespace WhereDarknessDwells.Game
                 var entry = new VisualElement();
                 entry.AddToClassList("journal-entry");
                 entry.AddToClassList("is-keepsake");
+                Views.Icon(entry, "keepsake", "label-icon");
                 var name = new Label($"Keepsake: {keepsake.Name}");
                 name.AddToClassList("journal-entry-name");
                 entry.Add(name);
@@ -674,6 +765,7 @@ namespace WhereDarknessDwells.Game
                 var entry = new VisualElement();
                 entry.AddToClassList("journal-entry");
                 entry.EnableInClassList("is-unknown", !found);
+                Views.Icon(entry, found ? "clue" : "empty-folio", "label-icon");
                 var name = new Label(found ? clue.Name : "Not found yet");
                 name.AddToClassList("journal-entry-name");
                 entry.Add(name);
@@ -689,6 +781,7 @@ namespace WhereDarknessDwells.Game
             {
                 var entry = new VisualElement();
                 entry.AddToClassList("journal-entry");
+                Views.Icon(entry, "stairs", "label-icon");
                 var name = new Label(_run.Villain.SecretRoom.Name);
                 name.AddToClassList("journal-entry-name");
                 entry.Add(name);
@@ -711,6 +804,7 @@ namespace WhereDarknessDwells.Game
             bool won = _run.Phase == RunPhase.Won;
             Debug.Log($"[Run] Expedition {(won ? "won" : "lost")}: seed {_run.Seed}, {_run.Route.Count} rooms, {_run.FightsWon} fights won, " +
                 $"{_run.CluesFound.Count} clues{(_run.TrueEnding ? ", true ending" : "")}.");
+            Views.SetEmblem(_endView, !won ? "defeat" : _run.TrueEnding ? "seal-broken" : "seal-whole");
             _endTitle.text = !won ? "Defeat" : _run.TrueEnding ? "The True Ending" : "Victory";
             _endText.text = won
                 ? _run.EndingText ?? "The thing at the heart of the Keep is still. For now, the Black Keep is quiet."
@@ -746,6 +840,7 @@ namespace WhereDarknessDwells.Game
                 swatch.AddToClassList("health-chip-swatch");
                 swatch.AddToClassList("swatch");
                 swatch.AddToClassList(Views.OwnerClass(hero.Colour));
+                Views.OwnerMark(swatch, hero.Colour);
                 chip.Add(swatch);
                 var text = new Label($"{hero.Name} {_run.Health(id)} / {_run.MaxHealth(id)}");
                 text.AddToClassList("health-chip-text");

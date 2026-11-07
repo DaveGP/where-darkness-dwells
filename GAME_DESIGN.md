@@ -16,7 +16,7 @@ The first release is one complete, polished run. It is not a large game.
 
 | Area | First release | Later, if it earns its place |
 | --- | --- | --- |
-| Heroes | 3 fixed heroes (Warden, Hunter, Occultist), then a 4th so the party is a real choice of 3 from 4 | More heroes |
+| Heroes | 12 heroes, of whom the party is 3 (see "Six more heroes") | More heroes |
 | Cards | About 15 starting cards and 30 to 40 reward cards, including dual-hero cards | Card upgrades, rarer cards |
 | Enemies | 5 or 6 normal enemies, 2 elites, 1 boss | More per villain |
 | Map | One floor of the Keep: 7 layers of branching rooms plus the boss | More floors or acts |
@@ -215,9 +215,10 @@ otherwise.
 
 ### Choosing the party
 
-- The party screen shows six heroes. You pick three before entering the Keep.
-- Every pair of heroes has one dual card, which makes fifteen. The starting deck is the chosen heroes' four
-  cards each plus the three dual cards for their pairs, so it is still 15 cards.
+- The party screen shows twelve heroes (six until 2026-10-26). You pick three before entering the Keep.
+- Every pair of heroes has one dual card. The starting deck is the chosen heroes' four cards each plus the
+  three dual cards for their pairs, so it is still 15 cards. See "Six more heroes" for how the 66 pairs are
+  covered.
 - Rewards only offer cards that someone in the party can play.
 
 ### Keepsakes
@@ -273,6 +274,27 @@ David chose to add all three proposed heroes, so the party is a choice of 3 from
 - **Hollis, the Bellwright** (Bronze, 32 health): bells that reach every enemy or every hero at once, with
   Weak, Exposed and Block.
 
+### Six more heroes **(decided: David, 2026-10-26)**
+
+David asked for six more heroes, one for each character model that wasn't in use, so the party is a choice of 3
+from 12. They use only effects and statuses that already exist. The King model was left out because the rumours
+speak of a missing lord. The two peasant women are still unused.
+
+| Hero | Model | Colour | Health | Style |
+| --- | --- | --- | --- | --- |
+| **Silas, the Cutpurse** | Rogue | Smoke | 28 | Cheap 0-cost cards, Bleed, card draw |
+| **Isidore, the Exile** | Sorcerer | Ember | 26 | Costly fire that hits every enemy, Resolve |
+| **Aldous, the Archivist** | Wizard | Ink | 30 | Draw, Exposed, Block for allies |
+| **Vesna, the Seer** | Gypsy | Rose | 30 | Hex and Weak on every enemy, and Bad Fortune to cash Hex in |
+| **Lady Isolde, the Widow** | Queen | Verdigris | 36 | Block for the whole party, Guard, Weak, a little healing |
+| **Tam, the Torchbearer** | Peasant man | Tallow | 34 | A plain brawler: torch hits, Exposed, Block |
+
+- Each has four starting cards and four reward cards, like the first six.
+- **Dual cards:** each of the 15 pairs among the new six has its own dual card. The 36 pairs of an earlier hero
+  and a new one share **Back to Back** (1 Resolve: deal 5 damage, gain 4 Block). Every pair still has a dual card.
+- **Party screen:** two rows of six compact portraits with names. A panel below lists the pointed-at hero's health,
+  starting cards and the dual cards they would share with the heroes already chosen.
+
 ### Vael's Bloodrage **(decided: David, 2026-10-17)**
 
 Some new parties heal faster than Vael hurts them and deal less than his Blood Tithe heals, so the fight could
@@ -291,8 +313,14 @@ Fury is a general enemy status (data), not a rule about Vael. With it, no boss f
   removed, say) is refused with a reason, and the title screen offers a new expedition instead.
 - **Title:** Continue (only when there is a save), New Expedition, Settings, Quit.
 - **Pause (Esc):** Resume, Settings, Quit to Title. Quitting keeps the save.
-- **Settings:** fullscreen, animation speed (normal or fast), and the map as a chart (a debug view). Volume comes with
-  sound in Milestone 6.5.
+- **Settings:** fullscreen, animation speed (normal or fast), the map as a chart (a debug view), and three volume
+  sliders: master, music and sound effects.
+- **Sound (decided: David, 2026-10-27):** all the audio is CC0, so it is committed and every clone has it (credits in
+  `Unity/Assets/Audio/CREDITS.md`). Each kind of screen has its own track: the title (also the party screen and the
+  ending), the map, the rooms, fights, and the Lair. Fights play effects on the same beats as the floating numbers:
+  a swing, a blow (heavier at 10 or more), a clang when Block stops it all, a fall, and quieter sounds for Block,
+  healing, statuses, drawing and discarding. Entering a room opens a door, the journal opens and closes like a book,
+  and buttons click.
 - **Map:** the first layer's rooms carry an entrance marker before the first room, and every room the party can
   enter next glows and pulses.
 
@@ -324,7 +352,7 @@ Fury is a general enemy status (data), not a rule about Vael. With it, no boss f
    balance tool, a hero brought back with 1 health fell again in the next fight 45% of the time, against 35% with a
    quarter. David chose the quarter so a fall still costs something without making that hero useless.
 4. ~~**Fourth hero.**~~ **Decided (Milestone 5): three new heroes, and a choice of 3 from 6.** See "Three new
-   heroes" above.
+   heroes" above. Six more followed on 2026-10-26, for a choice of 3 from 12 ("Six more heroes").
 5. **Platform.** Steam, itch.io or both? This changes Milestone 7, not the earlier ones.
 6. **Meta-progression.** Should anything unlock between runs, such as new heroes or villains? Currently a
    non-goal.
