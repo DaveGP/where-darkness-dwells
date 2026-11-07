@@ -936,6 +936,8 @@
 .end-title {
     font-size: 40px;
     color: var(--brass);
+    -unity-font-definition: url("Art/Fonts/Cinzel-SemiBold SDF.asset");
+    -unity-font-style: normal;
 }
 
 .end-text {

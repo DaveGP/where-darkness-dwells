@@ -196,11 +196,14 @@
     font-size: 60px;
     white-space: normal;
     color: var(--brass);
+    -unity-font-definition: url("Art/Fonts/Cinzel-SemiBold SDF.asset");
+    -unity-font-style: normal;
 }
 
 .menu-heading {
     font-size: 28px;
-    -unity-font-style: bold;
+    -unity-font-definition: url("Art/Fonts/Cinzel-SemiBold SDF.asset");
+    -unity-font-style: normal;
 }
 
 .title-column,

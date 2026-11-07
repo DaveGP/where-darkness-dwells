@@ -1,5 +1,8 @@
 /* Approved palette, shared by both sibling document roots. */
 .screen, .menus {
+    /* Source Sans 3. The asset's weight table sends bold text to the Semibold file. */
+    -unity-font-definition: url("Art/Fonts/SourceSans3-Regular SDF.asset");
+
     --void: #10151C;
     --recess: #151C24;
     --panel: #1C2630;

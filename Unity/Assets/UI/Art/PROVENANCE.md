@@ -30,7 +30,11 @@ All icon pixels with nonzero alpha have RGB 255/255/255, including antialiased e
 
 ## Fonts and scope
 
-An upstream font/licence download was attempted with `curl` from `raw.githubusercontent.com/google/fonts/main/ofl/cinzel/OFL.txt`; DNS resolution failed (`Could not resolve host`). No font binaries or partial licence downloads are shipped. The approved temporary fallback is Unity's default runtime face, at the guide's role sizes, with bold headings/controls. Cinzel SemiBold and Source Sans 3 Regular/Semibold and their full notices remain to be imported when network access is available. There is no font package or runtime download.
+Both families are in `Fonts/` under the SIL Open Font License 1.1, with their full notices beside them (`Cinzel-OFL.txt`, `SourceSans3-LICENSE.md`). There is no font package or runtime download.
+
+- **Source Sans 3 Regular and Semibold:** unmodified static TTFs from Adobe's `3.052R` release (`TTF-source-sans-3.052R.zip`). "Source" is a Reserved Font Name, so these files must not be modified or subset under that name.
+- **Cinzel SemiBold:** upstream publishes no static SemiBold, so this is a static instance at `wght=600` made with fontTools from `ofl/cinzel/Cinzel[wght].ttf` in `google/fonts`, with its name table set to match. Cinzel's licence declares no Reserved Font Name.
+- **Unity bindings:** dynamic SDF Font Assets. `-unity-font-style: bold` resolves to the Semibold file through the Regular asset's weight table. Cinzel headings set `normal`, because the file is already SemiBold. Italic text is synthesised, since no italic file is shipped.
 
 Presentation bindings in `Views`, `CombatScreen`, `RunFlow`, `MapView`, `FloorPlanView` and `GameMenus` add non-picking artwork and use existing definitions, health, room types, status stacks, intentions, ending result and slider values. The party screen scrolls when the roster/detail content needs more room. `HeroPortraits`, stage/animation code and audio callbacks are unchanged. Floor-only optional paving now also works when a room picture is missing. No Core/content, tests, scenes or project settings changed. The web HTML template is outside this UI-only change; its separate loading-page pass remains pending.
 
