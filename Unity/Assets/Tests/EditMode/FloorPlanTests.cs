@@ -17,7 +17,7 @@ namespace WhereDarknessDwells.Tests
                 .Concat(map.Rooms.SelectMany(r => r.Next.Select(n => (r.Id, n))));
 
         static string Describe(FloorPlan plan) =>
-            string.Join(";", plan.Rooms.Select(r => $"{r.RoomId}:{r.X},{r.Y},{r.Width}x{r.Height}:{string.Join(",", r.Passages)}"))
+            string.Join(";", plan.Rooms.Select(r => $"{r.RoomId}:{r.X},{r.Y},{r.Width}x{r.Height}#{r.Design}:{string.Join(",", r.Passages)}"))
             + "|" + string.Join(";", plan.Doors.Select(d => $"{d.FromId}>{d.ToId}@{d.From}{d.To}"));
 
         [Test]
@@ -108,15 +108,41 @@ namespace WhereDarknessDwells.Tests
             Assert.That(Describe(NewRun(42).FloorPlan), Is.Not.EqualTo(Describe(NewRun(43).FloorPlan)));
         }
 
+        // The map scrolls, but a plan much bigger than this would be tiring to explore.
         [Test]
-        public void ThePlanStaysSmallEnoughForTheScreen()
+        public void ThePlanStaysAManageableSize()
         {
             foreach (ulong seed in Seeds())
             {
-                FloorPlan plan = NewRun(seed).FloorPlan;
-                Assert.That(plan.Width, Is.EqualTo(17), $"Seed {seed}");
-                Assert.That(plan.Height, Is.LessThanOrEqualTo(30), $"Seed {seed}");
+                RunState run = NewRun(seed);
+                FloorPlan plan = run.FloorPlan;
+                Assert.That(plan.Width, Is.LessThanOrEqualTo(2 + run.Map.LayerCount * FloorPlan.MaxRoomWidth + 3), $"Seed {seed}");
+                Assert.That(plan.Height, Is.LessThanOrEqualTo(48), $"Seed {seed}");
             }
+        }
+
+        [Test]
+        public void EveryRoomIsAsBigAsItsKindNeeds()
+        {
+            foreach (ulong seed in Seeds())
+            {
+                RunState run = NewRun(seed);
+                foreach (FloorRoom room in run.FloorPlan.Rooms)
+                {
+                    RoomKind? kind = room.RoomId == FloorPlan.EntranceId ? (RoomKind?)null : run.Map.Room(room.RoomId).Kind;
+                    (int width, int height, int maxWidth) = FloorPlan.Smallest(kind);
+                    Assert.That(room.Width, Is.InRange(width, maxWidth), $"Seed {seed}: room {room.RoomId} ({kind})");
+                    Assert.That(room.Height, Is.AtLeast(height), $"Seed {seed}: room {room.RoomId} ({kind})");
+                }
+            }
+        }
+
+        [Test]
+        public void RoomsComeInDifferentSizes()
+        {
+            var sizes = new HashSet<(int, int)>(Seeds().Take(20).SelectMany(s => NewRun(s).FloorPlan.Rooms.Select(r => (r.Width, r.Height))));
+            Assert.That(sizes.Select(s => s.Item1).Distinct().Count(), Is.EqualTo(2), "Rooms should be two and three squares wide.");
+            Assert.That(sizes.Select(s => s.Item2).Distinct().Count(), Is.AtLeast(4), "Rooms should come in several heights.");
         }
 
         [Test]

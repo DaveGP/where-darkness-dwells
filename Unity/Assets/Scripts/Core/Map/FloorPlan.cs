@@ -34,6 +34,11 @@ namespace WhereDarknessDwells.Core
         /// <summary>The map room's id, or <see cref="FloorPlan.EntranceId"/>.</summary>
         public readonly int RoomId;
         public readonly int X, Y, Width, Height;
+        /// <summary>
+        /// A number from the plan's random stream that the view turns into the room's look: which props it has and
+        /// where, and its wall features. It changes nothing in the run.
+        /// </summary>
+        public readonly int Design;
 
         public IReadOnlyList<Cell> Passages => _passages;
 
@@ -48,13 +53,14 @@ namespace WhereDarknessDwells.Core
             }
         }
 
-        internal FloorRoom(int roomId, int x, int y, int width, int height)
+        internal FloorRoom(int roomId, int x, int y, int width, int height, int design)
         {
             RoomId = roomId;
             X = x;
             Y = y;
             Width = width;
             Height = height;
+            Design = design;
         }
     }
 
@@ -82,13 +88,32 @@ namespace WhereDarknessDwells.Core
     /// Rows are found by solving difference constraints (each a "this row is at least that row plus n"): the doors in
     /// one wall run top to bottom in the order of the links, a room covers the rows of all its doors, and rooms in a
     /// band don't overlap. The generator's links never cross, so the constraints never loop and always solve; the
-    /// smallest solution keeps the plan compact. The <see cref="Rng"/> only adds slack and picks room shapes.
+    /// smallest solution keeps the plan compact. The <see cref="Rng"/> only adds slack and picks room sizes and designs.
+    ///
+    /// Rooms are two or three squares wide and two or more tall, at least as big as their kind needs (<see cref="Smallest"/>). Each band
+    /// is as wide as its widest room.
     /// </summary>
     public sealed class FloorPlan
     {
         /// <summary>The <see cref="FloorRoom.RoomId"/> and <see cref="FloorDoor.FromId"/> of the Entrance.</summary>
         public const int EntranceId = -1;
-        const int EntranceWidth = 1, BandWidth = 2, BossWidth = 2;
+        public const int MaxRoomWidth = 3;
+
+        /// <summary>
+        /// The smallest a room of this kind is, in squares, and the widest it can be. The Lair is the biggest room, and
+        /// Elites and Sanctuaries are never narrow. A null kind is the Entrance.
+        /// </summary>
+        public static (int width, int height, int maxWidth) Smallest(RoomKind? kind)
+        {
+            switch (kind)
+            {
+                case null: return (2, 2, 2);
+                case RoomKind.Boss: return (3, 3, 3);
+                case RoomKind.Elite: return (2, 2, 3);
+                case RoomKind.Sanctuary: return (2, 2, 2);
+                default: return (2, 2, MaxRoomWidth);
+            }
+        }
 
         readonly Dictionary<int, FloorRoom> _rooms;
 
@@ -134,6 +159,16 @@ namespace WhereDarknessDwells.Core
                     .ToList());
             }
 
+            // Each room's width, and the height it needs at least: its kind's smallest, sometimes a square more.
+            var width = new Dictionary<int, int>();
+            var minHeight = new Dictionary<int, int>();
+            foreach (int id in bands.SelectMany(b => b))
+            {
+                (int w, int h, int maxW) = Smallest(id == EntranceId ? (RoomKind?)null : map.Room(id).Kind);
+                width[id] = rng.Next(w, maxW + 1);
+                minHeight[id] = Math.Max(h, width[id] - 1) + rng.Next(2);
+            }
+
             var solver = new RowSolver();
             var doorRow = walls.Select(w => w.Select(_ => solver.Add()).ToArray()).ToArray();
             var top = new Dictionary<int, int>();
@@ -142,7 +177,6 @@ namespace WhereDarknessDwells.Core
                 for (int k = 1; k < walls[w].Count; k++) solver.AtLeast(doorRow[w][k], doorRow[w][k - 1], 1);
             for (int b = 0; b < bands.Count; b++)
             {
-                bool middle = b > 0 && b < bands.Count - 1;
                 for (int j = 0; j < bands[b].Count; j++)
                 {
                     int id = bands[b][j];
@@ -152,8 +186,8 @@ namespace WhereDarknessDwells.Core
                         solver.AtLeast(door, lo, 0);
                         solver.AtLeast(hi, door, 0);
                     }
-                    // A room is one or two squares tall at least, and usually sits right below the one above it.
-                    solver.AtLeast(hi, lo, middle ? rng.Next(2) : 0);
+                    // A room is as tall as its kind needs, and usually sits right below the one above it.
+                    solver.AtLeast(hi, lo, minHeight[id] - 1);
                     if (j > 0) solver.AtLeast(lo, bottom[bands[b][j - 1]], rng.Next(4) == 0 ? 2 : 1);
                 }
             }
@@ -169,31 +203,49 @@ namespace WhereDarknessDwells.Core
                         if (walls[band][k].from == id) yield return doorRow[band][k];
             }
 
-            // Columns: each band is a fixed width. A room narrower than its band is set against one wall, and
-            // passages on its door rows reach the other.
+            // Columns: each band is as wide as its widest room. A narrower room stands somewhere across the band.
+            // A room's rows are its own in its band, but a room spread over many rows by its doors would be a long
+            // strip, so its hall keeps to a compact height and corridors, part of the room, reach the doors beyond.
             var rooms = new Dictionary<int, FloorRoom>();
             int x0 = 0;
             var bandX = new int[bands.Count];
             for (int b = 0; b < bands.Count; b++)
             {
-                bool middle = b > 0 && b < bands.Count - 1;
-                int bandWidth = b == 0 ? EntranceWidth : middle ? BandWidth : BossWidth;
+                int bandWidth = bands[b].Max(id => width[id]);
                 bandX[b] = x0;
                 foreach (int id in bands[b])
                 {
-                    int width = middle ? 1 + rng.Next(BandWidth) : bandWidth;
-                    bool east = rng.Next(2) == 0;
-                    int y = solver.Value(top[id]);
-                    var room = new FloorRoom(id, east ? x0 + bandWidth - width : x0, y, width, solver.Value(bottom[id]) - y + 1);
-                    for (int x = x0; x < x0 + bandWidth; x++)
+                    int w = width[id];
+                    int x = x0 + rng.Next(bandWidth - w + 1);
+                    int y0 = solver.Value(top[id]), y1 = solver.Value(bottom[id]);
+                    // The doors on each side: west ones come in from the band before, east ones lead on.
+                    var westDoors = b == 0 ? new List<int>() : Enumerable.Range(0, walls[b - 1].Count)
+                        .Where(k => walls[b - 1][k].to == id).Select(k => solver.Value(doorRow[b - 1][k])).ToList();
+                    var eastDoors = b == walls.Count ? new List<int>() : Enumerable.Range(0, walls[b].Count)
+                        .Where(k => walls[b][k].from == id).Select(k => solver.Value(doorRow[b][k])).ToList();
+                    int span = y1 - y0 + 1;
+                    int height = Math.Min(span, Math.Max(minHeight[id], w + 2));
+                    // The hall sits over the middle of its doors, as far as its rows allow.
+                    List<int> all = westDoors.Concat(eastDoors).OrderBy(r => r).ToList();
+                    int middle = all.Count == 0 ? (y0 + y1) / 2 : all[all.Count / 2];
+                    int hallTop = Math.Max(y0, Math.Min(y1 - height + 1, middle - height / 2));
+                    var room = new FloorRoom(id, x, hallTop, w, height, rng.Next(1 << 30));
+                    var passages = new HashSet<Cell>();
+                    void Corridor(int row, bool west)
                     {
-                        if (x >= room.X && x < room.X + width) continue;
-                        // West of the room the passages lead in; east of it they lead out.
-                        int wall = x < room.X ? b - 1 : b;
-                        for (int k = 0; k < walls[wall].Count; k++)
-                            if ((x < room.X ? walls[wall][k].to : walls[wall][k].from) == id)
-                                room._passages.Add(new Cell(x, solver.Value(doorRow[wall][k])));
+                        // Along the door's row from the band's wall to the hall's side, then up or down beside the hall.
+                        bool inHall = row >= hallTop && row < hallTop + height;
+                        int side = west ? x : x + w - 1;
+                        int from = west ? x0 : (inHall ? x + w : side), to = west ? (inHall ? x - 1 : side) : x0 + bandWidth - 1;
+                        for (int c = from; c <= to; c++) passages.Add(new Cell(c, row));
+                        if (inHall) return;
+                        int step = row < hallTop ? 1 : -1;
+                        for (int r = row + step; r < hallTop || r >= hallTop + height; r += step) passages.Add(new Cell(side, r));
                     }
+                    foreach (int row in westDoors) Corridor(row, true);
+                    foreach (int row in eastDoors) Corridor(row, false);
+                    room._passages.AddRange(passages.Where(c => !(c.X >= x && c.X < x + w && c.Y >= hallTop && c.Y < hallTop + height))
+                        .OrderBy(c => c.Y).ThenBy(c => c.X));
                     rooms.Add(id, room);
                 }
                 x0 += bandWidth;
