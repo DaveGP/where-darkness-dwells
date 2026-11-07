@@ -39,12 +39,10 @@ namespace WhereDarknessDwells.Game
         int _pendingChoice = -1;
         // Set once OnEnable found everything it needs.
         bool _ready;
-        // The heroes' live portraits, while the party screen is open.
-        HeroPortraits _portraits;
 
         VisualElement _root, _partyView, _mapView, _rewardView, _sanctuaryView, _investigationView, _secretView, _eventView, _removeView, _foundView, _unwrittenView, _endView;
         VisualElement _partyHealth, _partyHeroes, _map, _rewardCards, _sanctuaryChoices, _reflectPanel, _reflectGrid, _searchers, _journalPanel, _journalEntries;
-        VisualElement _eventChoices, _eventHeroes, _removeGrid;
+        VisualElement _eventChoices, _eventHeroes, _removeGrid, _endParty;
         Label _depth, _deckCount, _keepsakeCount, _seedLabel, _mapHint, _mapLegend, _rewardHint, _rewardClue, _clueCount, _unwrittenTitle, _unwrittenText, _endTitle, _endText, _endSummary;
         Label _investigationText, _searchHelp, _investigationHint, _secretTitle, _secretText, _foundTitle, _foundText;
         Label _partyHint, _partyDetailName, _partyDetailCards, _eventTitle, _eventScene, _eventHeroHelp, _eventHint, _removeText, _removeHint;
@@ -76,6 +74,7 @@ namespace WhereDarknessDwells.Game
             _searchers = _root.Q("searchers");
             _journalPanel = _root.Q("journal-panel");
             _journalEntries = _root.Q("journal-entries");
+            _endParty = _root.Q("run-end-party");
             _eventChoices = _root.Q("event-choices");
             _eventHeroes = _root.Q("event-heroes");
             _removeGrid = _root.Q("remove-grid");
@@ -180,8 +179,6 @@ namespace WhereDarknessDwells.Game
 
         void OnDisable()
         {
-            _portraits?.Dispose();
-            _portraits = null;
             if (menus == null) return;
             menus.ContinueChosen -= ContinueRun;
             menus.NewExpeditionChosen -= ShowParty;
@@ -221,8 +218,6 @@ namespace WhereDarknessDwells.Game
         void ShowTitle(string note = null)
         {
             _run = null;
-            _portraits?.Dispose();
-            _portraits = null;
             DrawTopBar();
             menus.ShowTitle(SaveFile.Exists, note);
         }
@@ -296,7 +291,7 @@ namespace WhereDarknessDwells.Game
                 foreach (string hidden in new[] { "block", "guard", "incoming", "activate", "state" }) view.Q(hidden).AddToClassList("hidden");
                 // Twelve cards need to stay small, so health shows in the panel below instead of a bar.
                 view.Q(className: "bar").AddToClassList("hidden");
-                view.Insert(0, Portrait(hero));
+                view.Insert(0, Views.Portrait(content, hero, "party-portrait"));
                 view.RegisterCallback<ClickEvent>(_ => ToggleHero(id));
                 // The panel under the roster shows the cards of the hero under the mouse, or else the last one picked.
                 view.RegisterCallback<PointerEnterEvent>(_ => ShowPartyDetail(id));
@@ -498,34 +493,8 @@ namespace WhereDarknessDwells.Game
             }
         }
 
-        /// <summary>The live model at full length, or the hero's signature mark when the model is missing.</summary>
-        VisualElement Portrait(HeroDef hero)
-        {
-            if (_portraits == null) _portraits = new HeroPortraits(content);
-            var frame = new VisualElement { pickingMode = PickingMode.Ignore };
-            frame.AddToClassList("party-portrait");
-            Texture texture = _portraits.For(hero.Id);
-            if (texture is RenderTexture live) frame.style.backgroundImage = Background.FromRenderTexture(live);
-            else
-            {
-                var initial = new Label("") { pickingMode = PickingMode.Ignore };
-                initial.AddToClassList("party-portrait-initial");
-                initial.AddToClassList("hero-mark");
-                initial.AddToClassList(Views.OwnerClass(hero.Colour));
-                frame.Add(initial);
-            }
-            Views.Decoration(frame, "portrait-frame");
-            return frame;
-        }
-
         void Show(VisualElement view)
         {
-            // The portraits' cameras draw every frame, so they only live while the party screen is up.
-            if (view != _partyView)
-            {
-                _portraits?.Dispose();
-                _portraits = null;
-            }
             // The map has its own ambience, the party screen and the ending share the title's, and every room has the rooms'.
             GameAudio.Play(view == _mapView ? GameAudio.Track.Map
                 : view == _partyView || view == _endView ? GameAudio.Track.Title : GameAudio.Track.Rooms);
@@ -734,8 +703,33 @@ namespace WhereDarknessDwells.Game
             _journalPanel.EnableInClassList("hidden", !open);
             _journalEntries.Clear();
             if (!open || _run == null) return;
+            _journalEntries.Add(PartyRow());
             if (_run.Villain != null) AddClues();
             AddKeepsakes();
+        }
+
+        /// <summary>The party as it stands: each hero's portrait, name and health, for the journal and the run's end.</summary>
+        VisualElement PartyRow()
+        {
+            var row = new VisualElement();
+            row.AddToClassList("party-row");
+            foreach (string id in _run.Party)
+            {
+                HeroDef hero = _library.Hero(id);
+                int health = _run.Health(id);
+                var member = new VisualElement();
+                member.AddToClassList("party-member");
+                member.EnableInClassList("is-down", health <= 0);
+                member.Add(Views.Portrait(content, hero, "member-portrait"));
+                var name = new Label(hero.Name);
+                name.AddToClassList("party-member-name");
+                member.Add(name);
+                var state = new Label(health <= 0 ? "Fallen" : $"{health} / {_run.MaxHealth(id)}");
+                state.AddToClassList("party-member-health");
+                member.Add(state);
+                row.Add(member);
+            }
+            return row;
         }
 
         void AddKeepsakes()
@@ -812,6 +806,8 @@ namespace WhereDarknessDwells.Game
             _endSummary.text = $"Rooms entered {_run.Route.Count}   Fights won {_run.FightsWon}   " +
                 (_run.Villain != null ? $"Clues {_run.CluesFound.Count} of {_run.Villain.Clues.Count}   " : "") +
                 $"Keepsakes {_run.Keepsakes.Count}   Deck {_run.Deck.Count} cards   Seed {_run.Seed}";
+            _endParty.Clear();
+            _endParty.Add(PartyRow());
             _newExpedition.RemoveFromClassList("hidden");
             Show(_endView);
         }

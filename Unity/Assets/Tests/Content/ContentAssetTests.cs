@@ -50,6 +50,14 @@ namespace WhereDarknessDwells.Tests
             }
         }
 
+        // The portraits are original art in the repository, unlike the licensed models, so a fresh clone has them too.
+        [Test]
+        public void EveryHeroHasAPortrait()
+        {
+            foreach (HeroAsset hero in Database().Heroes)
+                Assert.That(hero.Portrait, Is.Not.Null, $"{hero.Id} has no portrait.");
+        }
+
         [Test]
         public void TheAssetsMatchTheContentTheRulesAreTestedWith()
         {

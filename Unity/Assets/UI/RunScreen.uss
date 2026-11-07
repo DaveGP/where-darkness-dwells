@@ -1162,3 +1162,41 @@
 .tile-stairs.with-icon {
     min-height: 18px;
 }
+
+/* Party screen: the painted portrait crops to the card's width. */
+.party-portrait.hero-portrait {
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+/* The party in the journal and at the run's end. */
+.party-row {
+    flex-direction: row;
+    justify-content: center;
+    margin: 4px 0 14px 0;
+}
+.party-member {
+    width: 128px;
+    margin: 0 8px;
+    align-items: center;
+}
+.member-portrait {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 6px;
+}
+.party-member-name {
+    -unity-font-style: bold;
+    color: var(--text);
+    -unity-text-align: middle-center;
+}
+.party-member-health {
+    font-size: 14px;
+    color: var(--text-secondary);
+    -unity-text-align: middle-center;
+}
+.party-member.is-down .member-portrait {
+    -unity-background-image-tint-color: rgb(96, 96, 96);
+}
+.party-member.is-down .party-member-health {
+    color: var(--danger);
+}

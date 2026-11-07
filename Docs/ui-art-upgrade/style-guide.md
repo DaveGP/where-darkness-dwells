@@ -171,7 +171,7 @@ Additional pairs calculated from the exact new hex values with the same sRGB tra
 
 Every dark surface listed above is opaque wherever text is drawn, including `.has-stage .combatant`, `.log-panel`, `.intent` and `.door-tag`. The scrim is decorative separation, not the text's contrast backing. Transparent corners and margins may show the stage; the label area cannot. Fill health bars with `--health`, not the brighter warning accent, so white numbers remain readable across both filled and empty regions. Text on all hero card backgrounds uses `--text` and `--text-secondary`; dual cards use neutral `--panel` beneath text. Text on room tiles uses these same neutral tokens, not room-coloured body copy. Coloured icons and narrow rails use hero/room accents against `--panel` or darker; hover and selected fills retain a separate opaque icon well when needed.
 
-Colour is reinforced by **owner name + signature mark**, including two named marks on dual cards. These are UI identity marks, not statuses. Author every mark at 64×64; use an owner-medal frame at card/panel sizes. No generated bust portraits are commissioned.
+Colour is reinforced by **owner name + signature mark**, including two named marks on dual cards. These are UI identity marks, not statuses. Author every mark at 64×64; use an owner-medal frame at card sizes. Painted hero portraits were added later and replace the medal in combat panels; see `Docs/portraits/portrait-plan.md`.
 
 | Hero | Existing class | Signature mark |
 | --- | --- | --- |

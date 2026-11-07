@@ -61,7 +61,7 @@ owns a card.
 ### Cards
 
 - Every card has an **owner**: one hero, or two heroes for a **dual card**. The card frame shows the
-  owner's colour, or both colours split, plus the owners' portraits.
+  owner's colour, or both colours split, plus the owners' names and signature marks.
 - A card is playable only while **one of its owners is the active hero** and that hero can pay its cost.
 - The **starting deck** has 15 cards: 4 for each hero and 3 dual cards, one for each pair of heroes.
 - All cards share one draw pile, one hand and one discard pile.

@@ -245,9 +245,15 @@ Bell Ringer (Gravedigger), Blood Thrall (Demon). The Bloodbound Knight is a red,
 Cistern Leech in fights, which have no models because the pack has no animal rigs. In a fresh
 clone the references are missing, so the field reads as empty and a placeholder is used.
 Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
-the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard. The party screen shows each hero's model at full length down the left of their card, breathing through the stage's idle
-loop, lit warm from the front and cold from behind over a backdrop in the hero's colour (`Game/HeroPortraits.cs`). Without the
-model, the card shows the hero's initial there instead.
+the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard. The models
+appear only on the combat stage.
+
+**Hero portraits** (David's choice, 2026-11-07): each hero has an original painted bust (`portrait` on the hero asset,
+256×256 in `Assets/UI/Art/Portraits/`). They're shown on the party screen, which no longer renders live models, in each
+combat hero panel in place of the mark medal, and in a party row in the journal and on the run-end screen. They're made
+from text prompts only, never from the Synty models, so they're committed and every clone has them. Cards keep the
+signature marks, since there's no room for a portrait. How they were made is in `Docs/portraits/`. A hero without a
+portrait shows their mark instead.
 
 Six more heroes (David's request, 2026-10-26), one for each unused character model: Silas (Rogue), Isidore (Sorcerer),
 Aldous (Wizard), Vesna (Gypsy), Lady Isolde (Queen) and Tam (Peasant). The design is in `GAME_DESIGN.md` under "Six more

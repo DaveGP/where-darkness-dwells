@@ -11,10 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a8c15279dc64333819190cc766b1ceb, type: 3}
   m_Name: Silas
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: silas
   displayName: Silas
   title: the Cutpurse
   colour: Smoke
   maxHealth: 28
   model: {fileID: 130070, guid: 534b7b0f42c1d304299f3f3762536fb4, type: 3}
+  portrait: {fileID: 2800000, guid: 0f8959c1c1736499797c969abd15950f, type: 3}

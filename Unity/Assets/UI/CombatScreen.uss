@@ -1948,3 +1948,28 @@
     min-width: 0;
     white-space: normal;
 }
+
+/* Painted hero portraits (Views.Portrait). The painting fills the frame; without one, the hero's mark is centred. */
+.hero-portrait {
+    flex-shrink: 0;
+    background-color: var(--void);
+    -unity-background-scale-mode: scale-and-crop;
+    justify-content: center;
+    align-items: center;
+}
+.hero-portrait.is-missing > .hero-mark {
+    width: 40%;
+    height: 40%;
+}
+.combatant-portrait {
+    width: 52px;
+    height: 52px;
+    margin-right: 8px;
+}
+.combatant-portrait > .portrait-frame,
+.member-portrait > .portrait-frame {
+    -unity-slice-scale: 0.5px;
+}
+.combatant.is-down .combatant-portrait {
+    -unity-background-image-tint-color: rgb(96, 96, 96);
+}

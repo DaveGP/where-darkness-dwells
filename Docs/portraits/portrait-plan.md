@@ -1,8 +1,7 @@
-# Planned hero portraits
+# Hero portraits
 
-A plan for after the UI art upgrade. David wants to look at adding portraits for all twelve heroes once that work is
-finished. **Nothing here is part of the current upgrade, and no portrait art exists yet.** The current style guide uses
-live 3D models on the party screen and signature marks everywhere else.
+Twelve painted hero busts, made after the UI art upgrade. The portraits are in `samples/` and the game, and the
+decisions are at the end of this file.
 
 The first six descriptions come from the first version of the style guide. The last six are new, based on each hero's
 title, role and mark in `GAME_DESIGN.md` and `style-guide.md`.
@@ -29,10 +28,14 @@ title, role and mark in `GAME_DESIGN.md` and `style-guide.md`.
   `Unity/Assets/Synty/` or `Unity/Assets/LocalArt/`, even where a hero uses one of them on the fight stage.
 - All twelve should look like one set: same framing, lighting and level of detail, in the Siege Ledger style.
 
-## To decide when we come back to this
+## Decided (David, 2026-11-07)
 
-- **Where they appear:** cards, combat panels, the party screen, or all three. Cards have little room, with a 20px
-  portrait slot in the first guide.
-- **Live models or paintings on the party screen:** whether paintings replace the live 3D models, or only stand in when
-  the licensed models are missing, as in a fresh clone.
-- **Test first:** generate two or three sample portraits and approve the style before making all twelve.
+- **How:** painted by Codex's image generation from text prompts only, so they can be committed. The prompts are in
+  `samples/prompts.md`, and the requests to Codex are the `codex-*` files here.
+- **Where:** the combat hero panels, the party screen, and the party row in the journal and on the run-end screen.
+  Cards keep the signature marks.
+- **Party screen:** the paintings replace the live 3D models everywhere, not only when the models are missing.
+- **Style test:** Bram, Lady Isolde and Tam were approved first, then the other nine were made to match.
+- **Heroes:** Wren, Sister Ashe, Mara, Vesna and Lady Isolde are women; the rest are men, matching their models.
+
+`samples/` keeps 512px copies for reference. The game uses 256px copies in `Unity/Assets/UI/Art/Portraits/`.

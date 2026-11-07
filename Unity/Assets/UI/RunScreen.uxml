@@ -125,6 +125,7 @@
             <ui:Label name="run-end-title" class="view-title" />
             <ui:Label name="run-end-text" class="view-text" />
             <ui:Label name="run-end-summary" class="run-summary" />
+            <ui:VisualElement name="run-end-party" />
             <ui:Button name="new-expedition" text="New expedition" class="big-button" />
         </ui:VisualElement>
 

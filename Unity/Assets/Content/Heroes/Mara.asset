@@ -18,3 +18,4 @@ MonoBehaviour:
   colour: Steel
   maxHealth: 34
   model: {fileID: 136616, guid: f7e586317327fe240bef5a82944f49c2, type: 3}
+  portrait: {fileID: 2800000, guid: ea9b7e0abd8444cf9835046829fe9e82, type: 3}
