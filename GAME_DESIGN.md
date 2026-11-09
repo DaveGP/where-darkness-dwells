@@ -121,11 +121,19 @@ Combat rules use no randomness apart from shuffling.
 The map is shown as a floor plan of the Keep, in the style of Betrayal at House on the Hill. The branching chart
 stays as a debug view. Both are drawings of the same map and run, so switching changes nothing in the run.
 
-- **Layout.** The Entrance is on the west edge and the Lair on the east. Each layer has its own band of columns, two
-  squares wide. Every link in the map is one door through the wall between two bands, so rooms that aren't linked
-  never share a door. A room can have up to 7 links, more than a square has sides, so a room is a rectangle one or
-  two squares wide and as tall as its doors need. A room narrower than its band reaches the far wall through
-  one-square passages, which are part of the room.
+- **Layout.** The Entrance is on the west edge and the Lair on the east. Each layer has its own band of columns.
+  Every link in the map is one door through the wall between two bands, so rooms that aren't linked never share a
+  door. A room can have up to 7 links, more than a square has sides, so a room is a rectangle as tall as its doors
+  need.
+- **Room sizes (decided: David, 2026-11-07).** Rooms are two or three squares wide and two or more tall,
+  as tall as their doors need and sometimes a square more. The Lair is 3×3 at least, and Sanctuaries are 2 wide. Each band is as wide as its widest
+  room, and a narrower room reaches the band's walls through one-square passages, which are part of the room.
+- **Room designs.** Each room is walled in stone, with the odd buttress, and dressed with a few props for its kind:
+  weapon racks and rubble in fights, bookshelves and desks in Investigations, a bedroll and brazier in a Sanctuary,
+  a throne in the Lair. The props are original generated art. The plan's random stream gives each room a design
+  number, so the same seed always looks the same. Decoration changes nothing in the run.
+- **Scrolling.** Rooms are drawn at a readable size, so the plan scrolls. It centres on the party's room whenever
+  they move, and can be dragged or scrolled with the mouse wheel. The whole-plan debug view shrinks to fit instead.
 - **Rows** come from the doors' order. The doors in a wall run top to bottom in the order of the links, a room covers
   all its doors, and rooms in a band don't overlap. The generator's links never cross, so a plan always exists. The
   smallest one is used, so there are no retries and the generator doesn't change. The plan is laid from the run's

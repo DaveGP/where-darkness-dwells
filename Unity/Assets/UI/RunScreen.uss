@@ -707,8 +707,18 @@
     background-color: var(--recess);
 }
 
-.tile-passage {
+.tile-passage,
+.tile-passage.is-current,
+.tile-passage.has-art.is-current {
     background-color: var(--panel);
+    border-width: 0;
+}
+
+/* Corridors belong to their room, which carries its marks. */
+.tile-passage > .current-mark,
+.tile-passage > .unexplored-mark,
+.tile-passage > .selection-frame {
+    display: none;
 }
 
 .tile-name,
@@ -1161,6 +1171,33 @@
 }
 .tile-stairs.with-icon {
     min-height: 18px;
+}
+
+/* The floor plan scrolls inside its viewport (FloorPlanView). */
+.plan-viewport {
+    overflow: hidden;
+}
+.plan-content {
+    position: absolute;
+}
+.tile-prop {
+    position: absolute;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.stone-wall {
+    position: absolute;
+    background-color: var(--raised);
+    border-color: rgb(12, 16, 22);
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+}
+.tile.is-unexplored > .tile-prop,
+.tile.is-unexplored > .stone-wall {
+    opacity: 0.45;
+}
+.tile > .tile-room-icon {
+    left: 12px;
+    top: 12px;
 }
 
 /* Party screen: the painted portrait crops to the card's width. */

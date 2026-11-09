@@ -255,6 +255,11 @@ from text prompts only, never from the Synty models, so they're committed and ev
 signature marks, since there's no room for a portrait. How they were made is in `Docs/portraits/`. A hero without a
 portrait shows their mark instead.
 
+**Floor-plan rooms** (David's request, 2026-11-07): rooms on the floor plan come in different sizes, walled in stone
+and dressed with props for their kind, as `GAME_DESIGN.md` describes. The props and surfaces are original generated
+art in `Assets/UI/Resources/MapArt/` (how they were made is in `Docs/map-rooms/`), so every clone has them. The plan
+no longer uses the rendered room pictures in `LocalArt/Resources/FloorTiles`. The floor plan now scrolls.
+
 Six more heroes (David's request, 2026-10-26), one for each unused character model: Silas (Rogue), Isidore (Sorcerer),
 Aldous (Wizard), Vesna (Gypsy), Lady Isolde (Queen) and Tam (Peasant). The design is in `GAME_DESIGN.md` under "Six more
 heroes". The party screen is now a roster of twelve, with a card panel below it. The new content is 6 heroes and 99 cards: 24
