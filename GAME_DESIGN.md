@@ -56,45 +56,45 @@ owns a card.
 | --- | --- | --- | --- | --- |
 | **Bram, the Warden** | Iron (amber) | 40 | Protect and control | Block, Guard (take hits meant for an ally), Stagger (weaken an enemy's next action) |
 | **Wren, the Hunter** | Thorn (green) | 28 | Damage and precision | Big single hits, Bleed, bonus damage against Exposed enemies |
-| **Sister Ashe, the Occultist** | Ash (violet) | 30 | Conditions and combinations | Hex, Weak, gaining Resolve, drawing cards, consuming Hex for big effects |
+| **Sister Ashe, the Occultist** | Ash (violet) | 30 | Conditions and combinations | Hex, Weak, drawing cards, consuming Hex for big effects |
 
 ### Cards
 
 - Every card has an **owner**: one hero, or two heroes for a **dual card**. The card frame shows the
   owner's colour, or both colours split, plus the owners' names and signature marks.
-- A card is playable only while **one of its owners is the active hero** and that hero can pay its cost.
+- A card is playable only while **one of its owners is the active hero**. Cards are free (see below).
 - The **starting deck** has 15 cards: 4 for each hero and 3 dual cards, one for each pair of heroes.
 - All cards share one draw pile, one hand and one discard pile.
 
-### Free cards **(experiment on the `free-cards` branch, David, 2026-10-26)**
+### Free cards **(tried on the `free-cards` branch from 2026-10-26, adopted: David, 2026-11-09)**
 
-On this branch every card is free: there is no Resolve. The active hero can play every one of their cards (and the
-dual cards they share) that the hand holds. What limits a turn is the hand: the game becomes shaping it so that the
-hero you activate next holds as many of their own cards as possible. The rules below stay as they are, apart from
-these changes:
+Every card is free: there is no Resolve. The active hero can play every one of their cards (and the dual cards they
+share) that the hand holds. What limits a turn is the hand: the game is about shaping it so that the hero you activate
+next holds as many of their own cards as possible.
 
 - **No Resolve.** Activating a hero gives nothing to spend, cards show no cost, and nothing gains Resolve. The combat
   screen's big number shows how many cards the active hero can play now ("Playable").
-- **The hand is the lever.** The hand refills to 6 each turn and unplayed cards stay, as before. Drawing cards and the
-  free discard are how you aim the next hand at a hero, so draw effects carry more weight.
-- **Every card is one play.** Cards that cost 2 or 3 were brought down to about the strength of a 1-cost card (rewards
-  stay a little stronger), and 0-cost cards were raised to one full play. The four cards that gained Resolve draw
-  cards instead: Dark Insight draws 2, Blood Offering is "pay 3 health, draw 3", Kindle deals 2 to every enemy and
-  draws 1, and Zeal is "pay 2 health, draw 3".
+- **The hand is the lever.** The hand refills to 6 each turn and unplayed cards stay. Drawing cards and the free
+  discard are how you aim the next hand at a hero, so draw effects carry more weight.
+- **Every card is one play.** When Resolve was removed, cards that cost 2 or 3 were brought down to about the strength
+  of a 1-cost card (rewards stay a little stronger), and 0-cost cards were raised to one full play. The four cards
+  that gained Resolve draw cards instead: Dark Insight draws 2, Blood Offering is "pay 3 health, draw 3", Kindle deals
+  2 to every enemy and draws 1, and Zeal is "pay 2 health, draw 3".
 - **Keepsakes:** the Gaoler's Keyring makes the hand hold 1 more card each turn, and the Steward's Seal-ring allows 1
   more discard each activation.
-
-The Resolve version is unchanged on the other branches, so the two can be compared.
+- **Balance:** with every card free and the old numbers, parties won 94.5% of runs, so every card's numbers were
+  scaled down with a factor for each hero. Parties with each hero win 47 to 58%, 53% on average.
 
 ### Turn structure
 
 1. **Draw.** Draw until the hand holds 6 cards. Shuffle the discard pile in when the draw pile runs out.
-2. **Activate.** Choose one standing hero to activate. That hero gets **3 Resolve**. It is the only resource.
-3. **Play.** Play any number of eligible cards. Each card shows its Resolve cost and its target.
+2. **Activate.** Choose one standing hero to activate.
+3. **Play.** Play any number of that hero's cards, and the dual cards they share, from the hand. Each card shows its
+   target.
    **Discard (decided: David, 2026-10-17):** once per activation, the active hero may discard any one card
    from the hand for free. It goes to the discard pile and the next draw replaces it, so a card nobody can use
    soon doesn't clog the hand.
-4. **End activation.** Unspent Resolve is lost. **Cards you didn't play stay in your hand.** The next draw
+4. **End activation.** **Cards you didn't play stay in your hand.** The next draw
    only tops the hand back up to 6, so planning a turn ahead is rewarded.
 5. **Enemies act.** Each enemy carries out its shown intent, then shows its next one.
 6. **End of round.** Statuses tick down. Hero Block is removed at the start of the next player turn.
@@ -257,12 +257,12 @@ card choice, and some event choices give one. These are the first eight:
 
 | Keepsake | Effect |
 | --- | --- |
-| Gaoler's Keyring | The first card each fight costs 1 less. |
+| Gaoler's Keyring | The hand holds 1 more card at the start of each turn. |
 | Siege Lantern | Every hero starts each fight with 4 Block. |
 | Chapel Candle | After each won fight, every standing hero heals 3. |
 | Rusted Caltrops | At the start of each fight, every enemy gets Bleed 2. |
 | Widow's Veil | At the start of each fight, every enemy gets Weak 1. |
-| Steward's Seal-ring | The first activation each fight gets 1 more Resolve. |
+| Steward's Seal-ring | The active hero may discard 1 more card each activation. |
 | Marked Deck | Draw 2 more cards on the first turn of each fight. |
 | Bone Charm | Each hero's maximum health goes up by 4, and they heal 4. |
 
@@ -297,7 +297,7 @@ or the Widow.
 
 David chose to add all three proposed heroes, so the party is a choice of 3 from 6.
 - **Corvin, the Penitent** (Bone, 32 health): a healer who pays in his own blood. He heals allies, cleanses
-  Bleed and Weak, and trades his health for Resolve. New effects: heal, cleanse, pay health.
+  Bleed and Weak, and trades his health for cards. New effects: heal, cleanse, pay health.
 - **Mara, the Duelist** (Steel, 34 health): precise strikes, and Riposte to punish whoever attacks her.
 - **Hollis, the Bellwright** (Bronze, 32 health): bells that reach every enemy or every hero at once, with
   Weak, Exposed and Block.
@@ -310,8 +310,8 @@ speak of a missing lord. The two peasant women are still unused.
 
 | Hero | Model | Colour | Health | Style |
 | --- | --- | --- | --- | --- |
-| **Silas, the Cutpurse** | Rogue | Smoke | 28 | Cheap 0-cost cards, Bleed, card draw |
-| **Isidore, the Exile** | Sorcerer | Ember | 26 | Costly fire that hits every enemy, Resolve |
+| **Silas, the Cutpurse** | Rogue | Smoke | 28 | Quick small hits, Bleed, card draw |
+| **Isidore, the Exile** | Sorcerer | Ember | 26 | Fire that hits every enemy, card draw |
 | **Aldous, the Archivist** | Wizard | Ink | 30 | Draw, Exposed, Block for allies |
 | **Vesna, the Seer** | Gypsy | Rose | 30 | Hex and Weak on every enemy, and Bad Fortune to cash Hex in |
 | **Lady Isolde, the Widow** | Queen | Verdigris | 36 | Block for the whole party, Guard, Weak, a little healing |
@@ -319,7 +319,7 @@ speak of a missing lord. The two peasant women are still unused.
 
 - Each has four starting cards and four reward cards, like the first six.
 - **Dual cards:** each of the 15 pairs among the new six has its own dual card. The 36 pairs of an earlier hero
-  and a new one share **Back to Back** (1 Resolve: deal 5 damage, gain 4 Block). Every pair still has a dual card.
+  and a new one share **Back to Back** (deal 3 damage, gain 3 Block). Every pair still has a dual card.
 - **Party screen:** two rows of six compact portraits with names. A panel below lists the pointed-at hero's health,
   starting cards and the dual cards they would share with the heroes already chosen.
 
