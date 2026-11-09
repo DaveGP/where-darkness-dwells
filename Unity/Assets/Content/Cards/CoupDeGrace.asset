@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Coup de Grace'
   owners:
   - {fileID: 11400000, guid: b23294622dc245009af5478447bd3bf0, type: 2}
-  cost: 2
+  cost: 0
   target: 1
-  text: 'Deal 9 damage, or 18 if the target is Exposed.'
+  text: 'Deal 5 damage, or 10 if the target is Exposed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 9
+    amount: 5
     status: 0
-    bonusIfExposed: 9
+    bonusIfExposed: 5

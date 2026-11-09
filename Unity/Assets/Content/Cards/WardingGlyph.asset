@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Warding Glyph'
   owners:
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Give an ally 6 Block.'
+  text: 'Give an ally 3 Block.'
   effects:
   - kind: 1
     scope: 0
-    amount: 6
+    amount: 3
     status: 0
     bonusIfExposed: 0

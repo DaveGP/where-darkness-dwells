@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Open Vein'
   owners:
   - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Apply 5 Bleed.'
+  text: 'Apply 3 Bleed.'
   effects:
   - kind: 2
     scope: 0
-    amount: 5
+    amount: 3
     status: 2
     bonusIfExposed: 0

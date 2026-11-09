@@ -303,6 +303,15 @@ player carries the game's one AudioListener and switches off the cameras' listen
 main camera off during fights. Music streams, and the effects load up front. Not done yet: ambience for each room tile,
 and a sound for the boss's Blood Tithe.
 
+Free cards (tried on the `free-cards` branch from 2026-10-26, adopted by David on 2026-11-09, PR #20): David asked to
+try the game with no Resolve, so a turn is
+limited by the hand rather than by cost. The rules are in `GAME_DESIGN.md` under "Free cards". With every card free and
+the old numbers, parties won 94.5% of runs, so every card's numbers were scaled down, with a separate factor for each hero
+(0.56 for Aldous up to 0.77 for Ashe). Exposed and Weak keep their stacks, no 2 drops below 2, and Back to Back is the same
+for every pair. Balance (`tools/Balance -- parties 100`): parties with each hero win 47 to 58%, an average of 53%, against
+50% for the Resolve version. Earlier entries in this file that mention Resolve or card costs describe the game as it
+was then.
+
 ## Milestone 7: release preparation
 
 - Full playthroughs, bug fixing, balance, onboarding, release builds, credits, icon, screenshots and a store

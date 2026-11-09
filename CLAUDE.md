@@ -50,7 +50,7 @@ Assets/Tests/Content     Editor-only tests of the content assets. Unity's Test R
 3. **All randomness goes through `Rng`,** seeded from the run seed. The same seed plus the same commands
    gives the same result. A test checks this.
 4. **Validate every command.** An invalid action returns a reason the UI can show, such as "Wren isn't
-   active" or "Needs 2 Resolve". It never throws for something the player can do, and it never half-applies.
+   active" or "Choose an enemy for Stagger". It never throws for something the player can do, and it never half-applies.
 5. **Content is data.** Story-specific behaviour (a clue's effect, a boss's modifiers) is described by data
    that Core interprets. Don't write `if (villain == "Vael")` anywhere.
 6. **Keep it small.** No manager classes that do everything, no deep inheritance, no abstraction until there

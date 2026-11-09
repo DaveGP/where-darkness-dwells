@@ -17,17 +17,17 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
   - {fileID: 11400000, guid: 7accd055131b4c85af815dc996934cbf, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Deal 5 damage. Gain 4 Block.'
+  text: 'Deal 3 damage. Gain 3 Block.'
   effects:
   - kind: 0
     scope: 0
-    amount: 5
+    amount: 3
     status: 0
     bonusIfExposed: 0
   - kind: 1
     scope: 2
-    amount: 4
+    amount: 3
     status: 0
     bonusIfExposed: 0

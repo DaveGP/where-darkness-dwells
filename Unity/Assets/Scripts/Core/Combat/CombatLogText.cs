@@ -6,7 +6,7 @@ namespace WhereDarknessDwells.Core
     /// </summary>
     public static class CombatLogText
     {
-        /// <summary>A line for the log, or null for events the player doesn't need to read (cards drawn, Resolve).</summary>
+        /// <summary>A line for the log, or null for events the player doesn't need to read (cards drawn).</summary>
         public static string Describe(CombatEvent e, CombatState combat)
         {
             string source = Name(combat, e.SourceId);

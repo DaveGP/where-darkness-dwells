@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Twist the Knife'
   owners:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Deal 4 damage, or 10 if the target is Exposed.'
+  text: 'Deal 3 damage, or 7 if the target is Exposed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 4
+    amount: 3
     status: 0
-    bonusIfExposed: 6
+    bonusIfExposed: 4

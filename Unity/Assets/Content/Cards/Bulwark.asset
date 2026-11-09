@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Bulwark'
   owners:
   - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
-  cost: 2
+  cost: 0
   target: 2
-  text: 'Give an ally 12 Block.'
+  text: 'Give an ally 6 Block.'
   effects:
   - kind: 1
     scope: 0
-    amount: 12
+    amount: 6
     status: 0
     bonusIfExposed: 0

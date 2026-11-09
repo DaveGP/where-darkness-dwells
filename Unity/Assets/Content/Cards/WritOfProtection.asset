@@ -17,12 +17,12 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 6020169c31d040a483e87c15bb4c4b84, type: 2}
   - {fileID: 11400000, guid: 34490ab1b31148c3bcd46bdd681ddf37, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Give an ally 7 Block.'
+  text: 'Give an ally 5 Block.'
   effects:
   - kind: 1
     scope: 0
-    amount: 7
+    amount: 5
     status: 0
     bonusIfExposed: 0

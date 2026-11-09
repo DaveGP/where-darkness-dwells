@@ -16,17 +16,17 @@ MonoBehaviour:
   displayName: 'Cutthroat'
   owners:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
-  cost: 2
+  cost: 0
   target: 1
-  text: 'Deal 5 damage. Apply 5 Bleed.'
+  text: 'Deal 3 damage. Apply 3 Bleed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 5
+    amount: 3
     status: 0
     bonusIfExposed: 0
   - kind: 2
     scope: 0
-    amount: 5
+    amount: 3
     status: 2
     bonusIfExposed: 0

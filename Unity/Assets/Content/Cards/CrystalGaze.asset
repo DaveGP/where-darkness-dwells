@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Crystal Gaze'
   owners:
   - {fileID: 11400000, guid: d27b53b83f5b467db11813274af07e4a, type: 2}
-  cost: 1
+  cost: 0
   target: 0
-  text: 'Every hero gains 3 Block.'
+  text: 'Every hero gains 2 Block.'
   effects:
   - kind: 1
     scope: 3
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0

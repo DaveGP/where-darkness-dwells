@@ -24,7 +24,8 @@ namespace WhereDarknessDwells.Core
     {
         public const int HandSize = 6;
         public const int MaxHandSize = 10;
-        public const int ResolvePerActivation = 3;
+        /// <summary>Discards the active hero may make each activation, before Keepsakes.</summary>
+        public const int DiscardsPerActivation = 1;
 
         readonly ContentLibrary _content;
         readonly Rng _rng;
@@ -90,7 +91,7 @@ namespace WhereDarknessDwells.Core
             CancelsLeft = other.CancelsLeft;
             CardsPlayed = other.CardsPlayed;
             Activations = other.Activations;
-            HasDiscarded = other.HasDiscarded;
+            Discards = other.Discards;
             _rng = other._rng.Copy();
             _heroes = other._heroes.Select(c => c.Copy()).ToList();
             _enemies = other._enemies.Select(c => c.Copy()).ToList();
@@ -102,7 +103,6 @@ namespace WhereDarknessDwells.Core
             Phase = other.Phase;
             Round = other.Round;
             ActiveHeroId = other.ActiveHeroId;
-            Resolve = other.Resolve;
         }
 
         /// <summary>An independent copy of the fight. Commands on the copy don't change this one.</summary>
@@ -112,7 +112,6 @@ namespace WhereDarknessDwells.Core
         public int Round { get; private set; }
         /// <summary>The active hero's id during an activation, otherwise null.</summary>
         public string ActiveHeroId { get; private set; }
-        public int Resolve { get; private set; }
 
         public IReadOnlyList<Combatant> Heroes => _heroes;
         public IReadOnlyList<Combatant> Enemies => _enemies;
@@ -133,16 +132,14 @@ namespace WhereDarknessDwells.Core
         /// <summary>Cards played and heroes activated so far this fight. Some Keepsakes only help the first.</summary>
         public int CardsPlayed { get; private set; }
         public int Activations { get; private set; }
-        /// <summary>True once the active hero has used this activation's one discard.</summary>
-        public bool HasDiscarded { get; private set; }
-
-        /// <summary>The Resolve a card in the hand costs right now, after Keepsakes.</summary>
-        public int CostOf(CardInstance card)
-        {
-            int cost = CardOf(card).Cost;
-            if (CardsPlayed == 0) cost -= _modifiers.Keepsake(KeepsakeEffectKind.FirstCardDiscount);
-            return Math.Max(0, cost);
-        }
+        /// <summary>Cards the active hero has discarded this activation.</summary>
+        public int Discards { get; private set; }
+        /// <summary>How many cards the active hero may discard each activation, with Keepsakes.</summary>
+        public int DiscardLimit => DiscardsPerActivation + _modifiers.Keepsake(KeepsakeEffectKind.ExtraDiscard);
+        /// <summary>True once the active hero has used this activation's discards.</summary>
+        public bool HasDiscarded => Discards >= DiscardLimit;
+        /// <summary>The hand is refilled to this many cards at the start of each turn, with Keepsakes.</summary>
+        public int HandLimit => HandSize + _modifiers.Keepsake(KeepsakeEffectKind.LargerHand);
 
         /// <summary>True while the party only sees this enemy's intents as vague text, with no numbers.</summary>
         public bool IsVague(Combatant enemy) => enemy?.Enemy != null && _modifiers.VagueIntents.Contains(enemy.Enemy.Id);
@@ -190,9 +187,8 @@ namespace WhereDarknessDwells.Core
             {
                 Phase = CombatPhase.Activation;
                 ActiveHeroId = hero.Id;
-                HasDiscarded = false;
+                Discards = 0;
                 Emit(CombatEventKind.HeroActivated, hero.Id);
-                SetResolve(ResolvePerActivation + (Activations == 0 ? _modifiers.Keepsake(KeepsakeEffectKind.FirstActivationResolve) : 0));
                 Activations++;
             });
         }
@@ -224,7 +220,6 @@ namespace WhereDarknessDwells.Core
             {
                 _hand.Remove(card);
                 Emit(CombatEventKind.CardPlayed, actor.Id, target?.Id, cardInstanceId: card.Id);
-                SetResolve(Resolve - CostOf(card));
                 CardsPlayed++;
                 foreach (EffectDef effect in def.Effects)
                 {
@@ -238,7 +233,7 @@ namespace WhereDarknessDwells.Core
 
         /// <summary>
         /// Moves a card from the hand to the discard pile without playing it, so the next draw replaces it. Any card
-        /// can be discarded, once per activation, for free.
+        /// can be discarded, once per activation (more with a Keepsake).
         /// </summary>
         public CombatResult TryDiscard(int cardInstanceId)
         {
@@ -249,7 +244,7 @@ namespace WhereDarknessDwells.Core
             {
                 _hand.Remove(card);
                 _discard.Add(card);
-                HasDiscarded = true;
+                Discards++;
                 Emit(CombatEventKind.CardDiscarded, ActiveHeroId, cardInstanceId: card.Id);
             });
         }
@@ -261,7 +256,8 @@ namespace WhereDarknessDwells.Core
             if (over != null) return over;
             if (Phase != CombatPhase.Activation) return "Activate a hero to discard a card.";
             if (_hand.All(c => c.Id != cardInstanceId)) return "That card isn't in your hand.";
-            if (HasDiscarded) return $"{Name(ActiveHeroId)} has already discarded a card this activation.";
+            if (HasDiscarded) return DiscardLimit == 1 ? $"{Name(ActiveHeroId)} has already discarded a card this activation."
+                : $"{Name(ActiveHeroId)} has already discarded {DiscardLimit} cards this activation.";
             return null;
         }
 
@@ -275,7 +271,6 @@ namespace WhereDarknessDwells.Core
             {
                 Emit(CombatEventKind.ActivationEnded, ActiveHeroId);
                 ActiveHeroId = null;
-                SetResolve(0);
 
                 foreach (Combatant enemy in _enemies.Where(e => !e.IsDown).ToList())
                 {
@@ -333,7 +328,6 @@ namespace WhereDarknessDwells.Core
             CardDef def = CardOf(card);
             if (Phase != CombatPhase.Activation) return $"Activate {OwnerNames(def)} to play {def.Name}.";
             if (!def.IsOwnedBy(ActiveHeroId)) return $"Only {OwnerNames(def)} can play {def.Name}.";
-            if (CostOf(card) > Resolve) return $"{def.Name} needs {CostOf(card)} Resolve; {Name(ActiveHeroId)} has {Resolve}.";
             if (def.Target == CardTarget.Enemy && _enemies.All(e => e.IsDown)) return "There's no enemy to target.";
             return null;
         }
@@ -410,10 +404,6 @@ namespace WhereDarknessDwells.Core
                         t.GuardedBy = actor.Id;
                         Emit(CombatEventKind.Guarded, actor.Id, t.Id);
                     }
-                    break;
-
-                case EffectKind.GainResolve:
-                    SetResolve(Resolve + effect.Amount);
                     break;
 
                 case EffectKind.Draw:
@@ -617,13 +607,6 @@ namespace WhereDarknessDwells.Core
             Emit(CombatEventKind.StatusChanged, null, target.Id, stacks, status: status);
         }
 
-        void SetResolve(int value)
-        {
-            if (Resolve == value) return;
-            Resolve = value;
-            Emit(CombatEventKind.ResolveChanged, amount: value);
-        }
-
         // ---------- rounds ----------
 
         void BeginRound()
@@ -637,7 +620,7 @@ namespace WhereDarknessDwells.Core
                 hero.GuardedBy = null;
                 SetStatus(hero, StatusKind.Riposte, 0);
             }
-            Draw(HandSize - _hand.Count, HandSize);
+            Draw(HandLimit - _hand.Count, HandLimit);
         }
 
         /// <summary>The Keepsakes that act once, as the fight starts: Block for the heroes, statuses on the enemies, extra cards.</summary>

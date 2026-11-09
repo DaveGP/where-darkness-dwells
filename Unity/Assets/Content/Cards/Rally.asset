@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: 'Rally'
   owners:
   - {fileID: 11400000, guid: 34490ab1b31148c3bcd46bdd681ddf37, type: 2}
-  cost: 1
+  cost: 0
   target: 0
-  text: 'Every hero gains 3 Block. Draw a card.'
+  text: 'Every hero gains 2 Block. Draw a card.'
   effects:
   - kind: 1
     scope: 3
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 5

@@ -18,10 +18,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
   cost: 0
   target: 1
-  text: 'Deal 3 damage.'
+  text: 'Deal 2 damage. Draw a card.'
   effects:
   - kind: 0
     scope: 0
-    amount: 3
+    amount: 2
+    status: 0
+    bonusIfExposed: 0
+  - kind: 5
+    scope: 2
+    amount: 1
     status: 0
     bonusIfExposed: 0

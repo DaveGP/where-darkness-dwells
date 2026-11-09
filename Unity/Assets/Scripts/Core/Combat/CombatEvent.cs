@@ -8,7 +8,6 @@ namespace WhereDarknessDwells.Core
         CardsDrawn,
         DeckShuffled,
         HeroActivated,
-        ResolveChanged,
         CardPlayed,
         /// <summary>The active hero discarded a card from the hand without playing it. SourceId is the hero.</summary>
         CardDiscarded,

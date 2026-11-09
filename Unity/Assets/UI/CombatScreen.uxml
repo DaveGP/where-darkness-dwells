@@ -23,8 +23,9 @@
                 <ui:VisualElement name="hand" class="hand" />
             </ui:VisualElement>
             <ui:VisualElement class="controls">
-                <ui:Label name="resolve" text="-" class="resolve" />
-                <ui:Label text="Resolve" class="with-icon resolve-caption"><ui:VisualElement class="ui-icon icon-resolve label-icon" picking-mode="Ignore" /></ui:Label>
+                <!-- Cards are free: the big number is how many of the active hero's cards the hand holds. -->
+                <ui:Label name="playable" text="-" class="resolve" />
+                <ui:Label text="Playable" class="with-icon resolve-caption"><ui:VisualElement class="ui-icon icon-draw label-icon" picking-mode="Ignore" /></ui:Label>
                 <ui:Button name="end-activation" text="End activation" class="end-button" />
                 <ui:Button name="discard" text="Discard a card" class="with-icon discard-button"><ui:VisualElement class="ui-icon icon-discard label-icon" picking-mode="Ignore" /></ui:Button>
                 <ui:Label name="piles" class="with-icon piles"><ui:VisualElement class="ui-icon icon-draw label-icon" picking-mode="Ignore" /></ui:Label>

@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Ember Lance'
   owners:
   - {fileID: 11400000, guid: e558b7710f684c6282cacaf0351bfe73, type: 2}
-  cost: 2
+  cost: 0
   target: 1
-  text: 'Deal 11 damage.'
+  text: 'Deal 6 damage.'
   effects:
   - kind: 0
     scope: 0
-    amount: 11
+    amount: 6
     status: 0
     bonusIfExposed: 0

@@ -126,18 +126,25 @@ namespace WhereDarknessDwells.Tests
         }
 
         [Test]
-        public void ResolveLimitsWhatOneActivationCanPlay()
+        public void CardsAreFreeSoTheActiveHeroCanPlayAllTheirCards()
         {
-            CombatState combat = Fight(new[] { "exploit", "volley" });
+            CombatState combat = Fight(new[] { "exploit", "volley", "quick_shot", "barbed_arrow" });
             Ok(combat.TryActivate(Wren));
-            Assert.That(combat.Resolve, Is.EqualTo(3));
-
             Ok(combat.TryPlay(CardId(combat, "exploit"), Enemy(combat).Id));
-            Assert.That(combat.Resolve, Is.EqualTo(1));
+            Ok(combat.TryPlay(CardId(combat, "volley")));
+            Ok(combat.TryPlay(CardId(combat, "quick_shot"), Enemy(combat).Id));
+            Ok(combat.TryPlay(CardId(combat, "barbed_arrow"), Enemy(combat).Id));
+            Assert.That(combat.CardsPlayed, Is.EqualTo(4));
+        }
 
-            CombatResult refused = combat.TryPlay(CardId(combat, "volley"));
-            Assert.That(refused.Ok, Is.False);
-            Assert.That(refused.Reason, Is.EqualTo("Volley needs 2 Resolve; Wren has 1."));
+        [Test]
+        public void EveryCardIsFreeAndNothingGainsResolve()
+        {
+            foreach (CardDef card in StarterContent.Cards())
+            {
+                Assert.That(card.Cost, Is.Zero, card.Id);
+                Assert.That(card.Effects.Any(e => e.Kind == EffectKind.GainResolve), Is.False, card.Id);
+            }
         }
 
         [Test]
@@ -154,7 +161,7 @@ namespace WhereDarknessDwells.Tests
             Assert.That(combat.TryActivate(Bram).Ok, Is.False);                           // already activating
 
             Assert.That(combat.Hand, Has.Count.EqualTo(2));
-            Assert.That(combat.Resolve, Is.EqualTo(3));
+            Assert.That(combat.CardsPlayed, Is.EqualTo(0));
             Assert.That(Enemy(combat).Health, Is.EqualTo(health));
             Assert.That(combat.Log, Has.Count.EqualTo(logLength));
         }
@@ -177,7 +184,7 @@ namespace WhereDarknessDwells.Tests
         }
 
         [Test]
-        public void DarkInsightGivesResolveAndACard()
+        public void DarkInsightDrawsTwoCards()
         {
             CombatState combat = Fight(new[] { "dark_insight", "hex_bolt", "wither", "unravel", "quick_shot", "volley", "exploit" });
             Assert.That(combat.Hand, Has.Count.EqualTo(6));
@@ -186,8 +193,7 @@ namespace WhereDarknessDwells.Tests
 
             Ok(combat.TryActivate(Ashe));
             Ok(combat.TryPlay(insight));
-            Assert.That(combat.Resolve, Is.EqualTo(4));
-            Assert.That(combat.Hand, Has.Count.EqualTo(6)); // played one, drew one
+            Assert.That(combat.Hand, Has.Count.EqualTo(6)); // played one, and only one card was left to draw
             Assert.That(combat.DrawPile, Is.Empty);
         }
 
@@ -209,7 +215,7 @@ namespace WhereDarknessDwells.Tests
         {
             CombatState combat = Fight(new[] { "quick_shot" });
             Combatant sentry = Enemy(combat);
-            sentry.Block = 4;
+            sentry.Block = 2;
             Ok(combat.TryActivate(Wren));
             Ok(combat.TryPlay(CardId(combat, "quick_shot"), sentry.Id));
 
@@ -217,7 +223,7 @@ namespace WhereDarknessDwells.Tests
             Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 2));
             CombatEvent hit = combat.Log.Last(e => e.Kind == CombatEventKind.Damaged);
             Assert.That(hit.Amount, Is.EqualTo(2));
-            Assert.That(hit.Blocked, Is.EqualTo(4));
+            Assert.That(hit.Blocked, Is.EqualTo(2));
         }
 
         [Test]
@@ -230,8 +236,8 @@ namespace WhereDarknessDwells.Tests
             Assert.That(sentry.Status(StatusKind.Exposed), Is.EqualTo(1));
             Ok(combat.TryPlay(CardId(combat, "exploit"), sentry.Id));
 
-            // Pin Down 5, then Exploit (7 + 7 for Exposed) x 1.5 = 21.
-            Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 5 - 21));
+            // Pin Down 3, then Exploit (3 + 3 for Exposed) x 1.5 = 9.
+            Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 3 - 9));
         }
 
         [Test]
@@ -253,13 +259,13 @@ namespace WhereDarknessDwells.Tests
             Ok(combat.TryActivate(Bram));
             Ok(combat.TryPlay(CardId(combat, "stand_guard"), Wren));
             Assert.That(Hero(combat, Wren).GuardedBy, Is.EqualTo(Bram));
-            Assert.That(Hero(combat, Bram).Block, Is.EqualTo(4));
+            Assert.That(Hero(combat, Bram).Block, Is.EqualTo(2));
 
             SetAttack(Enemy(combat), 6, Wren);
             Ok(combat.TryEndActivation());
 
             Assert.That(Hero(combat, Wren).Health, Is.EqualTo(Hero(combat, Wren).MaxHealth));
-            Assert.That(Hero(combat, Bram).Health, Is.EqualTo(Hero(combat, Bram).MaxHealth - 2)); // 6 minus 4 Block
+            Assert.That(Hero(combat, Bram).Health, Is.EqualTo(Hero(combat, Bram).MaxHealth - 4)); // 6 minus 2 Block
             Assert.That(combat.Log.Any(e => e.Kind == CombatEventKind.Redirected && e.SourceId == Bram && e.TargetId == Wren));
             Assert.That(Hero(combat, Wren).GuardedBy, Is.Null, "guarding ends at the next player turn");
         }
@@ -285,8 +291,8 @@ namespace WhereDarknessDwells.Tests
             Ok(combat.TryPlay(CardId(combat, "barbed_arrow"), sentry.Id));
             Ok(combat.TryEndActivation());
 
-            Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 3 - 3), "3 from the arrow, 3 Bleed through Block");
-            Assert.That(sentry.Status(StatusKind.Bleed), Is.EqualTo(2));
+            Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 2 - 2), "2 from the arrow, 2 Bleed through Block");
+            Assert.That(sentry.Status(StatusKind.Bleed), Is.EqualTo(1));
         }
 
         [Test]
@@ -313,7 +319,7 @@ namespace WhereDarknessDwells.Tests
             Ok(combat.TryPlay(CardId(combat, "unravel"), sentry.Id));
 
             Assert.That(sentry.Status(StatusKind.Hex), Is.EqualTo(0));
-            Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 12)); // 3 stacks x 4
+            Assert.That(sentry.Health, Is.EqualTo(sentry.MaxHealth - 4)); // 2 stacks x 2
         }
 
         [Test]
@@ -322,7 +328,7 @@ namespace WhereDarknessDwells.Tests
             CombatState combat = Fight(new[] { "warding_sigil" }, StarterContent.FirstEncounter);
             Ok(combat.TryActivate(Ashe));
             Ok(combat.TryPlay(CardId(combat, "warding_sigil"), Wren));
-            Assert.That(Hero(combat, Wren).Block, Is.EqualTo(5));
+            Assert.That(Hero(combat, Wren).Block, Is.EqualTo(3));
             Assert.That(combat.Enemies.All(e => e.Status(StatusKind.Weak) == 1));
         }
 
@@ -364,7 +370,7 @@ namespace WhereDarknessDwells.Tests
         public void DefeatingEveryEnemyWinsAndEndsTheFight()
         {
             CombatState combat = Fight(new[] { "quick_shot", "volley" });
-            Enemy(combat).Health = 5;
+            Enemy(combat).Health = 4;
             Ok(combat.TryActivate(Wren));
             CombatResult result = combat.TryPlay(CardId(combat, "quick_shot"), Enemy(combat).Id);
 

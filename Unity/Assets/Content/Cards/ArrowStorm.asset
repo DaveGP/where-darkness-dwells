@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: 'Arrow Storm'
   owners:
   - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
-  cost: 3
+  cost: 0
   target: 0
-  text: 'Deal 6 damage to every enemy. Apply 2 Bleed to every enemy.'
+  text: 'Deal 2 damage to every enemy. Apply 2 Bleed to every enemy.'
   effects:
   - kind: 0
     scope: 1
-    amount: 6
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 2

@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 'Sap Strength'
   owners:
   - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
-  cost: 1
+  cost: 0
   target: 1
   text: 'Apply 2 Weak and 1 Hex.'
   effects:

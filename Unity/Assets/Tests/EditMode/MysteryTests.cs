@@ -144,12 +144,12 @@ namespace WhereDarknessDwells.Tests
             combat.TryActivate(StarterContent.Wren);
             int before = boss.Health;
             Assert.That(combat.TryPlay(1, boss.Id).Ok, Is.True);
-            Assert.That(before - boss.Health, Is.EqualTo(8), "Quick Shot deals 6, plus 2.");
+            Assert.That(before - boss.Health, Is.EqualTo(6), "Quick Shot deals 4, plus 2.");
 
             boss.SetStatus(StatusKind.Exposed, 1);
             before = boss.Health;
             combat.TryPlay(2, boss.Id);
-            Assert.That(before - boss.Health, Is.EqualTo(12), "(6 + 2) x 1.5.");
+            Assert.That(before - boss.Health, Is.EqualTo(9), "(4 + 2) x 1.5.");
         }
 
         [Test]

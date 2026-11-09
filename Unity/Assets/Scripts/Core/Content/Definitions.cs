@@ -47,6 +47,7 @@ namespace WhereDarknessDwells.Core
         ApplyStatus,
         /// <summary>Attacks aimed at the target hit the acting hero instead, until the next player turn.</summary>
         Guard,
+        /// <summary>Unused while cards are free: there is no Resolve. Kept so the kinds after it keep their numbers in saved assets.</summary>
         GainResolve,
         Draw,
         /// <summary>Remove all Hex from the target and deal Amount damage per stack removed.</summary>
@@ -214,16 +215,16 @@ namespace WhereDarknessDwells.Core
 
     public enum KeepsakeEffectKind
     {
-        /// <summary>The first card played each fight costs Amount less Resolve, never below 0.</summary>
-        FirstCardDiscount,
+        /// <summary>The hand is refilled to Amount more cards at the start of each turn.</summary>
+        LargerHand,
         /// <summary>Every hero starts each fight with Amount Block.</summary>
         StartBlock,
         /// <summary>After each won fight, every hero who is still standing heals Amount.</summary>
         HealAfterWin,
         /// <summary>At the start of each fight, every enemy gets Amount stacks of Status.</summary>
         EnemyStartStatus,
-        /// <summary>The first activation each fight gets Amount more Resolve.</summary>
-        FirstActivationResolve,
+        /// <summary>The active hero may discard Amount more cards each activation.</summary>
+        ExtraDiscard,
         /// <summary>Draw Amount more cards on the first turn of each fight.</summary>
         FirstTurnDraw,
         /// <summary>Every hero's maximum health goes up by Amount, and they heal Amount when it is found.</summary>

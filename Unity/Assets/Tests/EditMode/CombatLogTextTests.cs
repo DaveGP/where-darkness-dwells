@@ -27,7 +27,7 @@ namespace WhereDarknessDwells.Tests
             CombatState combat = Fight("quick_shot");
             combat.TryActivate(StarterContent.Wren);
             List<string> lines = Lines(combat.TryPlay(1, "hollow_sentry#0"), combat);
-            Assert.That(lines, Is.EqualTo(new[] { "Wren plays Quick Shot on Hollow Sentry.", "Wren hits Hollow Sentry for 6." }));
+            Assert.That(lines, Is.EqualTo(new[] { "Wren plays Quick Shot on Hollow Sentry.", "Wren hits Hollow Sentry for 4." }));
         }
 
         [Test]

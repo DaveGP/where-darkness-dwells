@@ -17,13 +17,13 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 6b2f4ad8ed9740628f048811863c9587, type: 2}
   - {fileID: 11400000, guid: fb7f7b5681554572900b8b341a33b3ae, type: 2}
-  cost: 2
+  cost: 0
   target: 0
-  text: 'Deal 3 damage to every enemy. Apply 2 Hex to every enemy.'
+  text: 'Deal 2 damage to every enemy. Apply 2 Hex to every enemy.'
   effects:
   - kind: 0
     scope: 1
-    amount: 3
+    amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 2

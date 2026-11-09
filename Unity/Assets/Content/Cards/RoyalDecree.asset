@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 'Royal Decree'
   owners:
   - {fileID: 11400000, guid: 34490ab1b31148c3bcd46bdd681ddf37, type: 2}
-  cost: 1
+  cost: 0
   target: 0
   text: 'Apply 2 Weak to every enemy.'
   effects:

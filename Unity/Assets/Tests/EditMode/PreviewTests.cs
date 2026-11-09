@@ -58,7 +58,7 @@ namespace WhereDarknessDwells.Tests
                 List<string> preview = combat.PreviewEnemyPhase().Select(Describe).ToList();
                 int logBefore = combat.Log.Count;
                 List<string> actual = combat.TryEndActivation().Events
-                    .SkipWhile(e => e.Kind == CombatEventKind.ActivationEnded || e.Kind == CombatEventKind.ResolveChanged)
+                    .SkipWhile(e => e.Kind == CombatEventKind.ActivationEnded)
                     .Take(preview.Count).Select(Describe).ToList();
 
                 Assert.That(actual, Is.EqualTo(preview), $"Seed {seed}, round {combat.Round}");
@@ -89,12 +89,12 @@ namespace WhereDarknessDwells.Tests
             sentry.IntentTargetId = StarterContent.Wren;
 
             combat.TryActivate(StarterContent.Bram);
-            combat.TryPlay(2, StarterContent.Wren); // Stand Guard: Bram takes Wren's hits and gains 4 Block.
+            combat.TryPlay(2, StarterContent.Wren); // Stand Guard: Bram takes Wren's hits and gains 2 Block.
 
             CombatEvent hit = combat.PreviewEnemyPhase().Single(e => e.Kind == CombatEventKind.Damaged);
             Assert.That(hit.TargetId, Is.EqualTo(StarterContent.Bram));
-            Assert.That(hit.Amount, Is.EqualTo(6));
-            Assert.That(hit.Blocked, Is.EqualTo(4));
+            Assert.That(hit.Amount, Is.EqualTo(8));
+            Assert.That(hit.Blocked, Is.EqualTo(2));
         }
     }
 }

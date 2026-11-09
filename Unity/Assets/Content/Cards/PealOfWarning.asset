@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Peal of Warning'
   owners:
   - {fileID: 11400000, guid: f5c7cc3ccb1c497f8182c462a266d302, type: 2}
-  cost: 1
+  cost: 0
   target: 0
-  text: 'Give every hero 5 Block.'
+  text: 'Give every hero 3 Block.'
   effects:
   - kind: 1
     scope: 3
-    amount: 5
+    amount: 3
     status: 0
     bonusIfExposed: 0

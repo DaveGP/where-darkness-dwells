@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 'Cleansing Rite'
   owners:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
-  cost: 1
+  cost: 0
   target: 2
   text: 'Remove all Bleed and Weak from an ally. Heal them 2.'
   effects:

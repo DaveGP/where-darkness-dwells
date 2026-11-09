@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: 'Searing Brand'
   owners:
   - {fileID: 11400000, guid: e558b7710f684c6282cacaf0351bfe73, type: 2}
-  cost: 1
+  cost: 0
   target: 1
-  text: 'Deal 5 damage. Apply 2 Bleed.'
+  text: 'Deal 4 damage. Apply 2 Bleed.'
   effects:
   - kind: 0
     scope: 0
-    amount: 5
+    amount: 4
     status: 0
     bonusIfExposed: 0
   - kind: 2

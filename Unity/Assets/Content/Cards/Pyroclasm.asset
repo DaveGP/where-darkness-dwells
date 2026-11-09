@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Pyroclasm'
   owners:
   - {fileID: 11400000, guid: e558b7710f684c6282cacaf0351bfe73, type: 2}
-  cost: 3
+  cost: 0
   target: 0
-  text: 'Deal 10 damage to every enemy.'
+  text: 'Deal 4 damage to every enemy.'
   effects:
   - kind: 0
     scope: 1
-    amount: 10
+    amount: 4
     status: 0
     bonusIfExposed: 0

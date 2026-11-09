@@ -18,20 +18,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
   cost: 0
   target: 0
-  text: 'Corvin pays 4 health. Gain 2 Resolve. Draw a card.'
+  text: 'Corvin pays 2 health. Draw 3 cards.'
   effects:
   - kind: 9
-    scope: 2
-    amount: 4
-    status: 0
-    bonusIfExposed: 0
-  - kind: 4
     scope: 2
     amount: 2
     status: 0
     bonusIfExposed: 0
   - kind: 5
     scope: 2
-    amount: 1
+    amount: 3
     status: 0
     bonusIfExposed: 0

@@ -17,9 +17,9 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 34490ab1b31148c3bcd46bdd681ddf37, type: 2}
   - {fileID: 11400000, guid: 7accd055131b4c85af815dc996934cbf, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Guard another ally until your next turn. Gain 5 Block.'
+  text: 'Guard another ally until your next turn. Gain 4 Block.'
   effects:
   - kind: 3
     scope: 0
@@ -28,6 +28,6 @@ MonoBehaviour:
     bonusIfExposed: 0
   - kind: 1
     scope: 2
-    amount: 5
+    amount: 4
     status: 0
     bonusIfExposed: 0

@@ -17,13 +17,13 @@ MonoBehaviour:
   owners:
   - {fileID: 11400000, guid: 9bdb502954d8455fb4c0c64ec567195c, type: 2}
   - {fileID: 11400000, guid: 6b89c8ffe00a4e1a8bc2b533961359a7, type: 2}
-  cost: 1
+  cost: 0
   target: 2
-  text: 'Give an ally 5 Block. Heal them 2.'
+  text: 'Give an ally 3 Block. Heal them 2.'
   effects:
   - kind: 1
     scope: 0
-    amount: 5
+    amount: 3
     status: 0
     bonusIfExposed: 0
   - kind: 7

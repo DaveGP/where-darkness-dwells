@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Brace'
   owners:
   - {fileID: 11400000, guid: 7accd055131b4c85af815dc996934cbf, type: 2}
-  cost: 1
+  cost: 0
   target: 0
-  text: 'Tam gains 7 Block.'
+  text: 'Tam gains 5 Block.'
   effects:
   - kind: 1
     scope: 2
-    amount: 7
+    amount: 5
     status: 0
     bonusIfExposed: 0

@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: 'Slip Away'
   owners:
   - {fileID: 11400000, guid: 3ebcf954356849ba900c6d190a3c7c3e, type: 2}
-  cost: 1
+  cost: 0
   target: 0
-  text: 'Silas gains 6 Block.'
+  text: 'Silas gains 4 Block.'
   effects:
   - kind: 1
     scope: 2
-    amount: 6
+    amount: 4
     status: 0
     bonusIfExposed: 0
