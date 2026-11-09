@@ -18,3 +18,4 @@ MonoBehaviour:
   colour: Ash
   maxHealth: 30
   model: {fileID: 179454, guid: d4d17342014c96842ae633419b8f07a5, type: 3}
+  portrait: {fileID: 2800000, guid: ed5ae0df859eb464c88605eb9010fb1f, type: 3}

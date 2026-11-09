@@ -2,19 +2,24 @@
     <Style src="CombatScreen.uss" />
     <ui:VisualElement class="combatant hero">
         <ui:VisualElement class="combatant-accent" />
-        <ui:Label name="name" text="Hero" class="combatant-name" />
+        <ui:VisualElement class="fighter-heading">
+            <ui:VisualElement class="owner-medal" picking-mode="Ignore"><ui:VisualElement class="hero-mark" picking-mode="Ignore" /></ui:VisualElement>
+            <ui:Label name="name" text="Hero" class="combatant-name" />
+        </ui:VisualElement>
         <ui:Label name="title" text="the Title" class="combatant-title" />
         <ui:VisualElement class="bar">
             <ui:VisualElement name="health-fill" class="bar-fill" />
             <ui:Label name="health" text="30 / 30" class="bar-text" />
         </ui:VisualElement>
         <ui:VisualElement class="badges">
-            <ui:Label name="block" text="Block 0" class="badge block-badge" />
-            <ui:Label name="guard" text="Guarded" class="badge guard-badge" />
-            <ui:Label name="incoming" text="Incoming 0" class="badge incoming-badge" />
+            <ui:Label name="block" text="Block 0" class="with-icon badge block-badge"><ui:VisualElement class="ui-icon icon-block label-icon" picking-mode="Ignore" /></ui:Label>
+            <ui:Label name="guard" text="Guarded" class="with-icon badge guard-badge"><ui:VisualElement class="ui-icon icon-guarded label-icon" picking-mode="Ignore" /></ui:Label>
+            <ui:Label name="incoming" text="Incoming 0" class="with-icon badge incoming-badge"><ui:VisualElement class="ui-icon icon-warning label-icon" picking-mode="Ignore" /></ui:Label>
         </ui:VisualElement>
         <ui:VisualElement name="statuses" class="statuses" />
         <ui:Button name="activate" text="Activate" class="activate-button" />
         <ui:Label name="state" text="Active" class="combatant-state" />
+        <ui:VisualElement class="selection-frame" picking-mode="Ignore" />
+        <ui:VisualElement class="ui-icon icon-check chosen-mark" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

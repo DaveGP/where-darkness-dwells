@@ -1,7 +1,7 @@
 {
     "name": "WhereDarknessDwells.Editor",
     "rootNamespace": "WhereDarknessDwells.Editor",
-    "references": ["WhereDarknessDwells.Core", "WhereDarknessDwells.Content", "WhereDarknessDwells.Game"],
+    "references": ["WhereDarknessDwells.Core", "WhereDarknessDwells.Content", "WhereDarknessDwells.Game", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

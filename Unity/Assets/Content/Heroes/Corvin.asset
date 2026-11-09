@@ -18,3 +18,4 @@ MonoBehaviour:
   colour: Bone
   maxHealth: 32
   model: {fileID: 6711451649947656021, guid: 6f84430900ee9f246aa877a58c0085a0, type: 3}
+  portrait: {fileID: 2800000, guid: 57137bc67ae5948d9936c20bc0c45de3, type: 3}

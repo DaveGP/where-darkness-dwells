@@ -245,9 +245,20 @@ Bell Ringer (Gravedigger), Blood Thrall (Demon). The Bloodbound Knight is a red,
 Cistern Leech in fights, which have no models because the pack has no animal rigs. In a fresh
 clone the references are missing, so the field reads as empty and a placeholder is used.
 Heroes have the same optional `model` (David's picks): Bram and Wren are the Dark Fantasy Hunters (male and female), Corvin
-the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard. The party screen shows each hero's model at full length down the left of their card, breathing through the stage's idle
-loop, lit warm from the front and cold from behind over a backdrop in the hero's colour (`Game/HeroPortraits.cs`). Without the
-model, the card shows the hero's initial there instead.
+the Plague Doctor, and from Fantasy Characters, Sister Ashe the Witch, Mara the Druid and Hollis the Bard. The models
+appear only on the combat stage.
+
+**Hero portraits** (David's choice, 2026-11-07): each hero has an original painted bust (`portrait` on the hero asset,
+256×256 in `Assets/UI/Art/Portraits/`). They're shown on the party screen, which no longer renders live models, in each
+combat hero panel in place of the mark medal, and in a party row in the journal and on the run-end screen. They're made
+from text prompts only, never from the Synty models, so they're committed and every clone has them. Cards keep the
+signature marks, since there's no room for a portrait. How they were made is in `Docs/portraits/`. A hero without a
+portrait shows their mark instead.
+
+**Floor-plan rooms** (David's request, 2026-11-07): rooms on the floor plan come in different sizes, walled in stone
+and dressed with props for their kind, as `GAME_DESIGN.md` describes. The props and surfaces are original generated
+art in `Assets/UI/Resources/MapArt/` (how they were made is in `Docs/map-rooms/`), so every clone has them. The plan
+no longer uses the rendered room pictures in `LocalArt/Resources/FloorTiles`. The floor plan now scrolls.
 
 Six more heroes (David's request, 2026-10-26), one for each unused character model: Silas (Rogue), Isidore (Sorcerer),
 Aldous (Wizard), Vesna (Gypsy), Lady Isolde (Queen) and Tam (Peasant). The design is in `GAME_DESIGN.md` under "Six more
@@ -264,13 +275,33 @@ and three enemy places on the right, its own camera, and the crypt's ambient lig
 idle loop (`LocalArt/Combat/CombatIdle.controller`), and fighters who are down are hidden. A fighter without a model
 gets a capsule. On the stage, each fighter's panel sits just above its head (projected from the stage camera), or beside
 it when there's no room above, and panels are pushed apart so they never overlap. Without the prefab the fight keeps its
-flat background and its usual rows. Attack animations come later.
+flat background and its usual rows.
+
+Fight animations (2026-10-26): **Where Darkness Dwells > Build Combat Animator** (`Editor/CombatAnimatorBuilder.cs`) builds
+`LocalArt/Combat/CombatActions.controller` from Synty's Sword Combat and Base Locomotion clips (gitignored) and gives it to the
+stage prefab. The controller has the idle loop, three attacks taken in turn, a gesture for cards that hit no one, a flinch,
+a stagger for blows of 10 or more, a raised guard, and a fall that ends lying down. The builder sets the two death clips to
+fall in place. `CombatScreen.ShowOnStage` picks each fighter's action from the command's events, on the same beats as the
+floating numbers, and `CombatStage.Act` plays it. A fallen fighter now stays on the stage lying down instead of disappearing.
+With the idle-only controller, or none, the stage behaves as before. Fast animations play the clips at double speed.
 
 Floor-plan map (David's request, 2026-10-25): the map is now drawn as a floor plan of the Keep, in the style of Betrayal
 at House on the Hill, with the chart kept as a debug view (a button on the map, F2, or Settings). How it works is in `GAME_DESIGN.md` under
 "The floor plan". The layout is `Core/Map/FloorPlan.cs` and `RunState.FloorPlan`, tested over 1,000 seeds in `FloorPlanTests`.
-The view is `Game/FloorPlanView.cs`. The tiles are placeholders: flat stone colours with each room type's border.
-Synty room art can come later.
+The view is `Game/FloorPlanView.cs`.
+Room tiles from the Dark Fantasy pack: **Where Darkness Dwells > Render Floor Tiles** (`Editor/FloorTileRenderer.cs`) builds a
+small lit diorama for each room type and photographs it from above. There are two fights, an elite cage, two
+investigations, a well and a feast for events, a chapel, the Lair's ritual circle, the Cistern's tomb and the gate. It also
+renders a tileable stone floor. The images go to `Assets/LocalArt/Resources/FloorTiles/` (gitignored). Each room is paved with
+the floor, and its picture sits in the middle, as wide as the room's narrower side. Without the images, the tiles stay plain.
+To change a picture, edit its recipe and run the menu item again.
+
+Sound and music (2026-10-27): `Game/GameAudio.cs` plays a crossfaded track for each kind of screen and short effects,
+loaded by name from `Assets/Audio/Resources/Audio`. There are 5 CC0 tracks from OpenGameArt and 33 CC0 Kenney effects;
+`Assets/Audio/CREDITS.md` lists each one. Settings has master, music and sound-effects volumes (PlayerPrefs). The audio
+player carries the game's one AudioListener and switches off the cameras' listeners, because the combat stage turns the
+main camera off during fights. Music streams, and the effects load up front. Not done yet: ambience for each room tile,
+and a sound for the boss's Blood Tithe.
 
 Free cards (experiment, branch `free-cards`, 2026-10-26): David asked to try the game with no Resolve, so a turn is
 limited by the hand rather than by cost. The rules are in `GAME_DESIGN.md` under "Free cards". With every card free and

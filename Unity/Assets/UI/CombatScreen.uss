@@ -1,59 +1,28 @@
-/* Combat screen. Placeholder look until Milestone 6: flat panels in the keep's colours.
-   Hero colours: Iron is amber, Thorn is green, Ash is violet (GAME_DESIGN.md). */
-
+/* The Siege Ledger. Exact slices match SpriteImporter; default Unity font uses approved sizes. */
+@import url("SiegeLedger.uss");
 .screen {
     flex-grow: 1;
-    background-color: rgb(16, 13, 18);
-    color: rgb(222, 214, 200);
-    font-size: 16px;
 }
 
 .hidden {
     display: none;
 }
 
-/* ---------- buttons ---------- */
-
-/* Every button, so none falls back to the default theme's light grey under the screen's light text.
-   Map rooms are buttons too; RunScreen.uss loads later and restyles them. */
 .unity-button {
-    background-color: rgb(58, 46, 60);
-    border-color: rgb(110, 88, 70);
     border-width: 1px;
-    border-radius: 4px;
-    color: rgb(240, 232, 214);
+    border-radius: 0;
 }
-
-.unity-button:hover {
-    background-color: rgb(80, 64, 82);
-    color: rgb(255, 248, 230);
-}
-
-.unity-button:active {
-    background-color: rgb(44, 35, 46);
-}
-
-.unity-button:disabled {
-    background-color: rgb(34, 28, 36);
-    border-color: rgb(50, 42, 52);
-    color: rgb(150, 140, 146);
-}
-
-/* ---------- top bar ---------- */
 
 .top-bar {
     flex-direction: row;
     align-items: center;
     height: 48px;
     padding: 0 20px;
-    background-color: rgb(26, 21, 29);
     border-bottom-width: 1px;
-    border-color: rgb(58, 46, 60);
 }
 
 .place {
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
     margin-right: 24px;
 }
 
@@ -63,16 +32,8 @@
 
 .prompt {
     flex-grow: 1;
-    color: rgb(240, 232, 214);
     -unity-font-style: italic;
 }
-
-.seed {
-    font-size: 12px;
-    color: rgb(120, 110, 118);
-}
-
-/* ---------- battlefield ---------- */
 
 .middle {
     flex-grow: 1;
@@ -93,28 +54,19 @@
 .combatant {
     width: 230px;
     margin: 0 12px;
-    padding: 10px 12px;
-    background-color: rgb(30, 25, 33);
     border-width: 2px;
-    border-radius: 6px;
-    border-color: rgb(58, 46, 60);
+    border-radius: 0;
 }
 
 .combatant-accent {
     height: 4px;
     margin: -4px -6px 8px -6px;
-    border-radius: 2px;
-    background-color: rgb(90, 80, 90);
-}
-
-.combatant-name {
-    font-size: 18px;
-    -unity-font-style: bold;
+    border-radius: 0;
+    background-color: var(--edge-quiet);
 }
 
 .combatant-title {
     font-size: 13px;
-    color: rgb(150, 140, 146);
     margin-bottom: 6px;
 }
 
@@ -122,36 +74,12 @@
     margin-top: 6px;
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
-}
-
-.combatant.is-active {
-    border-color: rgb(201, 162, 74);
-    background-color: rgb(40, 33, 30);
-}
-
-.combatant.is-down {
-    opacity: 0.4;
-}
-
-.combatant.is-down .combatant-state {
-    color: rgb(190, 80, 80);
-}
-
-.combatant.is-targetable {
-    border-color: rgb(232, 212, 138);
-}
-
-.combatant.is-targetable:hover {
-    background-color: rgb(52, 44, 36);
-    scale: 1.03 1.03;
 }
 
 .bar {
     height: 22px;
     margin: 4px 0;
-    background-color: rgb(50, 22, 26);
-    border-radius: 3px;
+    border-radius: 0;
     overflow: hidden;
     justify-content: center;
 }
@@ -162,12 +90,10 @@
     top: 0;
     bottom: 0;
     width: 100%;
-    background-color: rgb(150, 40, 48);
 }
 
 .bar-text {
     -unity-text-align: middle-center;
-    font-size: 14px;
     -unity-font-style: bold;
 }
 
@@ -178,19 +104,8 @@
 
 .badge,
 .status {
-    font-size: 13px;
-    padding: 2px 6px;
     margin: 3px 4px 0 0;
-    border-radius: 3px;
-    background-color: rgb(55, 50, 60);
-}
-
-.block-badge {
-    background-color: rgb(55, 75, 100);
-}
-
-.guard-badge {
-    background-color: rgb(110, 80, 40);
+    border-radius: 0;
 }
 
 .statuses {
@@ -199,63 +114,28 @@
     min-height: 22px;
 }
 
-.status-exposed {
-    background-color: rgb(140, 70, 30);
-}
-
-.status-weak {
-    background-color: rgb(70, 70, 110);
-}
-
-.status-bleed {
-    background-color: rgb(120, 25, 35);
-}
-
-.status-hex {
-    background-color: rgb(95, 50, 120);
-}
-
 .activate-button {
     margin: 8px 0 0 0;
     height: 30px;
 }
 
-/* enemies */
-
-.enemy-row .combatant {
-    background-color: rgb(34, 22, 26);
-}
-
 .intent {
-    padding: 4px 6px;
     margin-bottom: 8px;
-    border-radius: 3px;
-    background-color: rgb(60, 28, 32);
+    border-radius: 0;
 }
 
 .intent-text {
     -unity-font-style: bold;
-    color: rgb(240, 200, 180);
 }
-
-.intent-target {
-    font-size: 13px;
-    color: rgb(200, 170, 160);
-}
-
-/* ---------- log ---------- */
 
 .log-panel {
     width: 320px;
     padding: 12px;
-    background-color: rgb(22, 18, 25);
     border-left-width: 1px;
-    border-color: rgb(58, 46, 60);
+    border-color: var(--card-rose);
 }
 
 .panel-heading {
-    -unity-font-style: bold;
-    color: rgb(201, 162, 74);
     margin-bottom: 6px;
 }
 
@@ -264,32 +144,25 @@
 }
 
 .log-line {
-    font-size: 13px;
     white-space: normal;
     margin-bottom: 2px;
-    color: rgb(190, 182, 172);
 }
 
 .log-round {
     margin-top: 8px;
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
 }
 
 .log-end {
     -unity-font-style: bold;
-    color: rgb(240, 232, 214);
 }
-
-/* ---------- hand and controls ---------- */
 
 .bottom {
     flex-direction: row;
     height: 270px;
     padding: 8px 16px 16px 16px;
-    background-color: rgb(22, 18, 25);
     border-top-width: 1px;
-    border-color: rgb(58, 46, 60);
+    border-color: var(--card-rose);
 }
 
 .hand-area {
@@ -299,12 +172,10 @@
 .hint {
     height: 24px;
     -unity-text-align: middle-center;
-    color: rgb(200, 192, 180);
     white-space: normal;
 }
 
 .hint.is-error {
-    color: rgb(235, 120, 110);
     -unity-font-style: bold;
 }
 
@@ -316,16 +187,9 @@
 }
 
 .card {
-    width: 150px;
-    height: 210px;
     margin: 0 6px;
-    padding: 0 10px 8px 10px;
-    background-color: rgb(42, 36, 40);
     border-width: 2px;
-    border-radius: 8px;
-    border-color: rgb(80, 70, 76);
-    /* A long text is cut off at the bottom rather than pushing the colour bar and names out of the card. */
-    overflow: hidden;
+    border-radius: 0;
     transition-property: translate, scale, opacity;
     transition-duration: 0.12s;
 }
@@ -334,22 +198,14 @@
     translate: 0 -10px;
 }
 
-.card.is-unplayable:hover {
-    translate: 0 0;
-}
-
 .card.is-selected {
-    translate: 0 -24px;
-    border-color: rgb(232, 212, 138);
-    background-color: rgb(58, 50, 44);
+    background-color: var(--selected);
 }
 
 .card-owners {
     flex-direction: row;
-    height: 8px;
-    margin: 0 -10px 8px -10px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -364,51 +220,36 @@
     flex-shrink: 0;
 }
 
-/* A pale coin with a dark rim and a large black number, so the cost reads at a glance. */
 .card-cost {
     width: 30px;
     height: 30px;
     margin-right: 6px;
-    border-radius: 15px;
-    border-width: 2px;
-    border-color: rgb(110, 80, 30);
+    border-color: var(--health);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    font-size: 19px;
-    background-color: rgb(232, 200, 120);
-    color: rgb(0, 0, 0);
 }
 
 .card-name {
-    /* A zero basis gives a two-line name a fixed width to wrap in, so the header grows to fit it. */
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0;
-    margin-top: 4px;
     -unity-font-style: bold;
     white-space: normal;
 }
 
 .card-target {
     flex-shrink: 0;
-    font-size: 12px;
-    color: rgb(150, 140, 146);
-    margin: 4px 0;
 }
 
 .card-text {
     flex-grow: 1;
     flex-shrink: 1;
-    overflow: hidden;
-    font-size: 14px;
     white-space: normal;
 }
 
 .card-owner-names {
     flex-shrink: 0;
-    font-size: 12px;
     -unity-text-align: middle-center;
-    color: rgb(150, 140, 146);
 }
 
 .controls {
@@ -418,15 +259,12 @@
 }
 
 .resolve {
-    font-size: 56px;
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
 }
 
 .resolve-caption {
     margin-top: -6px;
     margin-bottom: 14px;
-    color: rgb(150, 140, 146);
 }
 
 .end-button {
@@ -435,7 +273,6 @@
     font-size: 16px;
 }
 
-/* One free discard per activation. Lit while the player is choosing which card. */
 .discard-button {
     width: 170px;
     height: 32px;
@@ -445,42 +282,22 @@
 }
 
 .discard-button.is-selected {
-    border-color: rgb(232, 212, 138);
-    background-color: rgb(80, 64, 40);
+    border-color: var(--hero-tallow);
+    background-color: var(--selected);
 }
 
 .piles {
     margin-top: 12px;
-    font-size: 12px;
-    color: rgb(150, 140, 146);
     -unity-text-align: middle-center;
     white-space: normal;
 }
 
-/* ---------- previews and feedback (Milestone 2) ---------- */
-
-.incoming-badge {
-    background-color: rgb(110, 35, 40);
-}
-
 .incoming-badge.is-lethal {
-    background-color: rgb(200, 50, 50);
     -unity-font-style: bold;
 }
 
-/* An intent the party only sees vaguely, before a clue explains the enemy. */
 .intent.is-vague .intent-text {
     -unity-font-style: italic;
-    color: rgb(210, 170, 190);
-}
-
-/* An intent the party cancelled with a clue. */
-.intent.is-cancelled {
-    background-color: rgb(40, 40, 48);
-}
-
-.intent.is-cancelled .intent-text {
-    color: rgb(150, 150, 160);
 }
 
 .cancel-intent {
@@ -488,33 +305,16 @@
     height: 30px;
     font-size: 14px;
     -unity-font-style: bold;
-    border-color: rgb(201, 162, 74);
-    color: rgb(232, 212, 138);
-}
-
-.cancel-intent.is-unavailable {
-    opacity: 0.45;
+    border-color: var(--brass);
+    color: var(--hero-tallow);
 }
 
 .intent-outcome {
-    font-size: 13px;
-    color: rgb(255, 170, 150);
     -unity-font-style: bold;
-    white-space: normal;
 }
 
 .combatant.is-acting {
-    border-color: rgb(220, 70, 60);
-    scale: 1.05 1.05;
-}
-
-.card.is-highlighted {
-    translate: 0 -12px;
-    border-color: rgb(232, 212, 138);
-}
-
-.card.is-boosted {
-    border-color: rgb(120, 200, 110);
+    border-color: var(--hero-bronze);
 }
 
 .floaters {
@@ -541,160 +341,13 @@
     opacity: 0;
 }
 
-.floater-damage {
-    color: rgb(255, 90, 80);
-}
-
-.floater-block {
-    color: rgb(130, 180, 255);
-}
-
-.floater-heal {
-    color: rgb(120, 220, 120);
-}
-
 .floater-status {
-    color: rgb(240, 190, 90);
     font-size: 18px;
 }
 
-/* ---------- hero colours ---------- */
-
-.owner-iron .combatant-accent,
-.swatch.owner-iron {
-    background-color: rgb(196, 138, 58);
-}
-
-.owner-thorn .combatant-accent,
-.swatch.owner-thorn {
-    background-color: rgb(96, 150, 72);
-}
-
-.owner-ash .combatant-accent,
-.swatch.owner-ash {
-    background-color: rgb(150, 112, 190);
-}
-
-.owner-bone .combatant-accent,
-.swatch.owner-bone {
-    background-color: rgb(214, 204, 180);
-}
-
-.owner-steel .combatant-accent,
-.swatch.owner-steel {
-    background-color: rgb(120, 156, 196);
-}
-
-.owner-bronze .combatant-accent,
-.swatch.owner-bronze {
-    background-color: rgb(176, 110, 62);
-}
-
-.owner-smoke .combatant-accent,
-.swatch.owner-smoke {
-    background-color: rgb(140, 140, 152);
-}
-
-.owner-ember .combatant-accent,
-.swatch.owner-ember {
-    background-color: rgb(222, 92, 52);
-}
-
-.owner-ink .combatant-accent,
-.swatch.owner-ink {
-    background-color: rgb(92, 100, 206);
-}
-
-.owner-rose .combatant-accent,
-.swatch.owner-rose {
-    background-color: rgb(206, 112, 150);
-}
-
-.owner-verdigris .combatant-accent,
-.swatch.owner-verdigris {
-    background-color: rgb(64, 164, 150);
-}
-
-.owner-tallow .combatant-accent,
-.swatch.owner-tallow {
-    background-color: rgb(222, 198, 92);
-}
-
-.card.owner-iron {
-    background-color: rgb(52, 40, 30);
-}
-
-.card.owner-thorn {
-    background-color: rgb(32, 46, 32);
-}
-
-.card.owner-ash {
-    background-color: rgb(42, 34, 52);
-}
-
-.card.owner-bone {
-    background-color: rgb(50, 47, 40);
-}
-
-.card.owner-steel {
-    background-color: rgb(30, 38, 50);
-}
-
-.card.owner-bronze {
-    background-color: rgb(50, 34, 26);
-}
-
-.card.owner-smoke {
-    background-color: rgb(36, 36, 40);
-}
-
-.card.owner-ember {
-    background-color: rgb(54, 30, 24);
-}
-
-.card.owner-ink {
-    background-color: rgb(30, 32, 56);
-}
-
-.card.owner-rose {
-    background-color: rgb(52, 32, 42);
-}
-
-.card.owner-verdigris {
-    background-color: rgb(26, 46, 44);
-}
-
-.card.owner-tallow {
-    background-color: rgb(52, 48, 28);
-}
-
-/* A card that can't be played is dimmed by its colours, not its opacity, so its cost coin stays crisp.
-   After the hero colours so it overrides their backgrounds. */
-.card.is-unplayable {
-    background-color: rgb(26, 22, 25);
-    border-color: rgb(54, 48, 52);
-}
-
-.card.is-unplayable .card-name,
-.card.is-unplayable .card-text {
-    color: rgb(120, 112, 116);
-}
-
-.card.is-unplayable .card-owners {
-    opacity: 0.4;
-}
-
-.card.is-unplayable .card-cost {
-    background-color: rgb(176, 156, 112);
-}
-
-/* A Keepsake discount turns the coin green, and the number stays black. */
 .card.is-discounted .card-cost {
-    background-color: rgb(150, 215, 140);
-    border-color: rgb(40, 100, 40);
+    border-color: var(--selected);
 }
-
-/* ---------- end of fight ---------- */
 
 .end-panel {
     position: absolute;
@@ -704,23 +357,19 @@
     bottom: 0;
     align-items: center;
     justify-content: center;
-    background-color: rgba(8, 6, 10, 0.8);
 }
 
 .end-box {
     width: 520px;
     padding: 28px;
     align-items: center;
-    background-color: rgb(30, 25, 33);
     border-width: 2px;
-    border-radius: 8px;
-    border-color: rgb(201, 162, 74);
+    border-radius: 0;
+    border-color: var(--brass);
 }
 
 .end-title {
-    font-size: 40px;
     -unity-font-style: bold;
-    color: rgb(201, 162, 74);
 }
 
 .end-text {
@@ -735,32 +384,10 @@
     font-size: 16px;
 }
 
-/* ---------- the 3D stage ---------- */
-
-/* With a stage (CombatScreen adds has-stage when the local art is there), the fight shows through the middle of the
-   screen, and the panels over it turn translucent so the fighters behind them stay visible. */
-.has-stage .screen {
-    background-color: rgba(0, 0, 0, 0);
-}
-
 .has-stage .battlefield {
     justify-content: space-between;
 }
 
-.has-stage .combatant {
-    background-color: rgba(20, 16, 22, 0.78);
-}
-
-.has-stage .enemy-row .combatant {
-    background-color: rgba(30, 18, 22, 0.78);
-}
-
-.has-stage .log-panel {
-    background-color: rgba(16, 13, 18, 0.88);
-}
-
-/* On a stage, CombatScreen places each panel by its fighter, so the rows fill the battlefield and the panels are
-   positioned inside them. */
 .has-stage .battlefield {
     padding: 0;
 }
@@ -776,4 +403,1573 @@
 .has-stage .combatant {
     width: 200px;
     margin: 0;
+}
+
+.screen {
+    background-image: url("Art/Surfaces/slate-field.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 24;
+    -unity-slice-top: 24;
+    -unity-slice-right: 24;
+    -unity-slice-bottom: 24;
+    -unity-slice-scale: 1px;
+}
+
+.unity-button {
+    background-image: url("Art/Controls/button.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 12;
+    -unity-slice-scale: 1px;
+}
+
+.unity-button:hover {
+    background-image: url("Art/Controls/button-hover.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 12;
+    -unity-slice-scale: 1px;
+}
+
+.unity-button:active {
+    background-image: url("Art/Controls/button-pressed.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 12;
+    -unity-slice-scale: 1px;
+}
+
+.unity-button:disabled,
+.searcher.is-unavailable,
+.cancel-intent.is-unavailable {
+    background-image: url("Art/Controls/button-disabled.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 12;
+    -unity-slice-scale: 1px;
+}
+
+.combatant {
+    background-image: url("Art/Frames/fighter.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 10;
+    -unity-slice-scale: 1px;
+}
+
+.intent {
+    background-image: url("Art/Frames/intent.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 8;
+    -unity-slice-top: 8;
+    -unity-slice-right: 8;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.badge,
+.status,
+.floater {
+    background-image: url("Art/Frames/badge.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 6;
+    -unity-slice-top: 6;
+    -unity-slice-right: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 1px;
+}
+
+.bar {
+    background-image: url("Art/Bars/health-track.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 5;
+    -unity-slice-top: 4;
+    -unity-slice-right: 5;
+    -unity-slice-bottom: 4;
+    -unity-slice-scale: 1px;
+}
+
+.bar-fill {
+    background-image: url("Art/Bars/health-fill.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 2;
+    -unity-slice-top: 2;
+    -unity-slice-right: 2;
+    -unity-slice-bottom: 2;
+    -unity-slice-scale: 1px;
+}
+
+.card {
+    background-image: url("Art/Cards/binding.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 10;
+    -unity-slice-scale: 1px;
+}
+
+.top-bar,
+.bottom,
+.log-panel {
+    background-image: url("Art/Frames/strip.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 4;
+    -unity-slice-top: 4;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 4;
+    -unity-slice-scale: 1px;
+}
+
+.end-box {
+    background-image: url("Art/Frames/folio.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 16;
+    -unity-slice-top: 16;
+    -unity-slice-right: 16;
+    -unity-slice-bottom: 16;
+    -unity-slice-scale: 1px;
+}
+
+.card-cost {
+    background-image: url("Art/Cards/cost.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.screen,
+.menus {
+    color: var(--text);
+    font-size: 16px;
+}
+
+.screen {
+    background-color: var(--void);
+}
+
+.unity-button {
+    padding-left: 12px;
+    padding-right: 12px;
+    color: var(--text);
+    background-color: var(--raised);
+    border-color: var(--edge);
+    font-size: 16px;
+    -unity-font-style: bold;
+    transition-property: background-color, border-color;
+    transition-duration: 0.12s;
+}
+
+.unity-button:hover {
+    background-color: var(--hover);
+    border-color: var(--brass);
+    color: var(--text);
+}
+
+.unity-button:active {
+    background-color: var(--pressed);
+    translate: 0 1px;
+}
+
+.unity-button.is-selected,
+.unity-button.is-selected:hover {
+    background-color: var(--selected);
+    border-color: var(--focus);
+    border-width: 2px;
+}
+
+.unity-button:focus {
+    border-color: var(--focus);
+    border-width: 2px;
+}
+
+.unity-button:disabled,
+.searcher.is-unavailable,
+.cancel-intent.is-unavailable {
+    background-color: var(--disabled);
+    color: var(--text-muted);
+    border-color: var(--edge-quiet);
+    opacity: 1;
+    translate: 0 0;
+}
+
+.top-bar {
+    background-color: var(--recess);
+    border-color: var(--brass);
+    flex-shrink: 0;
+}
+
+.place,
+.panel-heading,
+.combatant-state {
+    color: var(--brass);
+}
+
+.round,
+.prompt {
+    color: var(--text);
+}
+
+.seed,
+.piles {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.panel-heading,
+.combatant-name {
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.combatant {
+    padding: 12px;
+    background-color: var(--panel);
+    border-color: var(--edge-quiet);
+}
+
+.enemy-row .combatant {
+    background-color: var(--recess);
+}
+
+.combatant-title,
+.intent-target {
+    color: var(--text-secondary);
+}
+
+.combatant.is-active {
+    background-color: var(--panel);
+    border-color: var(--brass);
+}
+
+.combatant.is-down {
+    opacity: 1;
+}
+
+.combatant.is-down .hero-mark {
+    opacity: 0.45;
+}
+
+.combatant.is-down .combatant-state {
+    color: var(--danger);
+}
+
+.combatant.is-targetable {
+    border-color: var(--focus);
+}
+
+.combatant.is-targetable:hover {
+    scale: 1 1;
+    background-color: var(--hover);
+}
+
+.combatant.is-acting {
+    scale: 1 1;
+    border-left-color: var(--danger);
+    border-left-width: 4px;
+}
+
+.bar {
+    background-color: var(--health-track);
+    border-width: 1px;
+    border-color: var(--edge);
+}
+
+.bar-fill {
+    background-color: var(--health);
+}
+
+.bar-text {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.badge,
+.status {
+    min-height: 24px;
+    padding: 2px 6px;
+    font-size: 14px;
+    background-color: var(--badge-surface);
+    color: var(--text);
+    flex-shrink: 0;
+}
+
+.block-badge,
+.guard-badge,
+.status-exposed,
+.status-weak,
+.status-bleed,
+.status-hex {
+    background-color: var(--badge-surface);
+}
+
+.incoming-badge,
+.incoming-badge.is-lethal {
+    background-color: var(--warning-surface);
+}
+
+.incoming-badge.is-lethal {
+    border-color: var(--danger);
+    border-width: 1px;
+}
+
+.intent {
+    padding: 6px;
+    background-color: var(--warning-surface);
+}
+
+.intent-text {
+    font-size: 16px;
+    color: var(--text);
+    white-space: normal;
+}
+
+.intent-target,
+.intent-outcome {
+    font-size: 14px;
+    white-space: normal;
+}
+
+.intent-outcome {
+    color: var(--danger);
+}
+
+.intent.is-vague .intent-text,
+.intent.is-cancelled .intent-text {
+    color: var(--text-secondary);
+}
+
+.intent.is-cancelled {
+    background-color: var(--recess);
+}
+
+.log-panel,
+.bottom {
+    background-color: var(--recess);
+}
+
+.log-line {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.log-round {
+    color: var(--brass);
+}
+
+.log-end {
+    color: var(--text);
+}
+
+.hint {
+    color: var(--text-secondary);
+}
+
+.hint.is-error {
+    color: var(--danger);
+}
+
+.card {
+    width: 150px;
+    height: 210px;
+    padding: 0 8px 4px 8px;
+    background-color: var(--panel);
+    border-color: var(--edge);
+    overflow: visible;
+    flex-shrink: 0;
+}
+
+.card-owners {
+    height: 8px;
+    margin: 0 -8px 4px -8px;
+}
+
+.card-owners .swatch {
+    flex-basis: 0;
+    flex-grow: 1;
+    opacity: 1;
+}
+
+.card.is-dual .card-owners .swatch {
+    border-right-width: 2px;
+    border-right-color: var(--void);
+}
+
+.card-header {
+    max-height: 40px;
+    min-height: 34px;
+}
+
+.card-name {
+    font-size: 15px;
+    margin-top: 0;
+}
+
+.card-target {
+    font-size: 13px;
+    min-height: 17px;
+    margin: 2px 0;
+    color: var(--text-secondary);
+}
+
+.card-text {
+    font-size: 14px;
+    min-height: 80px;
+    overflow: visible;
+    color: var(--text);
+}
+
+.card-owner-names {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: normal;
+    margin: 0;
+}
+
+.card-cost {
+    font-size: 20px;
+    border-width: 0;
+    background-color: var(--paper);
+    color: var(--ink);
+    flex-shrink: 0;
+}
+
+.card.is-dual {
+    background-color: var(--panel);
+}
+
+.card:hover {
+    border-color: var(--brass);
+}
+
+.card.is-unplayable {
+    background-color: var(--recess);
+    border-color: var(--edge-quiet);
+}
+
+.card.is-unplayable .card-name,
+.card.is-unplayable .card-text {
+    color: var(--text-muted);
+}
+
+.card.is-unplayable .card-owners {
+    opacity: 1;
+}
+
+.card.is-unplayable .card-cost {
+    background-color: var(--paper);
+    color: var(--ink);
+}
+
+.card.is-discounted .card-cost {
+    background-color: var(--benefit);
+    color: var(--ink);
+}
+
+.card.is-highlighted {
+    translate: 0 -12px;
+    border-color: var(--focus);
+}
+
+.card.is-selected,
+.card.is-selected:hover {
+    translate: 0 -24px;
+    border-color: var(--focus);
+}
+
+.card.is-unplayable:hover,
+.card.is-unplayable.is-highlighted {
+    translate: 0 0;
+}
+
+.card.is-unplayable.is-selected,
+.card.is-unplayable.is-selected:hover {
+    translate: 0 -24px;
+    border-color: var(--focus);
+}
+
+.resolve {
+    font-size: 48px;
+    color: var(--brass);
+}
+
+.resolve-caption {
+    color: var(--text-secondary);
+}
+
+.floater {
+    background-color: var(--recess);
+}
+
+.floater-damage {
+    color: var(--danger);
+}
+
+.floater-block {
+    color: var(--hero-steel);
+}
+
+.floater-heal {
+    color: var(--benefit);
+}
+
+.floater-status {
+    color: var(--brass);
+}
+
+.end-panel {
+    background-color: var(--scrim);
+}
+
+.end-box {
+    background-color: var(--panel);
+}
+
+.end-title {
+    font-size: 40px;
+    color: var(--brass);
+    -unity-font-definition: url("Art/Fonts/Cinzel-SemiBold SDF.asset");
+    -unity-font-style: normal;
+}
+
+.end-text {
+    font-size: 18px;
+}
+
+.has-stage .screen {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+}
+
+.has-stage .combatant,
+.has-stage .enemy-row .combatant {
+    background-color: var(--panel);
+}
+
+.has-stage .log-panel {
+    background-color: var(--recess);
+}
+
+.ui-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: var(--text);
+}
+
+.label-icon {
+    position: absolute;
+    left: 4px;
+    top: 3px;
+    width: 16px;
+    height: 16px;
+}
+
+.with-icon {
+    padding-left: 26px;
+}
+
+.hero-mark {
+    -unity-background-scale-mode: scale-to-fit;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.owner-marks {
+    height: 20px;
+    flex-shrink: 0;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.owner-medal {
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+.card .owner-medal {
+    width: 20px;
+    height: 20px;
+}
+
+.fighter-heading {
+    flex-direction: row;
+    align-items: center;
+}
+
+.fighter-heading .owner-medal {
+    margin-right: 4px;
+}
+
+.card-state {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    display: none;
+}
+
+.boost-mark {
+    right: -5px;
+    top: 40px;
+    -unity-background-image-tint-color: var(--benefit);
+}
+
+.discount-mark {
+    left: -5px;
+    top: 36px;
+    -unity-background-image-tint-color: var(--benefit);
+}
+
+.lock-mark {
+    right: -5px;
+    bottom: 24px;
+    -unity-background-image-tint-color: var(--text-muted);
+}
+
+.card.is-boosted .boost-mark,
+.card.is-discounted .discount-mark,
+.card.is-unplayable .lock-mark {
+    display: flex;
+}
+
+.selection-frame,
+.portrait-frame,
+.room-wall {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.selection-frame {
+    display: none;
+}
+
+.is-selected > .selection-frame,
+.is-chosen > .selection-frame,
+.is-targetable > .selection-frame,
+.is-current > .selection-frame {
+    display: flex;
+}
+
+.chosen-mark,
+.current-mark,
+.unexplored-mark {
+    display: none;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+}
+
+.route-mark {
+    display: none;
+    position: absolute;
+    right: 4px;
+}
+
+.is-chosen > .chosen-mark,
+.is-current > .current-mark,
+.is-visited > .route-mark,
+.is-travelled > .route-mark,
+.is-unexplored > .unexplored-mark {
+    display: flex;
+}
+
+.current-mark {
+    -unity-background-image-tint-color: var(--focus);
+}
+
+.route-mark {
+    top: auto;
+    bottom: 3px;
+    width: 12px;
+    height: 12px;
+    -unity-background-image-tint-color: var(--brass);
+}
+
+.intent-icons {
+    flex-direction: row;
+}
+
+.owner-medal {
+    background-image: url("Art/Cards/owner-medal.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.selection-frame {
+    background-image: url("Art/Frames/focus.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 8;
+    -unity-slice-top: 8;
+    -unity-slice-right: 8;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.portrait-frame {
+    background-image: url("Art/Frames/portrait-frame.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 10;
+    -unity-slice-scale: 1px;
+}
+
+.room-wall {
+    background-image: url("Art/Map/room-wall.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 12;
+    -unity-slice-top: 12;
+    -unity-slice-right: 12;
+    -unity-slice-bottom: 12;
+    -unity-slice-scale: 1px;
+}
+
+.owner-iron .combatant-accent,
+.swatch.owner-iron {
+    background-color: var(--hero-iron);
+}
+
+.card.owner-iron,
+.owner-iron .party-portrait {
+    background-color: var(--card-iron);
+}
+
+.hero-mark.owner-iron {
+    background-image: url("Art/Icons/hero-iron.png");
+    -unity-background-image-tint-color: var(--hero-iron);
+}
+
+.owner-thorn .combatant-accent,
+.swatch.owner-thorn {
+    background-color: var(--hero-thorn);
+}
+
+.card.owner-thorn,
+.owner-thorn .party-portrait {
+    background-color: var(--card-thorn);
+}
+
+.hero-mark.owner-thorn {
+    background-image: url("Art/Icons/hero-thorn.png");
+    -unity-background-image-tint-color: var(--hero-thorn);
+}
+
+.owner-ash .combatant-accent,
+.swatch.owner-ash {
+    background-color: var(--hero-ash);
+}
+
+.card.owner-ash,
+.owner-ash .party-portrait {
+    background-color: var(--card-ash);
+}
+
+.hero-mark.owner-ash {
+    background-image: url("Art/Icons/hero-ash.png");
+    -unity-background-image-tint-color: var(--hero-ash);
+}
+
+.owner-bone .combatant-accent,
+.swatch.owner-bone {
+    background-color: var(--hero-bone);
+}
+
+.card.owner-bone,
+.owner-bone .party-portrait {
+    background-color: var(--card-bone);
+}
+
+.hero-mark.owner-bone {
+    background-image: url("Art/Icons/hero-bone.png");
+    -unity-background-image-tint-color: var(--hero-bone);
+}
+
+.owner-steel .combatant-accent,
+.swatch.owner-steel {
+    background-color: var(--hero-steel);
+}
+
+.card.owner-steel,
+.owner-steel .party-portrait {
+    background-color: var(--card-steel);
+}
+
+.hero-mark.owner-steel {
+    background-image: url("Art/Icons/hero-steel.png");
+    -unity-background-image-tint-color: var(--hero-steel);
+}
+
+.owner-bronze .combatant-accent,
+.swatch.owner-bronze {
+    background-color: var(--hero-bronze);
+}
+
+.card.owner-bronze,
+.owner-bronze .party-portrait {
+    background-color: var(--card-bronze);
+}
+
+.hero-mark.owner-bronze {
+    background-image: url("Art/Icons/hero-bronze.png");
+    -unity-background-image-tint-color: var(--hero-bronze);
+}
+
+.owner-smoke .combatant-accent,
+.swatch.owner-smoke {
+    background-color: var(--hero-smoke);
+}
+
+.card.owner-smoke,
+.owner-smoke .party-portrait {
+    background-color: var(--card-smoke);
+}
+
+.hero-mark.owner-smoke {
+    background-image: url("Art/Icons/hero-smoke.png");
+    -unity-background-image-tint-color: var(--hero-smoke);
+}
+
+.owner-ember .combatant-accent,
+.swatch.owner-ember {
+    background-color: var(--hero-ember);
+}
+
+.card.owner-ember,
+.owner-ember .party-portrait {
+    background-color: var(--card-ember);
+}
+
+.hero-mark.owner-ember {
+    background-image: url("Art/Icons/hero-ember.png");
+    -unity-background-image-tint-color: var(--hero-ember);
+}
+
+.owner-ink .combatant-accent,
+.swatch.owner-ink {
+    background-color: var(--hero-ink);
+}
+
+.card.owner-ink,
+.owner-ink .party-portrait {
+    background-color: var(--card-ink);
+}
+
+.hero-mark.owner-ink {
+    background-image: url("Art/Icons/hero-ink.png");
+    -unity-background-image-tint-color: var(--hero-ink);
+}
+
+.owner-rose .combatant-accent,
+.swatch.owner-rose {
+    background-color: var(--hero-rose);
+}
+
+.card.owner-rose,
+.owner-rose .party-portrait {
+    background-color: var(--card-rose);
+}
+
+.hero-mark.owner-rose {
+    background-image: url("Art/Icons/hero-rose.png");
+    -unity-background-image-tint-color: var(--hero-rose);
+}
+
+.owner-verdigris .combatant-accent,
+.swatch.owner-verdigris {
+    background-color: var(--hero-verdigris);
+}
+
+.card.owner-verdigris,
+.owner-verdigris .party-portrait {
+    background-color: var(--card-verdigris);
+}
+
+.hero-mark.owner-verdigris {
+    background-image: url("Art/Icons/hero-verdigris.png");
+    -unity-background-image-tint-color: var(--hero-verdigris);
+}
+
+.owner-tallow .combatant-accent,
+.swatch.owner-tallow {
+    background-color: var(--hero-tallow);
+}
+
+.card.owner-tallow,
+.owner-tallow .party-portrait {
+    background-color: var(--card-tallow);
+}
+
+.hero-mark.owner-tallow {
+    background-image: url("Art/Icons/hero-tallow.png");
+    -unity-background-image-tint-color: var(--hero-tallow);
+}
+
+.icon-room-entrance {
+    background-image: url("Art/Icons/room-entrance.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-combat {
+    background-image: url("Art/Icons/room-combat.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-elite {
+    background-image: url("Art/Icons/room-elite.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-investigation {
+    background-image: url("Art/Icons/room-investigation.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-event {
+    background-image: url("Art/Icons/room-event.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-sanctuary {
+    background-image: url("Art/Icons/room-sanctuary.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-secret {
+    background-image: url("Art/Icons/room-secret.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-room-boss {
+    background-image: url("Art/Icons/room-boss.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-block {
+    background-image: url("Art/Icons/block.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-guarded {
+    background-image: url("Art/Icons/guarded.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-exposed {
+    background-image: url("Art/Icons/exposed.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-weak {
+    background-image: url("Art/Icons/weak.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-bleed {
+    background-image: url("Art/Icons/bleed.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hex {
+    background-image: url("Art/Icons/hex.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-riposte {
+    background-image: url("Art/Icons/riposte.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-fury {
+    background-image: url("Art/Icons/fury.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-attack {
+    background-image: url("Art/Icons/attack.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-attack-all {
+    background-image: url("Art/Icons/attack-all.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-heal {
+    background-image: url("Art/Icons/heal.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-apply-status {
+    background-image: url("Art/Icons/apply-status.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-buff {
+    background-image: url("Art/Icons/buff.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-debuff {
+    background-image: url("Art/Icons/debuff.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-wait {
+    background-image: url("Art/Icons/wait.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-unknown {
+    background-image: url("Art/Icons/unknown.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-cancelled {
+    background-image: url("Art/Icons/cancelled.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-resolve {
+    background-image: url("Art/Icons/resolve.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-deck {
+    background-image: url("Art/Icons/deck.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-draw {
+    background-image: url("Art/Icons/draw.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-discard {
+    background-image: url("Art/Icons/discard.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-journal {
+    background-image: url("Art/Icons/journal.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-keepsake {
+    background-image: url("Art/Icons/keepsake.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-clue {
+    background-image: url("Art/Icons/clue.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-seal-whole {
+    background-image: url("Art/Icons/seal-whole.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-seal-broken {
+    background-image: url("Art/Icons/seal-broken.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-defeat {
+    background-image: url("Art/Icons/defeat.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-remove-card {
+    background-image: url("Art/Icons/remove-card.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-empty-folio {
+    background-image: url("Art/Icons/empty-folio.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-check {
+    background-image: url("Art/Icons/check.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-lock {
+    background-image: url("Art/Icons/lock.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-current {
+    background-image: url("Art/Icons/current.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-stairs {
+    background-image: url("Art/Icons/stairs.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-warning {
+    background-image: url("Art/Icons/warning.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-boost {
+    background-image: url("Art/Icons/boost.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-discount {
+    background-image: url("Art/Icons/discount.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-iron {
+    background-image: url("Art/Icons/hero-iron.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-thorn {
+    background-image: url("Art/Icons/hero-thorn.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-ash {
+    background-image: url("Art/Icons/hero-ash.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-bone {
+    background-image: url("Art/Icons/hero-bone.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-steel {
+    background-image: url("Art/Icons/hero-steel.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-bronze {
+    background-image: url("Art/Icons/hero-bronze.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-smoke {
+    background-image: url("Art/Icons/hero-smoke.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-ember {
+    background-image: url("Art/Icons/hero-ember.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-ink {
+    background-image: url("Art/Icons/hero-ink.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-rose {
+    background-image: url("Art/Icons/hero-rose.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-verdigris {
+    background-image: url("Art/Icons/hero-verdigris.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-hero-tallow {
+    background-image: url("Art/Icons/hero-tallow.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.log .unity-scroller .unity-base-slider__tracker {
+    background-image: url("Art/Controls/scroll-track.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 3;
+    -unity-slice-top: 6;
+    -unity-slice-right: 3;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 1px;
+}
+
+.log .unity-scroller .unity-base-slider__dragger {
+    background-image: url("Art/Controls/scroll-thumb.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 3;
+    -unity-slice-top: 8;
+    -unity-slice-right: 3;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.log .unity-scroller .unity-base-slider__tracker {
+    width: 10px;
+    background-color: var(--recess);
+}
+
+.log .unity-scroller .unity-base-slider__dragger {
+    min-height: 28px;
+    background-color: var(--edge);
+}
+
+.log .unity-scroller .unity-base-slider__dragger:hover {
+    background-color: var(--brass);
+}
+
+.log .unity-scroller .unity-base-slider__dragger:active {
+    background-color: var(--focus);
+}
+
+.log .unity-scroller:focus {
+    border-width: 2px;
+    border-color: var(--focus);
+}
+
+.journal-scroll .unity-scroller .unity-base-slider__tracker {
+    background-image: url("Art/Controls/scroll-track.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 3;
+    -unity-slice-top: 6;
+    -unity-slice-right: 3;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 1px;
+}
+
+.journal-scroll .unity-scroller .unity-base-slider__dragger {
+    background-image: url("Art/Controls/scroll-thumb.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 3;
+    -unity-slice-top: 8;
+    -unity-slice-right: 3;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.journal-scroll .unity-scroller .unity-base-slider__tracker {
+    width: 10px;
+    background-color: var(--recess);
+}
+
+.journal-scroll .unity-scroller .unity-base-slider__dragger {
+    min-height: 28px;
+    background-color: var(--edge);
+}
+
+.journal-scroll .unity-scroller .unity-base-slider__dragger:hover {
+    background-color: var(--brass);
+}
+
+.journal-scroll .unity-scroller .unity-base-slider__dragger:active {
+    background-color: var(--focus);
+}
+
+.journal-scroll .unity-scroller:focus {
+    border-width: 2px;
+    border-color: var(--focus);
+}
+
+.deck-grid-scroll .unity-scroller .unity-base-slider__tracker {
+    background-image: url("Art/Controls/scroll-track.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 3;
+    -unity-slice-top: 6;
+    -unity-slice-right: 3;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 1px;
+}
+
+.deck-grid-scroll .unity-scroller .unity-base-slider__dragger {
+    background-image: url("Art/Controls/scroll-thumb.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 3;
+    -unity-slice-top: 8;
+    -unity-slice-right: 3;
+    -unity-slice-bottom: 8;
+    -unity-slice-scale: 1px;
+}
+
+.deck-grid-scroll .unity-scroller .unity-base-slider__tracker {
+    width: 10px;
+    background-color: var(--recess);
+}
+
+.deck-grid-scroll .unity-scroller .unity-base-slider__dragger {
+    min-height: 28px;
+    background-color: var(--edge);
+}
+
+.deck-grid-scroll .unity-scroller .unity-base-slider__dragger:hover {
+    background-color: var(--brass);
+}
+
+.deck-grid-scroll .unity-scroller .unity-base-slider__dragger:active {
+    background-color: var(--focus);
+}
+
+.deck-grid-scroll .unity-scroller:focus {
+    border-width: 2px;
+    border-color: var(--focus);
+}
+
+.owner-iron > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-iron.png");
+    -unity-background-image-tint-color: var(--hero-iron);
+}
+
+.owner-thorn > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-thorn.png");
+    -unity-background-image-tint-color: var(--hero-thorn);
+}
+
+.owner-ash > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-ash.png");
+    -unity-background-image-tint-color: var(--hero-ash);
+}
+
+.owner-bone > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-bone.png");
+    -unity-background-image-tint-color: var(--hero-bone);
+}
+
+.owner-steel > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-steel.png");
+    -unity-background-image-tint-color: var(--hero-steel);
+}
+
+.owner-bronze > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-bronze.png");
+    -unity-background-image-tint-color: var(--hero-bronze);
+}
+
+.owner-smoke > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-smoke.png");
+    -unity-background-image-tint-color: var(--hero-smoke);
+}
+
+.owner-ember > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-ember.png");
+    -unity-background-image-tint-color: var(--hero-ember);
+}
+
+.owner-ink > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-ink.png");
+    -unity-background-image-tint-color: var(--hero-ink);
+}
+
+.owner-rose > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-rose.png");
+    -unity-background-image-tint-color: var(--hero-rose);
+}
+
+.owner-verdigris > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-verdigris.png");
+    -unity-background-image-tint-color: var(--hero-verdigris);
+}
+
+.owner-tallow > .fighter-heading .hero-mark {
+    background-image: url("Art/Icons/hero-tallow.png");
+    -unity-background-image-tint-color: var(--hero-tallow);
+}
+
+.intent-target > .owner-medal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.intent-target.with-owner-mark {
+    padding-left: 24px;
+    min-height: 20px;
+}
+
+.health-chip .owner-medal {
+    background-color: var(--panel);
+}
+
+.card.is-unplayable.is-discounted .card-cost {
+    background-color: var(--benefit);
+    color: var(--ink);
+}
+
+.unity-disabled {
+    opacity: 1;
+}
+
+.card-cost {
+    -unity-background-image-tint-color: var(--paper);
+}
+
+.card.is-discounted .card-cost,
+.card.is-unplayable.is-discounted .card-cost {
+    -unity-background-image-tint-color: var(--benefit);
+}
+
+.block-badge .ui-icon {
+    -unity-background-image-tint-color: var(--hero-steel);
+}
+
+.guard-badge .ui-icon {
+    -unity-background-image-tint-color: var(--brass);
+}
+
+.incoming-badge .ui-icon {
+    display: none;
+}
+
+.incoming-badge.is-lethal .ui-icon {
+    display: flex;
+    -unity-background-image-tint-color: var(--danger);
+}
+
+.status-exposed .ui-icon,
+.status-bleed .ui-icon {
+    -unity-background-image-tint-color: var(--danger);
+}
+
+.status-weak .ui-icon,
+.status-hex .ui-icon {
+    -unity-background-image-tint-color: var(--hero-ash);
+}
+
+.status-riposte .ui-icon {
+    -unity-background-image-tint-color: var(--hero-steel);
+}
+
+.status-fury .ui-icon {
+    -unity-background-image-tint-color: var(--brass);
+}
+
+.card .owner-medal .hero-mark {
+    width: 16px;
+    height: 16px;
+}
+
+.card-cost {
+    border-radius: 15px;
+}
+
+/* Review fixes: explicit text space for TextElements with decorative children.
+   The icon's absolute box is independent of text measurement and never consumes it. */
+.with-icon {
+    padding-left: 26px;
+    min-height: 22px;
+}
+.with-icon > .label-icon {
+    left: 5px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 16px;
+    height: 16px;
+    background-color: rgba(0, 0, 0, 0);
+}
+.badge.with-icon,
+.status.with-icon {
+    padding: 3px 6px 3px 26px;
+    min-width: 108px;
+    white-space: nowrap;
+}
+.incoming-badge.with-icon {
+    min-width: 112px;
+    padding-left: 6px;
+}
+.incoming-badge.is-lethal.with-icon {
+    min-width: 130px;
+    padding-left: 26px;
+}
+.controls {
+    width: 300px;
+    min-width: 300px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+}
+.controls > * {
+    flex-shrink: 0;
+}
+.controls .resolve {
+    height: 54px;
+    margin: 0;
+    -unity-text-align: middle-center;
+}
+.controls .resolve-caption {
+    width: 108px;
+    height: 26px;
+    margin: 0 0 6px 0;
+    -unity-text-align: middle-left;
+}
+.controls .end-button {
+    margin: 0;
+}
+.controls .discard-button.with-icon {
+    width: 280px;
+    height: 36px;
+    margin: 6px 0 0 0;
+    padding-left: 28px;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.controls .piles.with-icon {
+    width: 296px;
+    height: 26px;
+    margin: 6px 0 0 0;
+    padding-left: 24px;
+    padding-right: 0;
+    font-size: 13px;
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+
+/* Full sentences (guard source and lethal forecast) may wrap within the panel. */
+.guard-badge.with-icon,
+.incoming-badge.with-icon,
+.incoming-badge.is-lethal.with-icon {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+}
+
+/* Painted hero portraits (Views.Portrait). The painting fills the frame; without one, the hero's mark is centred. */
+.hero-portrait {
+    flex-shrink: 0;
+    background-color: var(--void);
+    -unity-background-scale-mode: scale-and-crop;
+    justify-content: center;
+    align-items: center;
+}
+.hero-portrait.is-missing > .hero-mark {
+    width: 40%;
+    height: 40%;
+}
+.combatant-portrait {
+    width: 52px;
+    height: 52px;
+    margin-right: 8px;
+}
+.combatant-portrait > .portrait-frame,
+.member-portrait > .portrait-frame {
+    -unity-slice-scale: 0.5px;
+}
+.combatant.is-down .combatant-portrait {
+    -unity-background-image-tint-color: rgb(96, 96, 96);
 }

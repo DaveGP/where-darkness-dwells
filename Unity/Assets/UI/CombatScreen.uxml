@@ -25,15 +25,16 @@
             <ui:VisualElement class="controls">
                 <!-- Cards are free: the big number is how many of the active hero's cards the hand holds. -->
                 <ui:Label name="playable" text="-" class="resolve" />
-                <ui:Label text="Playable" class="resolve-caption" />
+                <ui:Label text="Playable" class="with-icon resolve-caption"><ui:VisualElement class="ui-icon icon-draw label-icon" picking-mode="Ignore" /></ui:Label>
                 <ui:Button name="end-activation" text="End activation" class="end-button" />
-                <ui:Button name="discard" text="Discard a card" class="discard-button" />
-                <ui:Label name="piles" class="piles" />
+                <ui:Button name="discard" text="Discard a card" class="with-icon discard-button"><ui:VisualElement class="ui-icon icon-discard label-icon" picking-mode="Ignore" /></ui:Button>
+                <ui:Label name="piles" class="with-icon piles"><ui:VisualElement class="ui-icon icon-draw label-icon" picking-mode="Ignore" /></ui:Label>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="floaters" picking-mode="Ignore" class="floaters" />
         <ui:VisualElement name="end-panel" class="end-panel hidden">
             <ui:VisualElement class="end-box">
+                <ui:VisualElement class="ui-icon icon-seal-whole narrative-emblem" picking-mode="Ignore" />
                 <ui:Label name="end-title" text="Victory" class="end-title" />
                 <ui:Label name="end-text" class="end-text" />
                 <ui:Button name="again" text="Fight again" class="again-button" />

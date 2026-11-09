@@ -25,6 +25,7 @@ namespace WhereDarknessDwells.Game
         Button _continue;
         Label _titleNote;
         Toggle _fullscreen, _fastAnimations, _chartMap;
+        Slider _masterVolume, _musicVolume, _effectsVolume;
         // Where Back on the settings menu returns to.
         VisualElement _settingsFrom;
 
@@ -39,9 +40,16 @@ namespace WhereDarknessDwells.Game
             _fullscreen = _root.Q<Toggle>("fullscreen");
             _fastAnimations = _root.Q<Toggle>("fast-animations");
             _chartMap = _root.Q<Toggle>("chart-map");
+            _masterVolume = _root.Q<Slider>("master-volume");
+            _musicVolume = _root.Q<Slider>("music-volume");
+            _effectsVolume = _root.Q<Slider>("effects-volume");
+
+            DecorateVolume(_masterVolume);
+            DecorateVolume(_musicVolume);
+            DecorateVolume(_effectsVolume);
 
             // The backdrop is rendered from licensed art that is never committed, so a fresh clone won't have it
-            // and the title keeps its plain background.
+            // and the title keeps its independent ledger-cover background.
             var backdrop = Resources.Load<Texture2D>("TitleBackdrop");
             if (backdrop != null)
             {
@@ -76,8 +84,38 @@ namespace WhereDarknessDwells.Game
                 Debug.Log($"[Settings] Map drawn as {(e.newValue ? "the chart" : "the floor plan")}.");
             });
 
+            // Volumes change as the slider moves, so the player hears the level they are choosing.
+            _masterVolume.RegisterValueChangedCallback(e => GameSettings.MasterVolume = e.newValue);
+            _musicVolume.RegisterValueChangedCallback(e => GameSettings.MusicVolume = e.newValue);
+            _effectsVolume.RegisterValueChangedCallback(e => GameSettings.EffectsVolume = e.newValue);
+            GameAudio.ClickSounds(_root);
+
             GameSettings.Apply();
             Close();
+        }
+
+        static void DecorateVolume(Slider slider)
+        {
+            var tracker = slider.Q(className: "unity-base-slider__tracker");
+            var thumb = slider.Q(className: "unity-base-slider__dragger");
+            if (tracker == null || thumb == null || tracker.Q(className: "volume-fill") != null) return;
+            var fill = Views.Decoration(tracker, "volume-fill");
+            void Refresh()
+            {
+                float fraction = Mathf.InverseLerp(slider.lowValue, slider.highValue, slider.value);
+                float width = tracker.contentRect.width;
+                if (float.IsNaN(width) || width <= 0) return;
+                // Thumb centre in track coordinates also accounts for Unity's end-cap inset.
+                float centre = tracker.WorldToLocal(thumb.worldBound.center).x;
+                fill.style.width = fraction <= 0 ? 0 : fraction >= 1 ? width : Mathf.Clamp(centre, 0, width);
+            }
+            slider.userData = (Action)Refresh;
+            slider.RegisterValueChangedCallback(_ => slider.schedule.Execute(Refresh));
+            slider.RegisterCallback<GeometryChangedEvent>(_ => Refresh());
+            thumb.RegisterCallback<GeometryChangedEvent>(_ => Refresh());
+            slider.RegisterCallback<FocusInEvent>(_ => slider.AddToClassList("has-keyboard-focus"));
+            slider.RegisterCallback<FocusOutEvent>(_ => slider.RemoveFromClassList("has-keyboard-focus"));
+            slider.RegisterCallback<AttachToPanelEvent>(_ => slider.schedule.Execute(Refresh));
         }
 
         public bool IsOpen => _root.style.display != DisplayStyle.None;
@@ -88,6 +126,7 @@ namespace WhereDarknessDwells.Game
             CanPause = false;
             _continue.EnableInClassList("hidden", !canContinue);
             _titleNote.text = note ?? "";
+            GameAudio.Play(GameAudio.Track.Title);
             Show(_titleView);
         }
 
@@ -105,7 +144,13 @@ namespace WhereDarknessDwells.Game
             _fullscreen.SetValueWithoutNotify(GameSettings.Fullscreen);
             _fastAnimations.SetValueWithoutNotify(GameSettings.FastAnimations);
             _chartMap.SetValueWithoutNotify(GameSettings.ChartMap);
+            _masterVolume.SetValueWithoutNotify(GameSettings.MasterVolume);
+            _musicVolume.SetValueWithoutNotify(GameSettings.MusicVolume);
+            _effectsVolume.SetValueWithoutNotify(GameSettings.EffectsVolume);
             Show(_settingsView);
+            // SetValueWithoutNotify intentionally skips callbacks; repaint after layout when opening settings.
+            foreach (var slider in new[] { _masterVolume, _musicVolume, _effectsVolume })
+                slider.schedule.Execute(() => (slider.userData as Action)?.Invoke());
         }
 
         void Choose(Action choice)

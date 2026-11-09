@@ -18,3 +18,4 @@ MonoBehaviour:
   colour: Thorn
   maxHealth: 28
   model: {fileID: 2438390183911661607, guid: 5c93c808e1c8a6445924e912ddf5e34c, type: 3}
+  portrait: {fileID: 2800000, guid: f85f9b03821f94a33bd82428fef869b0, type: 3}
