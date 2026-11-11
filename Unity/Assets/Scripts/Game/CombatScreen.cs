@@ -189,7 +189,9 @@ namespace WhereDarknessDwells.Game
         // but doesn't resize it, so only a change of size places them again; reacting to the moves would loop.
         void OnPanelLaidOut(GeometryChangedEvent e)
         {
-            if (e.oldRect.size == e.newRect.size) return;
+            // At a fractional UI scale (a browser on a high-density screen) pixel snapping makes a moved panel's size
+            // flicker by less than a point, so only a real change of size counts.
+            if (Mathf.Abs(e.oldRect.width - e.newRect.width) < 1f && Mathf.Abs(e.oldRect.height - e.newRect.height) < 1f) return;
             PlacePanelsOnStage();
             // Once more on the next frame, outside this layout pass, in case the stage hadn't drawn its fighters yet.
             _heroRow.schedule.Execute(PlacePanelsOnStage);
