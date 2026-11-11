@@ -61,6 +61,17 @@ namespace WhereDarknessDwells.Editor
                 return;
             }
 
+            // A build that switches platform itself strips shaders with the last platform's URP prefiltering, which
+            // removed the stage's Lit variants (v0.2.0 drew only the sky). So switch first, and build once it's done.
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.WebGL)
+            {
+                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+                Debug.LogWarning("[Editor] Switched the Editor to Web. Run Build for Web again to build.");
+                EditorUtility.DisplayDialog("Switched to Web",
+                    "The Editor is now on the Web platform. Run Where Darkness Dwells > Build for Web again to build.", "OK");
+                return;
+            }
+
             ApplySettings();
 
             if (Directory.Exists(OutputFolder)) Directory.Delete(OutputFolder, true);

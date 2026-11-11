@@ -88,8 +88,8 @@ GitHub Pages, so don't use that for a build he hasn't reviewed.
 
 1. Open this project in the Editor, from the branch being tested, and keep Unity as the front app. Batch mode doesn't
    work here: it fails to start the licence, and the scripts then fail to compile.
-2. Run **Where Darkness Dwells > Build for Web** (it needs the Web Build Support module). The build goes to
-   `Unity/Builds/Web`.
+2. Run **Where Darkness Dwells > Build for Web** (it needs the Web Build Support module). If the Editor is on another
+   platform, the first run only switches it to Web; run it again to build. The build goes to `Unity/Builds/Web`.
 3. Serve it locally, and test at http://localhost:8000:
 
    ```bash
